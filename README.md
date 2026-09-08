@@ -11,14 +11,12 @@ Subtree of the planning superset, same pattern as `journal-app/`,
 
 - Planning superset: `https://github.com/greninja-op/PROJECT-PLANNING-.git`
   (`PROJECT-PLANNING/` → remote `origin`)
-- Standalone: `https://github.com/greninja-op/TRAVEL-AGENT.git`
-  (remote `travel-guide`, prefix `travel-guide/`)
+- Standalone: `https://github.com/greninja-op/TRAVEL-GUIDE.git`
+  (remote `travel-guide`, prefix `travel-guide/` — renamed from TRAVEL-AGENT)
 
 **Naming:** folder/remote use git-safe `travel-guide` (your asked name,
-hyphenated — spaces break `subtree --prefix` matching). The GitHub repo is
-currently named `TRAVEL-AGENT`; you said you'll rename it afterwards, so the
-URL is preserved exactly. When you rename it, tell me the new URL and I'll
-update the remote — no code changes needed.
+hyphenated — spaces break `subtree --prefix` matching). The GitHub repo was
+`TRAVEL-AGENT` and is now `TRAVEL-GUIDE`; remote already updated.
 
 ## Push — the only command (from `PROJECT-PLANNING/`)
 
