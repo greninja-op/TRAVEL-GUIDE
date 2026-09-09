@@ -52,6 +52,9 @@ Filled credentials live ONLY at workspace root in `../secrets/`
 ## Current status
 
 - [x] Repo registered + `push.ps1` wiring
-- [ ] Phase 0: scaffolding, POI pack format, one test city walking loop
-- [ ] Open questions (SPEC §8): Android-only vs iOS later, POI data source,
-      on-device vs cloud TTS/narration
+- [x] Phase 0: scaffolding, POI pack format, Fort Kochi pack v1 (20 POIs)
+- [x] Phase 1: triggers, narration queue, on-device TTS, foreground service
+- [x] Phase 2: seeing pick, itineraries, POI detail, routes, voice settings
+- [x] Phase 3: packs manager, trip export, battery profiles, QA docs
+- Decisions taken: Android-only beta, hand-written packs, on-device TTS,
+  OSM/MapLibre offline (no API keys). SPEC §8 answered in code.
