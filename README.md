@@ -58,3 +58,6 @@ Filled credentials live ONLY at workspace root in `../secrets/`
 - [x] Phase 3: packs manager, trip export, battery profiles, QA docs
 - Decisions taken: Android-only beta, hand-written packs, on-device TTS,
   OSM/MapLibre offline (no API keys). SPEC §8 answered in code.
+- [x] v1.0.0 finished: offline map UI, all screens wired, quiet hours,
+  visited-rerank, food/stay layer (pack v1.1.0, 24 POIs), events sample,
+  runnable `python tools/demo.py --yes` (full trip + exports in demo-out/)

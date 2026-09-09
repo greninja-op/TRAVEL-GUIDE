@@ -17,6 +17,10 @@ class Narrator(context: Context) {
     val queue = NarrationQueue()
     var muted = false
         private set
+    /** Quiet hours: cards still appear, voice stays silent. Set from Settings. */
+    var quiet = false
+    /** Auto-play off = triggers become cards only, queue untouched by voice. */
+    var autoPlay = true
 
     var speechRate = 1.0f
         set(value) {
@@ -65,7 +69,7 @@ class Narrator(context: Context) {
     private val pendingTexts = mutableMapOf<String, String>()
 
     private fun pump() {
-        if (muted || !ready || queue.speaking != null) return
+        if (muted || quiet || !autoPlay || !ready || queue.speaking != null) return
         val next = queue.next() ?: return
         val text = pendingTexts.remove(next) ?: return
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, next)
