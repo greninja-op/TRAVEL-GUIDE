@@ -1,0 +1,6 @@
+// Top-level build — see app/build.gradle.kts for deps.
+plugins {
+    id("com.android.application") version "8.5.2" apply false
+    id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+    id("com.google.devtools.ksp") version "2.0.21-1.0.25" apply false
+}
