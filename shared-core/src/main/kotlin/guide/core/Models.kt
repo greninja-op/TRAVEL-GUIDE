@@ -10,6 +10,8 @@ data class Poi(
     val lng: Double,
     val radiusM: Double,
     val category: String,
+    /** Content layer: heritage (default) | food | stay. Separate map layers (SPEC §3.2). */
+    val layer: String = "heritage",
     val summary: String,
     val history: String,
     val isLegend: Boolean = false,

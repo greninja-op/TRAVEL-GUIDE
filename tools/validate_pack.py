@@ -25,6 +25,8 @@ def validate(pack):
             errors.append(f"{pid}: missing sources (SPEC 1.5)")
         if len(p.get("summary", "")) > 140:
             errors.append(f"{pid}: summary > 140 chars")
+        if p.get("layer", "heritage") not in ("heritage", "food", "stay"):
+            errors.append(f"{pid}: bad layer")
         for key in ("name", "history", "fun_facts", "see_list", "category"):
             if key not in p:
                 errors.append(f"{pid}: missing {key}")

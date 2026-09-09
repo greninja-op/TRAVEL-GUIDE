@@ -11,7 +11,19 @@ Open `travel-guide/mobile/` (Gradle root). Run `app` on a device with GPS
 
 - `app/src/main/AndroidManifest.xml` — fine/coarse now; background location
   only requested from Settings (Phase 1), never at launch
-- `app/.../MainActivity.kt` — 8 destinations + always-visible mute
+- `app/.../MainActivity.kt` — consent gate + 6 tabs + detail/phrasebook,
+  MapView lifecycle forwarded, always-visible mute
+- `app/.../ui/` — MapScreen (MapLibre offline), NearbyScreen (radar + layers
+  + events + seeing), PoiDetailScreen (hours/closed badge C-02), RoutesScreen
+  (day-plan picker), PacksScreen, HistoryScreen (notes + export), SettingsScreen
+  (battery picker, bg-location opt-in, quiet hours), ConsentScreen, VoiceSettings,
+  PhrasebookScreen, NowPlayingSheet
+- `app/.../location/` — GuideService (foreground) + LocationTracker (battery
+  profiles) + HeadingSensor (seeing)
+- `app/.../voice/Narrator.kt` — on-device TTS, single voice, <500ms mute
+- `app/.../map/OfflinePackHelper.kt` — MapLibre tile-pyramid download (12..16)
+- `app/.../packs|export|power|extras|trip/` — PackManager, TripExport,
+  BatteryProfiles, phrasebook/events, TripModes
 - `app/.../ui/theme/Tokens.kt` — DESIGN-TOKENS.md as Compose values
 - `app/.../data/Entities.kt` — Room mirror of shared-core Models
 - `app/.../data/PackLoader.kt` — bundled pack reader (Phase 3: packs manager)

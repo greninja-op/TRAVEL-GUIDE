@@ -36,5 +36,5 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
-    // MapLibre (OSM offline tiles) is added in Phase 1 with the map screen.
+    implementation("org.maplibre.gl:android-sdk:11.11.0") // OSM offline tiles
 }

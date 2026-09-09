@@ -12,6 +12,7 @@ object PackValidator {
             if (p.radiusM !in 10.0..500.0) errors += "${p.id}: radius_m out of 10..500"
             if (p.sources.isEmpty()) errors += "${p.id}: missing sources (SPEC §1.5)"
             if (p.summary.length > 140) errors += "${p.id}: summary > 140 chars"
+            if (p.layer !in setOf("heritage", "food", "stay")) errors += "${p.id}: bad layer"
         }
         val known = ids.toSet()
         for (r in pack.routes) {

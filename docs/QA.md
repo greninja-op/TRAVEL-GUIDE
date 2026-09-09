@@ -9,9 +9,12 @@ python tools/validate_pack.py content/packs/fort-kochi-walk-v1.json
 python tools/simulate_triggers.py content/packs/fort-kochi-walk-v1.json
 python tools/test_queue.py        # F-02, F-04, F-08
 python tools/test_itinerary.py    # itineraries, closed-skip, budget
+python tools/test_completion.py   # quiet hours, visited-rerank, layers
 python tools/export_trip.py content/packs/fort-kochi-walk-v1.json 2026-09-10 \
   vasco-square chinese-fishing-nets st-francis-church
 ```
+
+Pack v1.1.0: 24 POIs (20 heritage + 2 food + 2 stay), 2 routes.
 
 ## Manual (device)
 

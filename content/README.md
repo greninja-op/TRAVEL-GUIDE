@@ -6,7 +6,8 @@ from a downloaded pack with zero network (SPEC §1.4).
 ```
 content/
   schema/poi-pack-schema.json   JSON Schema (advisory; enforced by tools/validate_pack.py)
-  packs/fort-kochi-walk-v1.json test-city pack v1.0.0 — 20 POIs, 1 route
+  packs/fort-kochi-walk-v1.json test-city pack v1.1.0 — 24 POIs (20 heritage
+    + 2 food + 2 stay), 2 routes
 ```
 
 ## Authoring rules (SPEC §1.5 honesty)
@@ -17,6 +18,8 @@ content/
 - `hours: null` = always viewable from outside (exteriors, streets, beach).
 - `radius_m` 10–500. Exteriors 40–80, interiors 20–40, streets 60–100.
 - Keep `summary` ≤ 140 chars (fits the now-playing sheet).
+- `layer` is `heritage` (default) | `food` | `stay` — separate map layers,
+  food/stay pins never interrupt heritage narration priority.
 
 ## Validation
 

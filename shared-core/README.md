@@ -13,6 +13,8 @@ shared-core/
   src/main/kotlin/guide/core/NarrationQueue.kt single-voice queue (Phase 1)
   src/main/kotlin/guide/core/Seeing.kt        "what am I seeing?" pick (Phase 2)
   src/main/kotlin/guide/core/Itineraries.kt   day-plan builder (Phase 2)
+  src/main/kotlin/guide/core/QuietHours.kt    quiet-hours voice gate
+  src/main/kotlin/guide/core/VisitRank.kt     visited-rerank + closed-sink + layer filter
 ```
 
 ## Rules (mirrored in tools/*.py so CI-free verification works)

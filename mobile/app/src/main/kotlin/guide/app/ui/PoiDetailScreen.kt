@@ -15,9 +15,14 @@ import guide.app.ui.theme.GuideTokens
  * pack version (SPEC §1.5 honesty), personal note entry point.
  */
 @Composable
-fun PoiDetailScreen(card: PackLoader.PoiCard, onAddNote: () -> Unit) {
+fun PoiDetailScreen(card: PackLoader.PoiCard, hoursText: String?, openNow: Boolean, onAddNote: () -> Unit) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(card.name, style = GuideTokens.Heading)
+        hoursText?.let {
+            // C-02: closed POIs show it plainly; exterior story still narrates.
+            Text(if (openNow) "Open now · $it" else "Closed now · $it — exterior story still plays",
+                style = GuideTokens.Chrome)
+        }
         Text(card.summary, style = GuideTokens.Body)
         Text(card.history, style = GuideTokens.Body)
         Text("Fun facts", style = GuideTokens.Chrome)
