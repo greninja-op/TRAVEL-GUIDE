@@ -21,6 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- Phase 1: GuideService (foreground, location type) + TTS declared here. -->
+        <!-- Phase 1: foreground location service with persistent notification. -->
+        <service
+            android:name=".location.GuideService"
+            android:foregroundServiceType="location"
+            android:exported="false" />
     </application>
 </manifest>
