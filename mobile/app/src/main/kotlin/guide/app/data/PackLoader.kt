@@ -10,6 +10,7 @@ object PackLoader {
         val id: String, val name: String, val summary: String,
         val history: String, val funFacts: List<String>,
         val seeList: List<String>, val sources: List<String>,
+        val lat: Double, val lng: Double, val radiusM: Double,
         val hours: String?, // "09:00–17:00" or null = always viewable
         val layer: String, // heritage | food | stay
         val packVersion: String,
@@ -30,6 +31,8 @@ object PackLoader {
                 funFacts = List(p.getJSONArray("fun_facts").length()) { k -> p.getJSONArray("fun_facts").getString(k) },
                 seeList = List(p.getJSONArray("see_list").length()) { k -> p.getJSONArray("see_list").getString(k) },
                 sources = List(p.getJSONArray("sources").length()) { k -> p.getJSONArray("sources").getString(k) },
+                lat = p.getDouble("lat"), lng = p.getDouble("lng"),
+                radiusM = p.getDouble("radius_m"),
                 hours = hoursObj?.let { "${it.getString("open")}–${it.getString("close")}" },
                 layer = p.optString("layer", "heritage"),
                 packVersion = version,
