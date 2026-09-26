@@ -1,6 +1,7 @@
 package guide.app.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -136,19 +137,21 @@ private fun Promise(
 ) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Surface(
-            modifier = Modifier.size(36.dp),
+            modifier = Modifier.size(40.dp),
             shape = RoundedCornerShape(GuideTokens.PinRadius),
             color = GuideTokens.PrimaryWash,
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
+            Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = GuideTokens.Primary,
-                    modifier = Modifier.size(18.dp),
+                    // 22dp, not 18: these are stroke-2 glyphs, and at 18dp the
+                    // thin strokes lose definition against the 10% green wash
+                    // (seen on device 2026-09-26 — they read as faint marks).
+                    // 22dp holds the stroke weight legibly, and 40dp keeps the
+                    // concentric ratio (outer = inner + padding).
+                    modifier = Modifier.size(22.dp),
                 )
             }
         }

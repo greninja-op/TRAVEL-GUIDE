@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Cache-only FileProvider for trip export.
+
+  The Markdown file is written to cacheDir and shared out via a content:// URI,
+  so nothing outside the app can read arbitrary app storage — only the specific
+  file the user chose to export. Cache (not files) because the export is a
+  one-shot handoff to the share sheet; if the OS reclaims it, the user can
+  simply export again.
+-->
+<paths>
+    <cache-path name="exports" path="." />
+</paths>

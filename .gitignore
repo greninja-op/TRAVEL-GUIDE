@@ -3,7 +3,10 @@ CONTEXT.md
 sessions/
 
 # Android/Gradle build artifacts
+.gradle/
+**/.gradle/
 mobile/.gradle/
+shared-core/.gradle/
 mobile/build/
 mobile/app/build/
 mobile/local.properties

@@ -33,5 +33,18 @@
             android:name=".location.GuideService"
             android:foregroundServiceType="location"
             android:exported="false" />
+
+        <!-- Trip export: hands the generated Markdown to the share sheet as a
+             content:// URI, so the file is readable only by the app the user
+             picked. Cache-scoped (see res/xml/file_paths.xml). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 </manifest>
