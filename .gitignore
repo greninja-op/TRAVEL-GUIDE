@@ -1,0 +1,18 @@
+# Local-only terminal state (Kelvra pattern — never pushed)
+CONTEXT.md
+sessions/
+
+# Android/Gradle build artifacts
+mobile/.gradle/
+mobile/build/
+mobile/app/build/
+mobile/local.properties
+shared-core/build/
+*.apk
+*.aab
+
+# Generated demo exports (python tools/demo.py --yes) — never committed
+demo-out/
+
+# Workspace-local toolchain (JDK etc.) — never committed
+.tools/

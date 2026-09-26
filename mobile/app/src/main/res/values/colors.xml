@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- DESIGN-TOKENS.md finalized palette -->
+    <color name="primary">#2F5D50</color>
+    <color name="highlight">#C97B4A</color>
+    <color name="bg">#FAFAF7</color>
+    <color name="ic_launcher_background">#2F5D50</color>
+</resources>

@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Travel Guide — design language reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* Color — the only hues in the product */
+      --bg: #FAFAF7;
+      --surface: #FFFFFF;
+      --border: #E9E6E0;
+      --primary: #2F5D50;
+      --highlight: #C97B4A;
+      --text: #1F1D1B;
+      --text-2: #6B6862;
+      --danger: #B3453A;
+
+      /* Alpha state layers — no new hues, ever */
+      --primary-wash: rgba(47, 93, 80, 0.10);
+      --highlight-wash: rgba(201, 123, 74, 0.14);
+      --danger-wash: rgba(179, 69, 58, 0.10);
+      --state-hover: rgba(31, 29, 27, 0.05);
+      --state-press: rgba(31, 29, 27, 0.10);
+      --scrim: rgba(31, 29, 27, 0.32);
+      --focus: #2F5D50;
+
+      /* Radius — three values only */
+      --radius-button: 8px;
+      --radius-card: 10px;
+      --radius-pill: 999px;
+
+      /* Depth — one shadow, maximum */
+      --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+      /* Spacing — 4pt base */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
+      --space-6: 32px;
+      --space-7: 48px;
+      --space-8: 64px;
+
+      /* Motion */
+      --duration-press: 100ms;
+      --duration-fast: 150ms;
+      --duration-page: 200ms;
+      --ease-out: cubic-bezier(0, 0, 0.2, 1);
+      --ease-in: cubic-bezier(0.4, 0, 1, 1);
+      --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Type */
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-serif: 'Lora', 'Source Serif 4', Georgia, serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .sheet { max-width: 880px; margin: 0 auto; padding: var(--space-7) var(--space-5) var(--space-8); }
+
+    header.sheet-head { margin-bottom: var(--space-7); }
+    header.sheet-head h1 { font-size: 32px; font-weight: 600; line-height: 1.15; margin-bottom: var(--space-2); }
+    header.sheet-head .lede { font-family: var(--font-serif); font-size: 18px; line-height: 1.6; color: var(--text-2); max-width: 62ch; margin-bottom: var(--space-3); }
+    header.sheet-head .how { font-size: 14px; color: var(--text-2); max-width: 72ch; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-3) var(--space-4); }
+
+    section { margin-bottom: var(--space-7); padding-top: var(--space-5); border-top: 1px solid var(--border); }
+    section > h2 { font-size: 24px; font-weight: 600; line-height: 1.3; margin-bottom: var(--space-1); }
+    section > p.rule { color: var(--text-2); font-size: 14px; margin-bottom: var(--space-4); max-width: 72ch; }
+    section > h3 { font-size: 16px; font-weight: 600; margin: var(--space-5) 0 var(--space-2); }
+
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-3); }
+    .swatch { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-3); }
+    .swatch .chip { height: 44px; border-radius: var(--radius-button); margin-bottom: var(--space-2); border: 1px solid var(--border); }
+    .swatch .name { font-size: 14px; font-weight: 600; }
+    .swatch .hex { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+    .swatch .use { font-size: 12px; color: var(--text-2); line-height: 1.5; margin-top: var(--space-1); }
+    .swatch .contrast { font-size: 12px; color: var(--text-2); margin-top: var(--space-1); }
+
+    .taxonomy { display: flex; flex-direction: column; gap: var(--space-2); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-4); }
+    .tax { display: flex; align-items: baseline; gap: var(--space-2); font-size: 14px; }
+    .tax .label { font-weight: 500; min-width: 150px; }
+    .tax .meaning { color: var(--text-2); font-size: 12px; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: var(--radius-pill); flex: none; transform: translateY(-1px); }
+    .dot.primary { background: var(--primary); }
+    .dot.highlight { background: var(--highlight); }
+    .dot.muted { background: var(--text-2); }
+    .dot.danger { background: var(--danger); }
+    .dot.ring { background: transparent; border: 2px solid var(--text-2); width: 8px; height: 8px; }
+    .tax .icon { color: var(--text-2); align-self: center; }
+
+    .type-ladder { display: flex; flex-direction: column; gap: var(--space-3); }
+    .type-row { display: flex; gap: var(--space-4); align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: var(--space-3); }
+    .type-row:last-child { border-bottom: none; }
+    .type-row .tag { font-size: 12px; color: var(--text-2); width: 200px; flex-shrink: 0; }
+    .type-row .sample { min-width: 0; }
+    .t-40 { font-size: 40px; font-weight: 600; line-height: 1.15; }
+    .t-32 { font-size: 32px; font-weight: 600; line-height: 1.15; }
+    .t-24 { font-size: 24px; font-weight: 600; line-height: 1.3; }
+    .t-18 { font-size: 18px; font-weight: 600; line-height: 1.35; }
+    .t-16 { font-size: 16px; font-weight: 500; line-height: 1.45; }
+    .t-14 { font-size: 14px; line-height: 1.5; color: var(--text-2); }
+    .t-12 { font-size: 12px; line-height: 1.5; color: var(--text-2); }
+    .t-story { font-family: var(--font-serif); font-size: 18px; line-height: 1.65; max-width: 60ch; }
+
+    .scale-bar { display: flex; gap: var(--space-2); align-items: flex-end; flex-wrap: wrap; margin-bottom: var(--space-2); }
+    .scale-bar .bar { width: 24px; background: var(--primary-wash); border: 1px solid rgba(47, 93, 80, 0.25); border-radius: 3px; }
+    .scale-bar .cap { font-size: 12px; color: var(--text-2); }
+    .radius-row { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-3); }
+    .radius-demo { display: flex; flex-direction: column; gap: var(--space-1); align-items: center; }
+    .radius-demo .box { width: 72px; height: 44px; background: var(--surface); border: 1px solid var(--border); }
+    .radius-demo .cap { font-size: 12px; color: var(--text-2); }
+    .elev-demo { margin-top: var(--space-3); display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: flex-start; }
+    .elev-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: var(--space-3) var(--space-4); font-size: 14px; max-width: 280px; }
+    .elev-flat { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-3) var(--space-4); font-size: 14px; max-width: 280px; color: var(--text-2); }
+
+    .state-row { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-end; margin-bottom: var(--space-3); }
+    .state { display: flex; flex-direction: column; gap: var(--space-1); align-items: center; }
+    .state .tag { font-size: 12px; color: var(--text-2); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+      min-height: 44px; padding: 0 var(--space-5);
+      font-family: var(--font-sans); font-size: 16px; font-weight: 600; line-height: 1;
+      color: var(--text); background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-button); cursor: pointer; text-decoration: none;
+      transition: background-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out), transform var(--duration-press) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
+    }
+    .btn:hover { background: var(--state-hover); }
+    .btn:active { transform: scale(0.96); }
+    .btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .btn.primary { background: var(--primary); border-color: var(--primary); color: #FFFFFF; }
+    .btn.primary:hover { background: var(--primary); box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.06); }
+    .btn.danger { background: var(--danger); border-color: var(--danger); color: #FFFFFF; }
+    .btn.danger:hover { background: var(--danger); box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.06); }
+    .btn.ghost { background: transparent; border-color: transparent; color: var(--text); }
+    .btn.is-hover { background: var(--state-hover); }
+    .btn.primary.is-hover, .btn.danger.is-hover { box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.06); }
+    .btn.is-pressed { transform: scale(0.96); }
+    .btn.is-focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .btn.is-disabled { opacity: 0.38; cursor: not-allowed; }
+    .btn.loading { color: transparent; position: relative; pointer-events: none; }
+    .btn.loading::after { content: ""; position: absolute; width: 20px; height: 20px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.8s linear infinite; color: #FFFFFF; }
+    .btn.secondary.loading::after { color: var(--primary); }
+    .icon-btn {
+      width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-button);
+      color: var(--text); cursor: pointer;
+      transition: background-color var(--duration-fast) var(--ease-out), transform var(--duration-press) var(--ease-out);
+    }
+    .icon-btn:hover { background: var(--state-hover); }
+    .icon-btn:active { transform: scale(0.96); }
+    .icon-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .icon-btn.plain { border-color: transparent; background: transparent; }
+    .icon-btn.plain:hover { background: var(--state-hover); }
+
+    .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+    .icon-16 { width: 16px; height: 16px; }
+    .icon-24 { width: 24px; height: 24px; }
+
+    .fields { display: flex; flex-wrap: wrap; gap: var(--space-5); }
+    .field { display: flex; flex-direction: column; gap: var(--space-1); max-width: 300px; }
+    .field label { font-size: 14px; font-weight: 500; line-height: 1.4; }
+    .field input {
+      min-height: 44px; padding: 0 var(--space-3);
+      font-family: var(--font-sans); font-size: 16px; color: var(--text);
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card);
+      transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+    }
+    .field input::placeholder { color: var(--text-2); }
+    .field input:focus-visible, .field.is-focus input { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-wash); outline: none; }
+    .field .help { font-size: 12px; color: var(--text-2); }
+    .field.is-error input { border-color: var(--danger); }
+    .field.is-error .help { color: var(--danger); }
+    .field.is-disabled input { opacity: 0.5; }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: var(--space-1);
+      min-height: 28px; padding: var(--space-1) var(--space-3);
+      font-size: 12px; font-weight: 600; line-height: 1;
+      color: var(--text); background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-pill);
+    }
+    .pill .icon { width: 14px; height: 14px; }
+    .pill.legend { border-style: dashed; color: var(--text-2); }
+    .pill.fact { background: var(--highlight-wash); border-color: transparent; }
+    .pill.fact .icon { color: var(--highlight); }
+    .pill.cat { font-weight: 500; color: var(--text-2); }
+    .pill.status { border-color: transparent; background: var(--bg); }
+
+    .chip { display: inline-flex; align-items: center; gap: var(--space-1); font-size: 14px; font-weight: 500; color: var(--text-2); }
+    .chip .icon { color: var(--text-2); }
+
+    .poi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: var(--space-4); max-width: 440px; }
+    .poi-card .head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); }
+    .poi-card h4 { font-size: 18px; font-weight: 600; line-height: 1.35; }
+    .poi-card .summary { font-size: 14px; line-height: 1.5; color: var(--text-2); margin-bottom: var(--space-2); }
+    .poi-card .story { font-family: var(--font-serif); font-size: 17px; line-height: 1.65; margin-bottom: var(--space-2); }
+    .poi-card .see { list-style: none; display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-3); }
+    .poi-card .see li { display: flex; gap: var(--space-2); font-size: 14px; align-items: baseline; }
+    .poi-card .see .icon { color: var(--primary); align-self: flex-start; transform: translateY(3px); }
+    .poi-card .sources { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; font-size: 12px; color: var(--text-2); border-top: 1px solid var(--border); padding-top: var(--space-2); }
+
+    .row { display: flex; align-items: center; gap: var(--space-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-3) var(--space-4); max-width: 440px; }
+    .row .lead { width: 44px; height: 44px; border-radius: var(--radius-button); background: var(--primary-wash); color: var(--primary); display: flex; align-items: center; justify-content: center; flex: none; }
+    .row .grow { flex: 1; min-width: 0; }
+    .row .name { font-size: 16px; font-weight: 500; }
+    .row .meta { font-size: 12px; color: var(--text-2); display: flex; gap: var(--space-2); align-items: center; }
+    .row .trail { color: var(--text-2); }
+    .row.visited .name { color: var(--text-2); font-weight: 400; }
+
+    .progress { height: 6px; border-radius: var(--radius-pill); background: var(--primary-wash); overflow: hidden; margin-top: var(--space-2); }
+    .progress span { display: block; height: 100%; width: 62%; background: var(--primary); border-radius: var(--radius-pill); }
+
+    .pins { display: flex; gap: var(--space-6); flex-wrap: wrap; }
+    .pin-state { display: flex; flex-direction: column; gap: var(--space-2); align-items: center; }
+    .pin-state .dot-wrap { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .pin-state .cap { font-size: 12px; color: var(--text-2); }
+    .pin-state.default .dot-wrap { color: var(--primary); background: var(--primary-wash); }
+    .pin-state.next .dot-wrap { color: var(--primary); background: var(--primary-wash); box-shadow: 0 0 0 2px var(--primary); }
+    .pin-state.playing .dot-wrap { color: var(--highlight); background: var(--highlight-wash); box-shadow: 0 0 0 2px var(--highlight); }
+    .pin-state.visited .dot-wrap { color: var(--text-2); background: var(--state-hover); }
+
+    .player { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: var(--space-4); max-width: 440px; }
+    .player .grabber { width: 32px; height: 4px; border-radius: var(--radius-pill); background: var(--border); margin: 0 auto var(--space-3); }
+    .player .state-line { display: flex; align-items: center; gap: var(--space-2); font-size: 12px; color: var(--text-2); margin-bottom: var(--space-1); }
+    .player .state-line .label { color: var(--text); font-weight: 500; }
+    .player h4 { font-size: 18px; font-weight: 600; margin-bottom: var(--space-1); }
+    .player .now { font-family: var(--font-serif); font-size: 17px; line-height: 1.65; color: var(--text); margin-bottom: var(--space-3); }
+    .player .controls { display: flex; align-items: center; gap: var(--space-3); }
+    .player .speed { font-size: 14px; font-weight: 600; color: var(--text-2); background: none; border: none; cursor: pointer; padding: var(--space-2); min-height: 44px; border-radius: var(--radius-button); }
+    .player .speed:hover { background: var(--state-hover); }
+    .player .speed:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+    .trio { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-3); }
+    .state-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); align-items: flex-start; }
+    .state-card .icon-24 { color: var(--text-2); }
+    .state-card.error .icon-24 { color: var(--danger); }
+    .state-card h4 { font-size: 16px; font-weight: 600; }
+    .state-card p { font-size: 14px; color: var(--text-2); }
+    .skeleton { width: 100%; display: flex; flex-direction: column; gap: var(--space-2); }
+    .skeleton .bar { height: 14px; border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--bg) 25%, var(--border) 50%, var(--bg) 75%); background-size: 200% 100%; animation: shimmer 1.5s linear infinite; }
+    .skeleton .bar.w60 { width: 60%; }
+    .skeleton .bar.w90 { width: 90%; }
+
+    .icon-index { display: flex; flex-wrap: wrap; gap: var(--space-5); }
+    .icon-index figure { display: flex; flex-direction: column; gap: var(--space-1); align-items: center; color: var(--text); }
+    .icon-index figcaption { font-size: 12px; color: var(--text-2); }
+    .icon-index .icon-24 { color: var(--text); }
+
+    .motion-demo { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-4); max-width: 520px; }
+    .motion-panel { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows var(--duration-page) var(--ease-out), opacity var(--duration-page) var(--ease-out); }
+    .motion-panel.open { grid-template-rows: 1fr; opacity: 1; }
+    .motion-panel > div { overflow: hidden; }
+    .motion-panel .inner { padding-top: var(--space-3); }
+
+    .copy-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-2); max-width: 560px; }
+    .copy-block .label { font-size: 12px; color: var(--text-2); margin-bottom: var(--space-1); }
+    .copy-block .line { font-size: 14px; }
+    .copy-block .bad { color: var(--danger); text-decoration: line-through; }
+    .copy-block .good { color: var(--text); }
+
+    ul.donts { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); max-width: 72ch; }
+    ul.donts li { font-size: 14px; color: var(--text-2); padding-left: var(--space-5); position: relative; }
+    ul.donts li::before { content: "\00d7"; position: absolute; left: 0; color: var(--danger); font-weight: 600; }
+    ul.rules { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); max-width: 72ch; }
+    ul.rules li { font-size: 14px; padding-left: var(--space-5); position: relative; }
+    ul.rules li::before { content: "\2192"; position: absolute; left: 0; color: var(--text-2); }
+
+    table.tokens { border-collapse: collapse; font-size: 14px; margin-top: var(--space-2); }
+    table.tokens th, table.tokens td { text-align: left; padding: var(--space-2) var(--space-4) var(--space-2) 0; border-bottom: 1px solid var(--border); }
+    table.tokens th { font-size: 12px; color: var(--text-2); font-weight: 500; }
+    table.tokens td code { font-family: inherit; color: var(--text-2); }
+
+    footer { margin-top: var(--space-7); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+    footer p { font-size: 12px; color: var(--text-2); max-width: 84ch; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+
+    @media (max-width: 640px) {
+      .sheet { padding: var(--space-5) var(--space-4) var(--space-7); }
+      header.sheet-head h1 { font-size: 24px; }
+      .type-row { flex-direction: column; gap: var(--space-1); }
+      .type-row .tag { width: auto; }
+      .tax .label { min-width: 0; }
+      .tax { flex-wrap: wrap; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <header class="sheet-head">
+      <h1>Travel Guide design language</h1>
+      <p class="lede">The place explains itself — the interface stays out of the way. Calm, warm, sun-readable; one accent per screen.</p>
+      <p class="how">Open this page before any UI change. Copy values from here (:root / swatches) — never from memory or prose. This page is law where it disagrees with SPEC text, DESIGN-TOKENS.md, or Tokens.kt; rev it only on a system change (palette, type, radii, icons, motion), never for a feature.</p>
+    </header>
+
+    <section>
+      <h2>Color</h2>
+      <p class="rule">Eight hues total, plus alpha washes of the same colors. One deep green accent; one warm highlight reserved for "you are here / playing now"; borders are hairlines, never boxes of color. No gradient anywhere.</p>
+      <div class="swatches">
+        <div class="swatch"><div class="chip" style="background:#FAFAF7"></div><div class="name">Background</div><div class="hex">#FAFAF7 · --bg</div><div class="use">App and map background.</div></div>
+        <div class="swatch"><div class="chip" style="background:#FFFFFF"></div><div class="name">Surface</div><div class="hex">#FFFFFF · --surface</div><div class="use">Cards, sheets, inputs. Always with a 1px --border hairline.</div></div>
+        <div class="swatch"><div class="chip" style="background:#E9E6E0"></div><div class="name">Border</div><div class="hex">#E9E6E0 · --border</div><div class="use">1px hairlines and dividers. Never text.</div></div>
+        <div class="swatch"><div class="chip" style="background:#2F5D50"></div><div class="name">Primary</div><div class="hex">#2F5D50 · --primary</div><div class="contrast">7.2:1 on bg · 7.5:1 white-on-primary (AA)</div><div class="use">Active states, primary actions, next stop.</div></div>
+        <div class="swatch"><div class="chip" style="background:#C97B4A"></div><div class="name">Highlight</div><div class="hex">#C97B4A · --highlight</div><div class="contrast">3.1:1 on bg — UI / large text only, never body text</div><div class="use">Now playing, "you are here" only. Sparing.</div></div>
+        <div class="swatch"><div class="chip" style="background:#1F1D1B"></div><div class="name">Text</div><div class="hex">#1F1D1B · --text</div><div class="contrast">16.1:1 on bg (AAA)</div><div class="use">Headings and primary text.</div></div>
+        <div class="swatch"><div class="chip" style="background:#6B6862"></div><div class="name">Text 2</div><div class="hex">#6B6862 · --text-2</div><div class="contrast">5.0:1 on bg (AA)</div><div class="use">Secondary text, metadata, labels.</div></div>
+        <div class="swatch"><div class="chip" style="background:#B3453A"></div><div class="name">Danger</div><div class="hex">#B3453A · --danger</div><div class="contrast">5.2:1 on bg (AA)</div><div class="use">Closed now, destructive actions, errors.</div></div>
+      </div>
+      <h3>State layers (no new hues)</h3>
+      <p class="rule">Hover, press, tinted backgrounds and scrims are alpha layers of the colors above — never new hexes. In Compose these are the same overlays.</p>
+      <table class="tokens">
+        <tr><th>Token</th><th>Value</th><th>Used for</th></tr>
+        <tr><td><code>--state-hover</code></td><td><code>rgba(31,29,27,.05)</code></td><td>hover on neutral surfaces</td></tr>
+        <tr><td><code>--state-press</code></td><td><code>rgba(31,29,27,.10)</code></td><td>press feedback, icon buttons</td></tr>
+        <tr><td><code>--primary-wash</code></td><td><code>rgba(47,93,80,.10)</code></td><td>selected rows, lead tiles, skeletons</td></tr>
+        <tr><td><code>--highlight-wash</code></td><td><code>rgba(201,123,74,.14)</code></td><td>now-playing tint, fun-fact pill</td></tr>
+        <tr><td><code>--danger-wash</code></td><td><code>rgba(179,69,58,.10)</code></td><td>closed state tint, error rows</td></tr>
+        <tr><td><code>--scrim</code></td><td><code>rgba(31,29,27,.32)</code></td><td>behind the bottom sheet only</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Status taxonomy</h2>
+      <p class="rule">Status is always dot (or icon) plus a word. Color never carries meaning alone — the label is mandatory.</p>
+      <div class="taxonomy">
+        <div class="tax"><span class="dot highlight"></span><span class="label">Playing now</span><span class="meaning">The story being narrated right now. Highlight is used here and nowhere else.</span></div>
+        <div class="tax"><span class="dot primary"></span><span class="label">Next on route</span><span class="meaning">The upcoming stop in walk mode.</span></div>
+        <div class="tax"><span class="dot ring"></span><span class="label">Queued</span><span class="meaning">Will speak after the current story. One voice at a time, always.</span></div>
+        <div class="tax"><span class="icon"><svg viewBox="0 0 24 24" class="icon icon-16"><use href="#i-check"/></svg></span><span class="label">Visited</span><span class="meaning">Heard or skipped; shows the time. Muted text weight, never a color change alone.</span></div>
+        <div class="tax"><span class="dot danger"></span><span class="label">Closed now</span><span class="meaning">Hours say closed. The exterior story still plays.</span></div>
+        <div class="tax"><span class="icon"><svg viewBox="0 0 24 24" class="icon icon-16"><use href="#i-volume-x"/></svg></span><span class="label">Muted</span><span class="meaning">Audio off; queue paused. Mute is always visible on every screen.</span></div>
+        <div class="tax"><span class="icon"><svg viewBox="0 0 24 24" class="icon icon-16"><use href="#i-download"/></svg></span><span class="label">Offline ready</span><span class="meaning">Pack and map downloaded; full loop works with zero network.</span></div>
+        <div class="tax"><span class="dot highlight"></span><span class="label">Update available</span><span class="meaning">A newer pack version exists. Highlight dot plus the word — never a badge count.</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Type</h2>
+      <p class="rule">Inter for the interface, Lora for place stories. Sizes come from this scale only: 12 / 14 / 16 / 18 / 24 / 32 / 40. Line height tightens as size grows; story text never goes below 17px.</p>
+      <div class="type-ladder">
+        <div class="type-row"><span class="tag">Display · 40 / 600 · first-run consent headline</span><span class="sample t-40">Your guide is ready.</span></div>
+        <div class="type-row"><span class="tag">Title · 32 / 600 · screen title</span><span class="sample t-32">Fort Kochi</span></div>
+        <div class="type-row"><span class="tag">Heading · 24 / 600 · section heading</span><span class="sample t-24">Today's walk</span></div>
+        <div class="type-row"><span class="tag">Card title · 18 / 600 · POI name</span><span class="sample t-18">St. Francis Church</span></div>
+        <div class="type-row"><span class="tag">Chrome · 16 / 500 · body, controls</span><span class="sample t-16">Start walk · 2 h · 16 stops</span></div>
+        <div class="type-row"><span class="tag">Secondary · 14 / 400 · summaries, labels</span><span class="sample t-14">Heritage · 4 min walk · open until 6 pm</span></div>
+        <div class="type-row"><span class="tag">Meta · 12 / 400 · sources, versions, timestamps</span><span class="sample t-12">Sources: 3 · pack v1.1.0 · heard at 10:42</span></div>
+        <div class="type-row"><span class="tag">Story · 17–18 / 400 Lora · place stories</span><span class="sample t-story">Place stories read here, in Lora at 17–18px with 1.65 line height — calm, unhurried, sized for reading in sunlight.</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Spacing, radius, depth</h2>
+      <p class="rule">4pt base, eight tokens. Bigger gaps between groups than inside them. Three radii only: 8 buttons, 10 cards and inputs, pill for tags. One shadow, maximum — cards sit on the page, nothing glows.</p>
+      <div class="scale-bar">
+        <div class="bar" style="height:4px"></div>
+        <div class="bar" style="height:8px"></div>
+        <div class="bar" style="height:12px"></div>
+        <div class="bar" style="height:16px"></div>
+        <div class="bar" style="height:24px"></div>
+        <div class="bar" style="height:32px"></div>
+        <div class="bar" style="height:48px"></div>
+        <div class="bar" style="height:64px"></div>
+      </div>
+      <span class="cap">4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 — nothing off-grid</span>
+      <div class="radius-row">
+        <div class="radius-demo"><div class="box" style="border-radius:8px"></div><span class="cap">8 · buttons, inputs, icon buttons</span></div>
+        <div class="radius-demo"><div class="box" style="border-radius:10px"></div><span class="cap">10 · cards, sheets, fields</span></div>
+        <div class="radius-demo"><div class="box" style="border-radius:999px; width:96px"></div><span class="cap">pill · tags only</span></div>
+      </div>
+      <div class="elev-demo">
+        <div class="elev-flat">Flat — page background, map, list rows inside a sheet. No shadow.</div>
+        <div class="elev-card">Raised — cards and the bottom sheet: 1px border + 0 1px 3px rgba(0,0,0,.06). This is the maximum.</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Components</h2>
+      <p class="rule">One implementation per component, reused everywhere — never rebuilt per screen. Every interactive element has default, hover, focus, pressed, and disabled states; async ones also have loading.</p>
+
+      <h3>Buttons</h3>
+      <div class="state-row">
+        <div class="state"><button class="btn primary" type="button">Start walk</button><span class="tag">primary</span></div>
+        <div class="state"><button class="btn primary is-hover" type="button">Start walk</button><span class="tag">hover · +6% layer</span></div>
+        <div class="state"><button class="btn primary is-focus" type="button">Start walk</button><span class="tag">focus · 2px ring, 2px offset</span></div>
+        <div class="state"><button class="btn primary is-pressed" type="button">Start walk</button><span class="tag">pressed · scale .96, 100ms</span></div>
+        <div class="state"><button class="btn primary is-disabled" type="button" disabled>Start walk</button><span class="tag">disabled · 38% opacity</span></div>
+        <div class="state"><button class="btn primary loading" type="button" aria-label="Starting walk">Start walk</button><span class="tag">loading · no layout shift</span></div>
+      </div>
+      <div class="state-row">
+        <div class="state"><button class="btn secondary" type="button">View route</button><span class="tag">secondary</span></div>
+        <div class="state"><button class="btn ghost" type="button">Not now</button><span class="tag">ghost</span></div>
+        <div class="state"><button class="btn danger" type="button">Delete pack</button><span class="tag">destructive — names the object</span></div>
+        <div class="state"><button class="icon-btn plain" type="button" aria-label="Mute narration"><svg viewBox="0 0 24 24" class="icon"><use href="#i-volume-2"/></svg></button><span class="tag">icon button · 44px target</span></div>
+      </div>
+      <p class="rule">Primary buttons are 44–48px tall and full-width on mobile. One primary action per view. Press is scale .96 at 100ms — never a hover scale, never a glow.</p>
+
+      <h3>Inputs</h3>
+      <div class="fields">
+        <div class="field"><label for="ref-search">Search this place</label><input id="ref-search" type="search" placeholder="St. Francis Church" aria-describedby="ref-search-help" /><span class="help" id="ref-search-help">Finds POIs, food and stays in the offline pack.</span></div>
+        <div class="field is-focus"><label for="ref-note-focus">Your note</label><input id="ref-note-focus" type="text" value="Come back at sunset" aria-describedby="ref-note-focus-help" /><span class="help" id="ref-note-focus-help">Kept on this phone. Included in the trip export.</span></div>
+        <div class="field is-error"><label for="ref-note-error">Trip name</label><input id="ref-note-error" type="text" value="" aria-invalid="true" aria-describedby="ref-note-error-help" /><span class="help" id="ref-note-error-help">Trip name can't be empty. Type a name to save this day.</span></div>
+        <div class="field is-disabled"><label for="ref-note-disabled">Voice pick</label><input id="ref-note-disabled" type="text" value="On-device voice" disabled aria-describedby="ref-note-disabled-help" /><span class="help" id="ref-note-disabled-help">Cloud voices are opt-in and stay off by default.</span></div>
+      </div>
+
+      <h3>Tags, honesty labels, chips</h3>
+      <div class="state-row">
+        <span class="pill cat"><svg viewBox="0 0 24 24" class="icon"><use href="#i-map-pin"/></svg>Heritage</span>
+        <span class="pill cat"><svg viewBox="0 0 24 24" class="icon"><use href="#i-utensils"/></svg>Food</span>
+        <span class="pill cat"><svg viewBox="0 0 24 24" class="icon"><use href="#i-bed"/></svg>Stay</span>
+        <span class="pill">History</span>
+        <span class="pill legend"><svg viewBox="0 0 24 24" class="icon"><use href="#i-book-open"/></svg>Legend</span>
+        <span class="pill fact"><svg viewBox="0 0 24 24" class="icon icon-16"><use href="#i-star"/></svg>Fun fact</span>
+        <span class="chip"><svg viewBox="0 0 24 24" class="icon icon-16"><use href="#i-footprints"/></svg>4 min walk</span>
+      </div>
+      <p class="rule">History, legend and fun fact are labeled on every POI — never presented as the same thing. They differ by text, border style and icon, never by color alone. Tag pills are the only pills.</p>
+
+      <h3>POI card</h3>
+      <div class="poi-card">
+        <div class="head">
+          <h4>St. Francis Church</h4>
+          <span class="pill">History</span>
+          <span class="chip"><svg viewBox="0 0 24 24" class="icon icon-16"><use href="#i-footprints"/></svg>4 min walk</span>
+        </div>
+        <p class="summary">Specimen with real pack fields. Summary stays to three lines — the story carries the depth.</p>
+        <p class="story">The story text reads here at 17px Lora. Replace this sample with pack copy — never invent history, legends or facts in the UI.</p>
+        <ul class="see">
+          <li><svg viewBox="0 0 24 24" class="icon icon-16"><use href="#i-check"/></svg>Look up at the timber ceiling — it was rebuilt after the 1923 flood.</li>
+          <li><svg viewBox="0 0 24 24" class="icon icon-16"><use href="#i-check"/></svg>Find the Portuguese tombstones along the north wall.</li>
+        </ul>
+        <div class="sources">
+          <span>Sources: 3</span><span>·</span><span>Fort Kochi pack v1.1.0</span><span>·</span><span>English · on-device voice</span>
+        </div>
+      </div>
+      <p class="rule">Sources and pack version appear on every POI card, no exceptions. Content honesty is a product non-negotiable.</p>
+
+      <h3>Nearby row · offline pack row · map pins</h3>
+      <div class="state-row" style="align-items:flex-start">
+        <div class="row">
+          <span class="lead"><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-map-pin"/></svg></span>
+          <span class="grow"><span class="name">Chinese fishing nets</span><span class="meta"><span>Heritage</span><span>·</span><span>2 min walk</span></span></span>
+          <span class="trail"><svg viewBox="0 0 24 24" class="icon"><use href="#i-chevron-right"/></svg></span>
+        </div>
+        <div class="row visited">
+          <span class="lead"><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-check"/></svg></span>
+          <span class="grow"><span class="name">Vasco Square</span><span class="meta"><span>Visited 10:42</span></span></span>
+          <span class="trail"><svg viewBox="0 0 24 24" class="icon"><use href="#i-chevron-right"/></svg></span>
+        </div>
+      </div>
+      <div class="state-row" style="align-items:flex-start; margin-top:var(--space-3)">
+        <div class="row" style="max-width:380px">
+          <span class="lead"><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-download"/></svg></span>
+          <span class="grow"><span class="name">Fort Kochi pack</span><span class="meta"><span>v1.1.0</span><span>·</span><span>Downloading 62%</span></span>
+            <span class="progress"><span></span></span>
+          </span>
+          <button class="btn ghost" type="button">Pause</button>
+        </div>
+        <div class="row" style="max-width:380px">
+          <span class="lead"><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-check"/></svg></span>
+          <span class="grow"><span class="name">Fort Kochi pack</span><span class="meta"><span>v1.1.0</span><span>·</span><span>Offline ready</span></span></span>
+          <button class="btn ghost" type="button">Delete</button>
+        </div>
+      </div>
+      <div class="pins" style="margin-top:var(--space-4)">
+        <div class="pin-state default"><span class="dot-wrap"><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-map-pin"/></svg></span><span class="cap">POI</span></div>
+        <div class="pin-state next"><span class="dot-wrap"><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-map-pin"/></svg></span><span class="cap">Next stop</span></div>
+        <div class="pin-state playing"><span class="dot-wrap"><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-map-pin"/></svg></span><span class="cap">Playing · you are here</span></div>
+        <div class="pin-state visited"><span class="dot-wrap"><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-check"/></svg></span><span class="cap">Visited</span></div>
+      </div>
+
+      <h3>Now-playing sheet (one player, every screen)</h3>
+      <div class="player">
+        <div class="grabber"></div>
+        <div class="state-line"><span class="dot highlight"></span><span class="label">Playing</span><span>· St. Francis Church · 0:42</span></div>
+        <h4>St. Francis Church</h4>
+        <p class="now">Transcript and story read in Lora, replacing the sample with pack copy.</p>
+        <div class="controls">
+          <button class="btn primary" type="button"><svg viewBox="0 0 24 24" class="icon"><use href="#i-pause"/></svg>Pause</button>
+          <button class="icon-btn" type="button" aria-label="Mute narration"><svg viewBox="0 0 24 24" class="icon"><use href="#i-volume-2"/></svg></button>
+          <button class="speed" type="button">1&times; speed</button>
+        </div>
+      </div>
+      <p class="rule">States: playing · paused · queued ("Next: Chinese fishing nets · 2 min") · muted. Mute stops audio under 500ms and pauses the queue. Narration never surprises — audio only after the user starts it.</p>
+
+      <h3>Empty, loading, error</h3>
+      <div class="trio">
+        <div class="state-card">
+          <svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-compass"/></svg>
+          <h4>No stops within 5 minutes</h4>
+          <p>Keep walking, or open the route to see what's ahead.</p>
+          <button class="btn ghost" type="button">Open route</button>
+        </div>
+        <div class="state-card">
+          <div class="skeleton"><span class="bar w90"></span><span class="bar w60"></span><span class="bar"></span></div>
+          <p>Loading nearby places — shimmer is 1.5s linear and freezes under reduced motion.</p>
+        </div>
+        <div class="state-card error">
+          <svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-map"/></svg>
+          <h4>Offline map isn't downloaded</h4>
+          <p>Download the Fort Kochi pack once — the map and stories then work with no signal.</p>
+          <button class="btn secondary" type="button">Download pack</button>
+        </div>
+      </div>
+      <p class="rule">Empty states explain the space and give the first action. Errors name what happened and the fix — never "Something went wrong".</p>
+    </section>
+
+    <section>
+      <h2>Icons</h2>
+      <p class="rule">One family only: Lucide, from ICONS-ASSETS/system-and-ui/lucide/icons. 24px bounding box, 2px stroke, round caps and joins, unfilled, currentColor. Sizes 16 / 20 / 24 only. Never mix families, never fill, never emoji, never redraw a glyph per screen.</p>
+      <div class="icon-index">
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-map-pin"/></svg><figcaption>map-pin</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-map"/></svg><figcaption>map</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-compass"/></svg><figcaption>compass</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-navigation"/></svg><figcaption>navigation</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-locate-fixed"/></svg><figcaption>locate-fixed</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-route"/></svg><figcaption>route</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-play"/></svg><figcaption>play</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-pause"/></svg><figcaption>pause</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-volume-2"/></svg><figcaption>volume-2</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-volume-x"/></svg><figcaption>volume-x</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-headphones"/></svg><figcaption>headphones</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-search"/></svg><figcaption>search</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-clock"/></svg><figcaption>clock</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-book-open"/></svg><figcaption>book-open</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-download"/></svg><figcaption>download</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-battery-full"/></svg><figcaption>battery-full</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-footprints"/></svg><figcaption>footprints</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-utensils"/></svg><figcaption>utensils</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-bed"/></svg><figcaption>bed</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-camera"/></svg><figcaption>camera</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-star"/></svg><figcaption>star</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-check"/></svg><figcaption>check</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-x"/></svg><figcaption>x</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-chevron-right"/></svg><figcaption>chevron-right</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-settings"/></svg><figcaption>settings</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-share-2"/></svg><figcaption>share-2</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-flag"/></svg><figcaption>flag</figcaption></figure>
+        <figure><svg viewBox="0 0 24 24" class="icon icon-24"><use href="#i-sun"/></svg><figcaption>sun</figcaption></figure>
+      </div>
+      <p class="rule">Icon-only controls get a 44px hit area and an accessible name (TalkBack label / aria-label). Icons sit neutral; primary colors an icon only when its control or row is active. Brand or tool marks, if ever shown, come from ICONS-ASSETS/apps-and-dashboards → developer-tools/stacks-and-languages → other suites — never homemade shapes.</p>
+    </section>
+
+    <section>
+      <h2>Motion</h2>
+      <p class="rule">Motion only on a genuine state change — narration, sheet, selection. Nothing moves on its own. Press 96% at 100ms; state changes 150ms; page and sheet 200ms. Enter with ease-out, leave with ease-in. Reduced motion freezes everything.</p>
+      <table class="tokens">
+        <tr><th>Token</th><th>Value</th><th>Used for</th></tr>
+        <tr><td><code>--duration-press</code></td><td><code>100ms</code></td><td>press scale .96, opacity</td></tr>
+        <tr><td><code>--duration-fast</code></td><td><code>150ms</code></td><td>hover, focus, chips, narration state swaps</td></tr>
+        <tr><td><code>--duration-page</code></td><td><code>200ms</code></td><td>page slide/fade, bottom-sheet open</td></tr>
+        <tr><td><code>--ease-out</code></td><td><code>cubic-bezier(0,0,.2,1)</code></td><td>entering the screen</td></tr>
+        <tr><td><code>--ease-in</code></td><td><code>cubic-bezier(.4,0,1,1)</code></td><td>leaving the screen</td></tr>
+        <tr><td><code>--ease-in-out</code></td><td><code>cubic-bezier(.4,0,.2,1)</code></td><td>moving within the screen</td></tr>
+      </table>
+      <div class="motion-demo" style="margin-top:var(--space-3)">
+        <div class="state-row" style="margin-bottom:0">
+          <button class="btn secondary" type="button" id="motionToggle" aria-expanded="false">Show player</button>
+        </div>
+        <div class="motion-panel" id="motionPanel">
+          <div>
+            <div class="inner">
+              <div class="state-line"><span class="dot highlight"></span><span class="label">Playing</span><span>· Chinese fishing nets · 1:04</span></div>
+              <p class="now" style="font-family:var(--font-serif);font-size:17px;line-height:1.65">The sheet answers the tap above — it comes from that button, so dismissing returns you there. Nothing else on this page moves on its own.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Copy</h2>
+      <p class="rule">Plain verbs, sentence case, one job per element. The guide speaks like a calm person, never a hype machine. Name actions end to end; name consequences before destructive ones.</p>
+      <div class="copy-block"><div class="label">Empty state</div><div class="line">No stops visited yet. Start walking — stories play as you arrive.</div></div>
+      <div class="copy-block"><div class="label">Error</div><div class="line">Location is off. The guide needs it to notice where you are. Open settings, then try again.</div></div>
+      <div class="copy-block"><div class="label">Permission rationale (before the system dialog)</div><div class="line">The guide uses your location to notice which places you're near. It works with no network, and your trip stays on this phone.</div></div>
+      <div class="copy-block"><div class="label">Action naming</div><div class="line">Button "Download pack" produces "Downloaded". Button "Save note" produces "Saved". Never a bare "OK" or "Done".</div></div>
+      <div class="copy-block"><div class="label">Content honesty</div><div class="line">"History" means sourced. "Legend" means told locally, not verified. "Fun fact" means a small interesting extra — never dressed up as history.</div></div>
+      <p class="rule">No fabricated numbers — no ratings, counts or stats without a real source. No placeholder hype ("Discover amazing places!"). Formats are human: "4 min walk", "0:42", "heard at 10:42", "pack v1.1.0".</p>
+    </section>
+
+    <section>
+      <h2>Layout &amp; hierarchy</h2>
+      <ul class="rules">
+        <li>Map first: the map is the home screen; pins carry the one accent state (playing) and everything else stays quiet.</li>
+        <li>One focal point per view, at most three levels. The player sheet holds one primary action; the map holds none but mute, which is always visible.</li>
+        <li>Bottom sheet for context, never for the primary task. One sheet implementation reused on map, route and history.</li>
+        <li>Big targets outdoors: 44px minimum, 48px for primary actions. Text: chrome never below 12px, place content 17–18px serif.</li>
+        <li>Sun-readable: text tiers kept at AA or better; no thin gray body text on the map; no text over imagery without a scrim.</li>
+        <li>Group by proximity — bigger gaps between sections (32–48) than inside cards (8–16). Cards get padding on all sides; lists get rhythm, not boxes per item.</li>
+        <li>Battery and permissions stay visible and honest: power mode stated in plain words, cost disclosed before it happens.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Hard rules</h2>
+      <ul class="donts">
+        <li>No new colors, fonts, radii or motion curves outside this page. Hover/press/tints are alpha layers, never new hexes.</li>
+        <li>No gradients anywhere. One shadow maximum (0 1px 3px rgba(0,0,0,.06)); no glow, no blur, no glass.</li>
+        <li>No emoji as icons, no filled or mixed icon families — Lucide only.</li>
+        <li>No decorative animation; nothing moves without a state change; reduced motion freeze is mandatory.</li>
+        <li>No fabricated content or numbers: every POI carries sources and its pack version; history, legend and fun fact stay labeled.</li>
+        <li>No surprise audio and no silent tracking: audio starts only after the user starts it; mute is always visible; background location is a separate, plain-language opt-in.</li>
+        <li>No dark theme in beta — this light system is the only one. No second accent, no per-screen theme tweaks.</li>
+        <li>No second implementation of the player, POI card, pin or list row.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>reference v1 · 2026-09-26 · writer Terminal 2 · values carried 1:1 from SPEC §5 + DESIGN-TOKENS.md (draft) + mobile Tokens.kt · icons: verbatim Lucide SVGs from ICONS-ASSETS/system-and-ui/lucide/icons · this page is the UI contract: open it, sample exact values, never restyle from memory · rev only on a system change.</p>
+    </footer>
+  </div>
+
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/></symbol>
+    <symbol id="i-navigation" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></symbol>
+    <symbol id="i-locate-fixed" viewBox="0 0 24 24"><line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></symbol>
+    <symbol id="i-volume-2" viewBox="0 0 24 24"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></symbol>
+    <symbol id="i-volume-x" viewBox="0 0 24 24"><path d="M11 4.702a.7.7 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.7.7 0 0 0 11 19.298z"/><path d="m16.5 14.5 5-5"/><path d="m16.5 9.5 5 5"/></symbol>
+    <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></symbol>
+    <symbol id="i-battery-full" viewBox="0 0 24 24"><path d="M10 10v4"/><path d="M14 10v4"/><path d="M22 14v-4"/><path d="M6 10v4"/><rect x="2" y="6" width="16" height="12" rx="2"/></symbol>
+    <symbol id="i-footprints" viewBox="0 0 24 24"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/></symbol>
+    <symbol id="i-utensils" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></symbol>
+    <symbol id="i-bed" viewBox="0 0 24 24"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+  </svg>
+
+  <script>
+    document.getElementById('motionToggle').addEventListener('click', function () {
+      var panel = document.getElementById('motionPanel');
+      var open = panel.classList.toggle('open');
+      this.setAttribute('aria-expanded', String(open));
+      this.textContent = open ? 'Hide player' : 'Show player';
+    });
+  </script>
+</body>
+</html>

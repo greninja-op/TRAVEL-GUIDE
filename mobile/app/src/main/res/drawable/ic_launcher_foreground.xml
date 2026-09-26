@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Travel Guide launcher mark: location pin with narration waves.
+     Palette per DESIGN-TOKENS.md (primary/highlight/bg). Own brand asset.
+     Content kept inside the 66dp adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- narration waves, left -->
+    <path
+        android:pathData="M31,38 C27,42 27,48 31,52"
+        android:strokeColor="#FAFAF7"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.85" />
+    <!-- narration waves, right -->
+    <path
+        android:pathData="M77,38 C81,42 81,48 77,52"
+        android:strokeColor="#FAFAF7"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.85" />
+    <!-- pin -->
+    <path
+        android:pathData="M54,28 C44.61,28 37,35.61 37,45 C37,58.5 54,80 54,80 C54,80 71,58.5 71,45 C71,35.61 63.39,28 54,28 Z"
+        android:fillColor="#FAFAF7" />
+    <!-- pin heart: "speaking now" -->
+    <path
+        android:pathData="M54,38.5 A6.5,6.5 0 1,1 53.99,38.5 Z"
+        android:fillColor="#C97B4A" />
+</vector>
