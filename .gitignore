@@ -11,6 +11,10 @@ shared-core/build/
 *.apk
 *.aab
 
+# Kotlin compiler session/error logs (in-line comments are NOT supported in
+# .gitignore — a trailing "# ..." becomes part of the pattern and never matches)
+mobile/.kotlin/
+
 # Generated demo exports (python tools/demo.py --yes) — never committed
 demo-out/
 

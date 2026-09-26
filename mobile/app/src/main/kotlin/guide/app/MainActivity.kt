@@ -11,10 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,6 +40,7 @@ import guide.app.ui.RoutesScreen
 import guide.app.ui.SettingsScreen
 import guide.app.ui.Trio
 import guide.app.ui.VoiceSettings
+import guide.app.ui.components.GuideNavBar
 import guide.app.ui.theme.GuideTokens
 import org.maplibre.android.maps.MapView
 
@@ -90,7 +88,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private val TABS = listOf("map", "nearby", "routes", "packs", "history", "settings")
+// Navigation destinations live in ui/components/NavBar.kt (NavItem) so the bar
+// and the routes can never drift apart.
 
 @Composable
 fun GuideApp(onMapView: (MapView) -> Unit = {}) {
@@ -106,7 +105,9 @@ fun GuideApp(onMapView: (MapView) -> Unit = {}) {
             return@MaterialTheme
         }
         val nav = rememberNavController()
-        var muted by remember { mutableStateOf(false) }
+        // Mute state lives with the player sheet (ui/NowPlayingSheet.kt) — it is
+        // the audio's own control, and it is routed to the live Narrator via
+        // GuideService.setMuted() so it takes effect in <500ms (F-08).
         var current by remember { mutableStateOf("map") }
         var profile by remember { mutableStateOf(BatteryProfile.BALANCED) }
         val context = LocalContext.current
@@ -153,88 +154,91 @@ fun GuideApp(onMapView: (MapView) -> Unit = {}) {
         }
 
         Scaffold(
+            containerColor = GuideTokens.Bg,
             bottomBar = {
-                NavigationBar {
-                    TABS.forEach { tab ->
-                        NavigationBarItem(
-                            selected = current == tab,
-                            onClick = { current = tab; nav.navigate(tab) },
-                            label = { Text(tab) },
-                            icon = {},
-                        )
-                    }
-                }
+                // Real icons + labels, tonal surface, animated selection.
+                // The mute control lives in the player sheet (where the audio
+                // is), not here — it used to sit above the NavHost in a Column,
+                // stealing vertical space from every screen and pushing the
+                // map/content down (a direct cause of the overflow defects).
+                GuideNavBar(
+                    current = current,
+                    onSelect = { tab ->
+                        current = tab
+                        nav.navigate(tab) {
+                            popUpTo(nav.graph.startDestinationId) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                )
             },
         ) { pad ->
-            Surface(modifier = Modifier.fillMaxSize().padding(pad), color = GuideTokens.Bg) {
-                Column {
-                    // SPEC §1: one-tap mute always visible — routed to the LIVE
-                    // Narrator via the service (F-08, <500ms), not just local UI state.
-                    Button(onClick = {
-                        muted = !muted
-                        GuideService.setMuted(context, muted)
-                    }) {
-                        Text(if (muted) "Unmute guide" else "Mute guide")
+            Surface(
+                modifier = Modifier.fillMaxSize().padding(pad),
+                color = GuideTokens.Bg,
+            ) {
+                NavHost(navController = nav, startDestination = "map") {
+                    composable("map") {
+                        MapScreen(
+                            mapView = mapView,
+                            offRoute = false,
+                            seeingAnswer = null,
+                            onSeeingTap = { nav.navigate("nearby") },
+                        )
                     }
-                    NavHost(navController = nav, startDestination = "map") {
-                        composable("map") {
-                            MapScreen(
-                                mapView = mapView,
-                                offRoute = false,
-                                seeingAnswer = null,
-                                onSeeingTap = { nav.navigate("nearby") },
+                    composable("nearby") {
+                        NearbyScreen(
+                            rows = emptyList(), // fed by LocationTracker + VisitRank
+                            events = emptyList(),
+                            seeingAnswer = null,
+                            onSeeingTap = {},
+                            onRowTap = { id -> nav.navigate("poi/$id") },
+                        )
+                    }
+                    composable("routes") {
+                        RoutesScreen(
+                            routes = listOf(
+                                Trio("Fort Kochi Heritage Loop", "16 stops · ~150 min"),
+                                Trio("Kochi Full Day", "10 stops · ~240 min"),
+                            ),
+                            onPickPlan = {},
+                        )
+                    }
+                    composable("packs") {
+                        PacksScreen(
+                            packs = emptyList(), // fed by PackManager inventory
+                            downloadProgress = null,
+                            onDownloadCity = {},
+                            onDelete = {},
+                        )
+                    }
+                    composable("history") {
+                        HistoryScreen(visits = emptyList(), onSaveNote = { _, _ -> }, onExport = {})
+                    }
+                    composable("settings") {
+                        Column {
+                            SettingsScreen(
+                                profile = profile,
+                                onProfile = { profile = it },
+                                backgroundOptIn = false,
+                                onBackgroundOptIn = {},
+                                quietEnabled = true,
+                                onQuiet = {},
+                                autoPlay = true,
+                                onAutoPlay = {},
                             )
+                            // Auto-play moved into SettingsScreen — it was
+                            // duplicated in both places, and two controls for
+                            // one setting drift apart.
+                            VoiceSettings(onRate = {})
                         }
-                        composable("nearby") {
-                            NearbyScreen(
-                                rows = emptyList(), // fed by LocationTracker + VisitRank
-                                events = emptyList(),
-                                seeingAnswer = null,
-                                onSeeingTap = {},
-                                onRowTap = { id -> nav.navigate("poi/$id") },
-                            )
-                        }
-                        composable("routes") {
-                            RoutesScreen(
-                                routes = listOf(
-                                    Trio("Fort Kochi Heritage Loop", "16 stops · ~150 min"),
-                                    Trio("Kochi Full Day", "10 stops · ~240 min"),
-                                ),
-                                onPickPlan = {},
-                            )
-                        }
-                        composable("packs") {
-                            PacksScreen(
-                                packs = emptyList(), // fed by PackManager inventory
-                                downloadProgress = null,
-                                onDownloadCity = {},
-                                onDelete = {},
-                            )
-                        }
-                        composable("history") {
-                            HistoryScreen(visits = emptyList(), onSaveNote = { _, _ -> }, onExport = {})
-                        }
-                        composable("settings") {
-                            Column {
-                                SettingsScreen(
-                                    profile = profile,
-                                    onProfile = { profile = it },
-                                    backgroundOptIn = false,
-                                    onBackgroundOptIn = {},
-                                    quietEnabled = true,
-                                    onQuiet = {},
-                                    autoPlay = true,
-                                    onAutoPlay = {},
-                                )
-                                VoiceSettings(onRate = {}, onAutoPlay = {})
-                            }
-                        }
-                        composable("phrasebook") {
-                            PhrasebookScreen(onSpeak = {})
-                        }
-                        composable("poi/{id}") {
-                            Text("POI detail — fed by PackLoader card.", style = GuideTokens.Body)
-                        }
+                    }
+                    composable("phrasebook") {
+                        PhrasebookScreen(onSpeak = {})
+                    }
+                    composable("poi/{id}") {
+                        Text("POI detail — fed by PackLoader card.", style = GuideTokens.Body)
                     }
                 }
             }
