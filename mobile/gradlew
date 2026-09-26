@@ -119,6 +119,14 @@ CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 
 # Determine the Java command to use to start the JVM.
+# Self-contained toolchain (owner order 2026-09-26): if JAVA_HOME is unset, fall
+# back to the JDK vendored inside TRAVEL-GUIDE/. Nothing is borrowed from
+# elsewhere in PLANNING. In CI, actions/setup-java sets JAVA_HOME and that wins.
+# See mobile/gradle.properties + CONTEXT.md §3.
+if [ -z "$JAVA_HOME" ] && [ -x "$APP_HOME/../.tools/jdk-17/bin/java" ] ; then
+    JAVA_HOME=$APP_HOME/../.tools/jdk-17
+fi
+
 if [ -n "$JAVA_HOME" ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
         # IBM's JDK on AIX uses strange locations for the executables

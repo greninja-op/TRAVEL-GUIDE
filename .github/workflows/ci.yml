@@ -1,0 +1,72 @@
+# CI for the standalone TRAVEL-GUIDE repo.
+#
+# History: this workflow previously lived in the PROJECT-PLANNING superset repo
+# as .github/workflows/travel-guide-ci.yml and triggered on `travel-guide/**`.
+# That project moved out on 2026-09-26 (now PLANNING/TRAVEL-GUIDE, its own repo,
+# remote greninja-op/TRAVEL-GUIDE.git) — a workflow over there could never build
+# code living in a different repository, so it was removed and recreated here,
+# at the repo root, with paths relative to this project.
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # Real Kotlin engine tests + the Android debug build.
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      # The build is self-contained locally (JDK vendored at .tools/jdk-17,
+      # which is git-ignored and therefore absent in CI). Here we supply the
+      # JDK via setup-java instead; org.gradle.java.home in gradle.properties
+      # is overridden by the JAVA_HOME the action exports.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-dependencies: true
+
+      # Android SDK (platform 35) is preinstalled on ubuntu-latest; AGP
+      # auto-installs anything missing (licenses pre-accepted on the image).
+
+      - name: shared-core unit tests
+        run: ./gradlew :shared-core:test --stacktrace
+
+      - name: Assemble debug APK
+        run: ./gradlew :app:assembleDebug --stacktrace
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: travel-guide-debug-apk
+          path: mobile/app/build/outputs/apk/debug/*.apk
+
+  # Pack validation + the Python logic mirrors (stdlib only).
+  content-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate Fort Kochi pack against schema
+        run: python tools/validate_pack.py content/packs/fort-kochi-walk-v1.json
+
+      - name: Logic mirror tests (Python)
+        run: |
+          python tools/test_engine.py
+          python tools/test_queue.py
+          python tools/test_itinerary.py
+          python tools/test_completion.py
