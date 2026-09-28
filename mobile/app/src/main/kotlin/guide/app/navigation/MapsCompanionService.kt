@@ -18,7 +18,8 @@ import java.util.Locale
 enum class CompanionSource {
     GOOGLE_MAPS,
     SHARED_INTENT,
-    SIMULATED
+    SIMULATED,
+    ACCESSIBILITY,
 }
 
 /**
@@ -152,7 +153,8 @@ class MapsCompanionService : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
         val pkg = sbn?.packageName ?: return
-        if (pkg != GOOGLE_MAPS_PKG && !pkg.contains("maps", ignoreCase = true)) return
+        // Strict package isolation: Drop all notifications not originating exactly from Google Maps
+        if (pkg != GOOGLE_MAPS_PKG) return
 
         val n = sbn.notification ?: return
         val extras = n.extras ?: return
@@ -193,17 +195,22 @@ class MapsCompanionService : NotificationListenerService() {
                 }
             }
 
+            // Security sanitization (clamp length, filter control characters)
+            val cleanDest = destName.replace(Regex("""[^\w\s.,'#\-]"""), " ").trim().take(80)
+            val cleanManeuver = maneuver.replace(Regex("""[^\w\s.,'#\-]"""), " ").trim().take(100)
+            val cleanEta = eta.replace(Regex("""[^\w\s.,'#\-•]"""), " ").trim().take(40)
+
             if (MapsCompanionState.currentSession == null) {
                 MapsCompanionState.onNavStarted(
-                    destinationName = destName,
-                    etaOrDistance = eta.ifBlank { null },
-                    nextManeuver = maneuver.ifBlank { null },
+                    destinationName = cleanDest.ifBlank { "Active Navigation Route" },
+                    etaOrDistance = cleanEta.ifBlank { null },
+                    nextManeuver = cleanManeuver.ifBlank { null },
                     source = CompanionSource.GOOGLE_MAPS,
                 )
             } else {
                 MapsCompanionState.onNavUpdated(
-                    etaOrDistance = eta.ifBlank { null },
-                    nextManeuver = maneuver.ifBlank { null },
+                    etaOrDistance = cleanEta.ifBlank { null },
+                    nextManeuver = cleanManeuver.ifBlank { null },
                 )
             }
         }

@@ -1,5 +1,14 @@
 package guide.app.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -13,22 +22,12 @@ import guide.app.R
 /**
  * The Travel Guide design system, as Compose values.
  *
- * Expanded 2026-09-26 (owner: "triple quality", smooth motion, premium map UI).
- * Previously this file held only 8 colors + 3 text styles + 2 radii; screens
- * hardcoded everything else and the document → code contract was nominal.
- * It now carries the full scale so NO screen hardcodes a value.
- *
- * Rules that hold everywhere (see docs/UI-AUDIT-2026-09-26.md §5):
- *  - every gap/pad comes from [Space]; nothing off-grid
- *  - every animation routes through [Motion]; no ad-hoc durations or curves
- *  - elevation is TONAL (a lighter surface reads as higher), shadow supports
- *  - status is never color alone — always dot/icon PLUS a word (SPEC §5)
+ * Full theme support: Crisp Luxury Light Mode + Obsidian Midnight Carbon Dark Mode.
+ * All color tokens are accessed dynamically via [LocalGuideColors].
  */
 
 // ---------------------------------------------------------------------------
-// Fonts — bundled as real TTFs (res/font). Before 2026-09-26 nothing was
-// bundled and the app silently rendered in Roboto while the docs claimed
-// Inter/Lora. Do not reference FontFamily.Default for product text.
+// Fonts — bundled as real TTFs (res/font).
 // ---------------------------------------------------------------------------
 
 val Inter = FontFamily(
@@ -43,42 +42,168 @@ val Lora = FontFamily(
     Font(R.font.lora_medium, FontWeight.Medium),
 )
 
+/**
+ * Complete color palette definition for Travel Guide.
+ */
+data class GuideColorsPalette(
+    val bg: Color,
+    val surface: Color,
+    val border: Color,
+    val primary: Color,
+    val primaryDark: Color,
+    val dark: Color,
+    val highlight: Color,
+    val success: Color,
+    val text: Color,
+    val text2: Color,
+    val textMuted: Color,
+    val danger: Color,
+    val surface0: Color,
+    val surface1: Color,
+    val surface2: Color,
+    val surface3: Color,
+    val stateHover: Color,
+    val statePress: Color,
+    val primaryWash: Color,
+    val highlightWash: Color,
+    val dangerWash: Color,
+    val successWash: Color,
+    val darkWash: Color,
+    val scrim: Color,
+    val onPrimary: Color,
+    val isDark: Boolean,
+)
+
+val LightGuideColors = GuideColorsPalette(
+    bg = Color(0xFFF8F9FA),
+    surface = Color(0xFFFFFFFF),
+    border = Color(0xFFE5E7EB),
+    primary = Color(0xFFFF5A36),
+    primaryDark = Color(0xFFE04320),
+    dark = Color(0xFF121826),
+    highlight = Color(0xFFF59E0B),
+    success = Color(0xFF10B981),
+    text = Color(0xFF111827),
+    text2 = Color(0xFF6B7280),
+    textMuted = Color(0xFF9CA3AF),
+    danger = Color(0xFFEF4444),
+    surface0 = Color(0xFFF8F9FA),
+    surface1 = Color(0xFFFFFFFF),
+    surface2 = Color(0xFFF1F3F5),
+    surface3 = Color(0xFFE9ECEF),
+    stateHover = Color(0x0A121826),
+    statePress = Color(0x14121826),
+    primaryWash = Color(0x14FF5A36),
+    highlightWash = Color(0x1EF59E0B),
+    dangerWash = Color(0x14EF4444),
+    successWash = Color(0x1410B981),
+    darkWash = Color(0x0F121826),
+    scrim = Color(0x66121826),
+    onPrimary = Color(0xFFFFFFFF),
+    isDark = false,
+)
+
+val DarkGuideColors = GuideColorsPalette(
+    bg = Color(0xFF0B0F17),           // Deep luxury obsidian / midnight slate canvas
+    surface = Color(0xFF131A26),      // Elevated dark navy/carbon card surface
+    border = Color(0xFF232F42),       // Clear, elegant dark slate border
+    primary = Color(0xFFFF6D4D),      // Luminous warm coral brand accent
+    primaryDark = Color(0xFFE04320),  // Deep coral for pressed state
+    dark = Color(0xFF1E293B),         // Elevated slate for chips & buttons
+    highlight = Color(0xFFFBBF24),    // Luminous warm amber for ratings & audio
+    success = Color(0xFF34D399),      // Mint emerald for active/open status
+    text = Color(0xFFF8FAFC),         // Crisp off-white text (WCAG AAA readability)
+    text2 = Color(0xFF94A3B8),        // Soft slate grey secondary text
+    textMuted = Color(0xFF64748B),    // Slate caption text
+    danger = Color(0xFFF87171),       // Soft warning red
+    surface0 = Color(0xFF0B0F17),     // Canvas
+    surface1 = Color(0xFF131A26),     // Resting card
+    surface2 = Color(0xFF182232),     // Raised sheet/active row
+    surface3 = Color(0xFF1F2B3D),     // Floating controls
+    stateHover = Color(0x14FFFFFF),
+    statePress = Color(0x24FFFFFF),
+    primaryWash = Color(0x26FF6D4D),  // Coral wash @ 15%
+    highlightWash = Color(0x26FBBF24),
+    dangerWash = Color(0x26F87171),
+    successWash = Color(0x2634D399),
+    darkWash = Color(0x1AFFFFFF),
+    scrim = Color(0x99000000),
+    onPrimary = Color(0xFFFFFFFF),
+    isDark = true,
+)
+
+val LocalGuideColors = staticCompositionLocalOf { LightGuideColors }
+
+@Composable
+fun GuideTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
+) {
+    val colors = if (darkTheme) DarkGuideColors else LightGuideColors
+    val m3Colors = if (darkTheme) {
+        darkColorScheme(
+            background = colors.bg,
+            surface = colors.surface,
+            onBackground = colors.text,
+            onSurface = colors.text,
+            primary = colors.primary,
+        )
+    } else {
+        lightColorScheme(
+            background = colors.bg,
+            surface = colors.surface,
+            onBackground = colors.text,
+            onSurface = colors.text,
+            primary = colors.primary,
+        )
+    }
+
+    MaterialTheme(colorScheme = m3Colors) {
+        CompositionLocalProvider(
+            LocalGuideColors provides colors,
+            LocalContentColor provides colors.text,
+            content = content,
+        )
+    }
+}
+
 object GuideTokens {
 
     // -----------------------------------------------------------------------
-    // Color — Warm luxury travel palette (inspired by AirBnB Luxe, Wanderlust)
+    // Color — Warm luxury travel palette (Light) / Obsidian Slate (Dark)
     // -----------------------------------------------------------------------
-    val Bg = Color(0xFFF8F9FA)           // Crisp, airy off-white canvas
-    val Surface = Color(0xFFFFFFFF)      // Pure crisp white card/surface
-    val Border = Color(0xFFE5E7EB)       // Hairline subtle boundary
-    val Primary = Color(0xFFFF5A36)      // Sunset coral / warm terracotta brand accent
-    val PrimaryDark = Color(0xFFE04320)  // Deepened coral for active press
-    val Dark = Color(0xFF121826)         // Midnight carbon for prominent buttons/docks
-    val Highlight = Color(0xFFF59E0B)    // Radiant amber/gold for audio guide & ratings
-    val Success = Color(0xFF10B981)      // Emerald green for open now / active status
-    val Text = Color(0xFF111827)         // Deep charcoal text for high contrast readability
-    val Text2 = Color(0xFF6B7280)        // Slate grey secondary text
-    val TextMuted = Color(0xFF9CA3AF)    // Tertiary/caption text
-    val Danger = Color(0xFFEF4444)       // Vibrant warning red
+    val Bg: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.bg
+    val Surface: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.surface
+    val Border: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.border
+    val Primary: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.primary
+    val PrimaryDark: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.primaryDark
+    val Dark: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.dark
+    val Highlight: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.highlight
+    val Success: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.success
+    val Text: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.text
+    val Text2: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.text2
+    val TextMuted: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.textMuted
+    val Danger: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.danger
 
     // -----------------------------------------------------------------------
-    // Tonal elevation — higher surfaces are clean white with soft subtle elevation
+    // Tonal elevation
     // -----------------------------------------------------------------------
-    val Surface0 = Bg                   // page
-    val Surface1 = Surface              // resting card
-    val Surface2 = Color(0xFFF1F3F5)    // raised: sheet, active row wash
-    val Surface3 = Color(0xFFE9ECEF)    // floating: nav bar, controls over map
+    val Surface0: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.surface0
+    val Surface1: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.surface1
+    val Surface2: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.surface2
+    val Surface3: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.surface3
 
     // Alpha state layers
-    val StateHover = Color(0x0A121826)   // carbon @ 4%
-    val StatePress = Color(0x14121826)   // carbon @ 8%
-    val PrimaryWash = Color(0x14FF5A36)  // coral @ 8%
-    val HighlightWash = Color(0x1EF59E0B) // amber @ 12%
-    val DangerWash = Color(0x14EF4444)   // danger @ 8%
-    val SuccessWash = Color(0x1410B981)  // success @ 8%
-    val DarkWash = Color(0x0F121826)     // carbon wash @ 6%
-    val Scrim = Color(0x66121826)        // carbon @ 40% — sheet backdrop
-    val OnPrimary = Color(0xFFFFFFFF)
+    val StateHover: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.stateHover
+    val StatePress: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.statePress
+    val PrimaryWash: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.primaryWash
+    val HighlightWash: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.highlightWash
+    val DangerWash: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.dangerWash
+    val SuccessWash: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.successWash
+    val DarkWash: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.darkWash
+    val Scrim: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.scrim
+    val OnPrimary: Color @Composable @ReadOnlyComposable get() = LocalGuideColors.current.onPrimary
+    val IsDark: Boolean @Composable @ReadOnlyComposable get() = LocalGuideColors.current.isDark
 
     // -----------------------------------------------------------------------
     // Spacing — 4pt base, 9 tokens. Between-group gaps run 2-3x within-group.
@@ -123,41 +248,41 @@ object GuideTokens {
         trim = LineHeightStyle.Trim.None,
     )
 
-    val Display = TextStyle(
+    val Display: TextStyle @Composable @ReadOnlyComposable get() = TextStyle(
         fontFamily = Inter, fontSize = 32.sp, lineHeight = 38.sp,
         fontWeight = FontWeight.SemiBold, color = Text, lineHeightStyle = smooth,
     )
-    val Heading = TextStyle(
+    val Heading: TextStyle @Composable @ReadOnlyComposable get() = TextStyle(
         fontFamily = Inter, fontSize = 24.sp, lineHeight = 30.sp,
         fontWeight = FontWeight.SemiBold, color = Text, lineHeightStyle = smooth,
     )
-    val Title = TextStyle(
+    val Title: TextStyle @Composable @ReadOnlyComposable get() = TextStyle(
         fontFamily = Inter, fontSize = 18.sp, lineHeight = 24.sp,
         fontWeight = FontWeight.SemiBold, color = Text, lineHeightStyle = smooth,
     )
-    val Body = TextStyle(
+    val Body: TextStyle @Composable @ReadOnlyComposable get() = TextStyle(
         fontFamily = Inter, fontSize = 16.sp, lineHeight = 24.sp,
         fontWeight = FontWeight.Normal, color = Text, lineHeightStyle = smooth,
     )
-    val Chrome = TextStyle(
+    val Chrome: TextStyle @Composable @ReadOnlyComposable get() = TextStyle(
         fontFamily = Inter, fontSize = 14.sp, lineHeight = 20.sp,
         fontWeight = FontWeight.Medium, color = Text2, lineHeightStyle = smooth,
     )
-    val Caption = TextStyle(
+    val Caption: TextStyle @Composable @ReadOnlyComposable get() = TextStyle(
         fontFamily = Inter, fontSize = 12.sp, lineHeight = 16.sp,
         fontWeight = FontWeight.Medium, color = Text2, lineHeightStyle = smooth,
     )
 
     /** Place stories — serif, 17sp floor, generous leading (reference: 1.65). */
-    val Story = TextStyle(
+    val Story: TextStyle @Composable @ReadOnlyComposable get() = TextStyle(
         fontFamily = Lora, fontSize = 17.sp, lineHeight = 28.sp,
         fontWeight = FontWeight.Normal, color = Text, lineHeightStyle = smooth,
     )
-    val StoryTitle = TextStyle(
+    val StoryTitle: TextStyle @Composable @ReadOnlyComposable get() = TextStyle(
         fontFamily = Lora, fontSize = 24.sp, lineHeight = 32.sp,
         fontWeight = FontWeight.Medium, color = Text, lineHeightStyle = smooth,
     )
-    val Label = TextStyle(
+    val Label: TextStyle @Composable @ReadOnlyComposable get() = TextStyle(
         fontFamily = Inter, fontSize = 14.sp, lineHeight = 18.sp,
         fontWeight = FontWeight.SemiBold, color = Text, lineHeightStyle = smooth,
     )

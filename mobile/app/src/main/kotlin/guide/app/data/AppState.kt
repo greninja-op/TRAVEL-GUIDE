@@ -12,6 +12,7 @@ import guide.app.ui.Trio
 import guide.app.ui.VisitRow
 import guide.core.Geo
 import guide.core.Itineraries
+import guide.app.security.CryptoVault
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -84,7 +85,7 @@ class AppState(context: Context) {
     /** Routes from the pack, as the Routes screen wants them. */
     val routes: List<Trio>
 
-    private val cachedRoutePoints: List<org.maplibre.android.geometry.LatLng>
+    private val cachedRoutePoints: List<com.google.android.gms.maps.model.LatLng>
 
     init {
         val (version, loaded) = PackLoader.load(context)
@@ -95,7 +96,7 @@ class AppState(context: Context) {
         // The Heritage Loop is the pack's primary walking route; its stop order
         // is what "next stop" and the distance fallback both follow.
         order = loaded.map { it.id }
-        cachedRoutePoints = order.mapNotNull { id -> byId[id]?.let { org.maplibre.android.geometry.LatLng(it.lat, it.lng) } }
+        cachedRoutePoints = guide.app.map.RoadGeometry.HERITAGE_LOOP
 
         val sizeBytes = runCatching {
             context.assets.open("packs/fort-kochi-walk-v1.json").available().toLong()
@@ -141,8 +142,19 @@ class AppState(context: Context) {
     /** Pins for the map, in pack order, with visited state applied (stable reference). */
     fun pins(): List<MapPins.Pin> = cachedPins
 
-    /** Route polyline: the pack order, as coordinates (stable reference). */
-    fun routePoints(): List<org.maplibre.android.geometry.LatLng> = cachedRoutePoints
+    /** Whether the user manually started a walking tour route without Google Maps. */
+    var isManualRouteActive by mutableStateOf(false)
+
+    /**
+     * Route polyline: shown strictly while active navigation is underway
+     * (either from Google Maps companion session or a manual walking plan).
+     * When navigation is canceled or stopped, this returns emptyList() so the route
+     * polyline disappears, while preserving all map pins, GPS location, and places!
+     */
+    fun routePoints(): List<com.google.android.gms.maps.model.LatLng> {
+        val hasActiveNav = guide.app.navigation.MapsCompanionState.currentSession != null
+        return if (hasActiveNav || isManualRouteActive) cachedRoutePoints else emptyList()
+    }
 
     // ---- Location ----------------------------------------------------------
 
@@ -252,7 +264,9 @@ class AppState(context: Context) {
     fun loadVisits() {
         scope.launch {
             val raw = db.dao().visits()
-            val n = raw.mapNotNull { v -> db.dao().note(v.poiId)?.let { it.poiId to it.text } }.toMap()
+            val n = raw.mapNotNull { v ->
+                db.dao().note(v.poiId)?.let { it.poiId to CryptoVault.decrypt(it.text) }
+            }.toMap()
             notes = n
             visitedIds = raw.map { it.poiId }.toSet()
             recomputePins()
@@ -269,8 +283,9 @@ class AppState(context: Context) {
 
     fun saveNote(poiId: String, text: String) {
         scope.launch {
+            val encryptedText = CryptoVault.encrypt(text)
             db.dao().upsertNote(
-                NoteEntity(poiId = poiId, text = text, updatedAt = System.currentTimeMillis()),
+                NoteEntity(poiId = poiId, text = encryptedText, updatedAt = System.currentTimeMillis()),
             )
             loadVisits()
         }

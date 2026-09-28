@@ -92,7 +92,7 @@ fun PoiDetailScreen(
                         .height(310.dp),
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.kochi_hero),
+                        painter = painterResource(id = PoiImageResolver.getDrawableForPoi(card.id)),
                         contentDescription = card.name,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
@@ -193,8 +193,15 @@ fun PoiDetailScreen(
 
                         // Rating row
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = GuideIcons.Star,
+                                contentDescription = null,
+                                tint = GuideTokens.Highlight,
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Spacer(Modifier.width(4.dp))
                             Text(
-                                text = "★ 4.9",
+                                text = "4.9",
                                 style = GuideTokens.Body.copy(
                                     color = GuideTokens.Highlight,
                                     fontWeight = FontWeight.SemiBold,

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="12dp">
+
+    <!-- Top Header Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <FrameLayout
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:background="@drawable/bg_notif_badge">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_launcher_foreground"
+                android:tint="@color/white" />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="TRAVEL GUIDE"
+            android:textColor="@color/dark"
+            android:textStyle="bold"
+            android:textSize="11sp"
+            android:letterSpacing="0.05" />
+
+    </LinearLayout>
+
+    <!-- POI Name -->
+    <TextView
+        android:id="@+id/notif_expanded_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Chinese Fishing Nets"
+        android:textColor="@color/text_main"
+        android:textStyle="bold"
+        android:textSize="17sp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- Meta / Category Tag -->
+    <TextView
+        android:id="@+id/notif_expanded_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:text="Heritage • 2 min walk • Audio Tour Ready"
+        android:textColor="@color/primary"
+        android:textStyle="bold"
+        android:textSize="11sp" />
+
+    <!-- Story Snippet -->
+    <TextView
+        android:id="@+id/notif_expanded_story"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Giant cantilevered fishing structures introduced in the 14th century, towering over the Vembanad waters with teak poles and counterweight stones."
+        android:textColor="@color/text_sub"
+        android:textSize="12.5sp"
+        android:lineSpacingExtra="2dp"
+        android:maxLines="3"
+        android:ellipsize="end" />
+
+    <!-- Actions Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Primary Action: Explore Story / Place -->
+        <TextView
+            android:id="@+id/notif_btn_explore"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:gravity="center"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="@drawable/bg_notif_btn"
+            android:text="Explore Place"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="12sp" />
+
+        <!-- Secondary Action: Mute / Unmute -->
+        <TextView
+            android:id="@+id/notif_btn_mute"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginStart="8dp"
+            android:gravity="center"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:background="@drawable/bg_notif_card"
+            android:text="Mute"
+            android:textColor="@color/text_sub"
+            android:textStyle="bold"
+            android:textSize="12sp" />
+    </LinearLayout>
+</LinearLayout>

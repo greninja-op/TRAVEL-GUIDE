@@ -14,6 +14,8 @@ import java.util.Locale
 class Narrator(context: Context) {
     private var tts: TextToSpeech? = null
     private var ready = false
+    private val sarvam = SarvamAudioService.getInstance(context)
+
     val queue = NarrationQueue()
     var muted = false
         private set
@@ -21,6 +23,8 @@ class Narrator(context: Context) {
     var quiet = false
     /** Auto-play off = triggers become cards only, queue untouched by voice. */
     var autoPlay = true
+    /** Whether to use Sarvam AI studio voice (true) or device system voice (false). */
+    var useStudioVoice = true
 
     var speechRate = 1.0f
         set(value) {
@@ -47,7 +51,14 @@ class Narrator(context: Context) {
 
     fun enqueue(poiId: String, text: String, onRoute: Boolean = false) {
         if (muted) return
-        pendingTexts[poiId] = text
+        // TTS Input Sanitization & SSML Injection Protection (OWASP M4, OWASP LLM01)
+        val sanitized = text
+            .replace(Regex("""<[^>]*>"""), "") // Strip HTML/SSML tags (<say-as>, <break>, etc.)
+            .replace(Regex("""[\x00-\x1F\x7F]"""), " ") // Strip non-printable control characters
+            .trim()
+            .take(600)
+        if (sanitized.isBlank()) return
+        pendingTexts[poiId] = sanitized
         queue.enqueue(poiId, onRoute)
         pump()
     }
@@ -55,13 +66,15 @@ class Narrator(context: Context) {
     fun setMuted(m: Boolean) {
         muted = m
         if (m) {
-            tts?.stop() // <500ms stop (F-08)
+            sarvam.stop() // Immediate <500ms stop (F-08)
+            tts?.stop()
             queue.clear()
             pendingTexts.clear()
         }
     }
 
     fun shutdown() {
+        sarvam.stop()
         tts?.stop()
         tts?.shutdown()
     }
@@ -69,10 +82,27 @@ class Narrator(context: Context) {
     private val pendingTexts = mutableMapOf<String, String>()
 
     private fun pump() {
-        if (muted || quiet || !autoPlay || !ready || queue.speaking != null) return
+        if (muted || quiet || !autoPlay || queue.speaking != null) return
         val next = queue.next() ?: return
         val text = pendingTexts.remove(next) ?: return
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, next)
+
+        if (useStudioVoice) {
+            sarvam.speak(
+                text = text,
+                onStart = { /* Audio playback underway */ },
+                onDone = { onSpoken(next) },
+                onError = {
+                    // Gracefully fallback to on-device TTS if network or quota issue occurs
+                    if (ready) {
+                        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, next)
+                    } else {
+                        onSpoken(next)
+                    }
+                },
+            )
+        } else if (ready) {
+            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, next)
+        }
     }
 
     private fun onSpoken(utteranceId: String) {

@@ -56,7 +56,6 @@ import guide.app.ui.theme.Motion
 enum class NavItem(val route: String, val label: String, val icon: ImageVector) {
     Map("map", "Map", GuideIcons.Map),
     Nearby("nearby", "Nearby", GuideIcons.Compass),
-    Routes("routes", "Routes", GuideIcons.Route),
     Packs("packs", "Packs", GuideIcons.Package),
     History("history", "History", GuideIcons.Clock),
     Settings("settings", "Settings", GuideIcons.Sliders),
@@ -128,7 +127,7 @@ private fun NavBarItem(
     )
     Pressable(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         role = Role.Tab,
         withRipple = false,
     ) {

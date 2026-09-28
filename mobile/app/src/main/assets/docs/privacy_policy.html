@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Guide — Privacy Policy & Data Architecture</title>
+    <style>
+        :root {
+            --bg-color: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-primary: #121826;
+            --text-secondary: #475569;
+            --border-color: #E2E8F0;
+            --accent-color: #1A73E8;
+            --accent-subtle: #EEF2F6;
+            --code-bg: #F1F5F9;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0F172A;
+                --card-bg: #1E293B;
+                --text-primary: #F8FAFC;
+                --text-secondary: #94A3B8;
+                --border-color: #334155;
+                --accent-color: #38BDF8;
+                --accent-subtle: #1E293B;
+                --code-bg: #0F172A;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 24px 16px 48px;
+            max-width: 760px;
+            margin: 0 auto;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: var(--accent-subtle);
+            color: var(--accent-color);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        .callout {
+            background-color: var(--accent-subtle);
+            border-left: 4px solid var(--accent-color);
+            padding: 12px 14px;
+            border-radius: 0 8px 8px 0;
+            margin: 14px 0;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            background-color: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 36px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <span class="badge">Legal Documentation</span>
+        <h1>Privacy Policy & Data Architecture</h1>
+        <div class="meta">Effective Date: September 28, 2026 · Version 2.4.0 · Applicable to Travel Guide Mobile</div>
+    </header>
+
+    <section>
+        <h2>1. Architectural Overview</h2>
+        <p>Travel Guide is developed with an offline-first, local-processing architecture. The application is designed to function as an audio walking and driving guide without relying on remote user tracking or remote profiling servers.</p>
+        <p>All core functionalities—including GPS corridor proximity calculations, route rendering, place search, note taking, and voice narration synthesis—are executed entirely on the local device hardware.</p>
+    </section>
+
+    <section>
+        <h2>2. Location Information</h2>
+        <p>The application requires location access to determine proximity to historical monuments, cultural sites, and tourist destinations.</p>
+        <ul>
+            <li><strong>Foreground Processing:</strong> GPS coordinates are sampled while the application is active on screen to draw your current position and calculate distances to nearby landmarks.</li>
+            <li><strong>Ephemeral Memory Only:</strong> Real-time coordinates are processed in volatile memory (RAM) and are not written to unencrypted log files or persistent location history databases.</li>
+            <li><strong>No Cloud Uplink:</strong> Live GPS coordinates are never transmitted over the internet to analytics providers, advertisers, or remote backend infrastructure.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>3. Google Maps Companion & Accessibility Service Disclosure</h2>
+        <p>Travel Guide provides an optional Companion feature designed to work alongside Google Maps navigation. This feature utilizes Android's native <code>AccessibilityService</code> and/or <code>NotificationListenerService</code> APIs under the following constraints:</p>
+        
+        <div class="callout">
+            <strong>Accessibility Scope:</strong> The service is strictly scoped by the Android operating system to package <code>com.google.android.apps.maps</code>. It cannot observe, read, or interact with other applications.
+        </div>
+
+        <ul>
+            <li><strong>Purpose:</strong> The service reads destination titles and navigation status updates directly from Google Maps when turn-by-turn navigation is started by the user.</li>
+            <li><strong>Route Reactivity:</strong> When navigation is active, the app renders the matching road path and highlights corridor landmarks. When navigation is canceled or completed, navigation tracking terminates immediately.</li>
+            <li><strong>Data Handled:</strong> Only public geographic destination strings (e.g., landmark names or street addresses) are extracted. The service does not read text input, passwords, search queries, payment data, or private account details.</li>
+            <li><strong>Revocation:</strong> Accessibility and notification permissions can be revoked at any time via Android System Settings.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>4. Data Storage & Cryptographic Protection</h2>
+        <p>User-generated data—such as visited place records, custom trip notes, and preferences—is stored locally in an on-device SQLite database.</p>
+        <ul>
+            <li><strong>Hardware KeyStore:</strong> Sensitive credentials and local database encryption keys are managed through the Android KeyStore system, backed by hardware-isolated Secure Elements (StrongBox / TEE) where supported by the device.</li>
+            <li><strong>Authenticated Encryption:</strong> Stored security tokens use AES-256-GCM authenticated encryption.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>5. Audio Narration & Speech Synthesis</h2>
+        <p>Place stories and walking instructions are converted from text to speech using the Android system's built-in Text-to-Speech (TTS) engine. Audio playback occurs locally; voice synthesis does not stream audio or text queries to external cloud speech APIs.</p>
+    </section>
+
+    <section>
+        <h2>6. Third-Party Libraries & Telemetry</h2>
+        <p>The application does not integrate third-party advertising frameworks, tracking pixels, or commercial telemetry SDKs. Map rendering is powered by open-source MapLibre Native using locally bundled style definitions and vector packs.</p>
+    </section>
+
+    <section>
+        <h2>7. User Control & Data Sovereignty</h2>
+        <p>You retain full authority over all data created during your travels:</p>
+        <ul>
+            <li><strong>Data Export:</strong> You may export your complete visit history, timestamps, and personal notes into portable Markdown format at any time.</li>
+            <li><strong>Data Erasure:</strong> You can permanently wipe all local database tables and stored notes with a single tap in the Settings menu.</li>
+            <li><strong>Operating System Permissions:</strong> All granted permissions (Location, Notifications, Accessibility) can be audited and toggled directly through Android Settings.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>8. Contact & Policy Updates</h2>
+        <p>If updates are made to this document, the revision date and version number will be updated accordingly. Inquiries regarding technical architecture or data practices may be directed to the repository maintainers.</p>
+    </section>
+
+    <footer>
+        <p>© 2026 Travel Guide Project · Open-Source Architecture Documentation</p>
+    </footer>
+
+</body>
+</html>

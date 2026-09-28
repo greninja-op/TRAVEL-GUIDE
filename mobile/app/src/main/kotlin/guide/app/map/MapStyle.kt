@@ -56,15 +56,7 @@ object MapStyle {
      * declaration order, so a later property referencing this one would read
      * null.
      */
-    private val BACKGROUND_COLOR: String = run {
-        val bg = GuideTokens.Bg
-        String.format(
-            "#%02X%02X%02X",
-            (bg.red * 255f + 0.5f).toInt(),
-            (bg.green * 255f + 0.5f).toInt(),
-            (bg.blue * 255f + 0.5f).toInt(),
-        )
-    }
+    private val BACKGROUND_COLOR: String = "#F8F9FA"
 
     /**
      * The bundled default. A MapLibre style document, held as a Kotlin string
@@ -114,6 +106,88 @@ object MapStyle {
     """.trimIndent()
 
     /**
+     * Authentic Google Maps Navigation Road View Style.
+     * Renders authentic Google Maps vector/raster roads, water, and terrain.
+     */
+    val GOOGLE_MAPS_STYLE_JSON: String = """
+        {
+          "version": 8,
+          "name": "Travel Guide — Google Maps View",
+          "sources": {
+            "google-maps-raster": {
+              "type": "raster",
+              "tiles": [
+                "https://mt0.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+                "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+                "https://mt2.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+                "https://mt3.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+              ],
+              "tileSize": 256,
+              "minzoom": 0,
+              "maxzoom": 20,
+              "attribution": "© Google Maps"
+            }
+          },
+          "layers": [
+            {
+              "id": "background",
+              "type": "background",
+              "paint": { "background-color": "#F4F3F0" }
+            },
+            {
+              "id": "google-tiles",
+              "type": "raster",
+              "source": "google-maps-raster",
+              "minzoom": 0,
+              "maxzoom": 22
+            }
+          ]
+        }
+    """.trimIndent()
+
+    /**
+     * Authentic Google Maps Navigation Dark / Night Mode Style.
+     * Deep obsidian background, high contrast vector roads, luminous water and parks.
+     */
+    val GOOGLE_MAPS_DARK_STYLE_JSON: String = """
+        [
+          {"elementType": "geometry", "stylers": [{"color": "#131a26"}]},
+          {"elementType": "labels.text.stroke", "stylers": [{"color": "#131a26"}, {"weight": 3}]},
+          {"elementType": "labels.text.fill", "stylers": [{"color": "#9ca5b9"}]},
+          {"featureType": "administrative.locality", "elementType": "labels.text.fill", "stylers": [{"color": "#d59563"}]},
+          {"featureType": "landscape.man_made", "elementType": "geometry.fill", "stylers": [{"color": "#1a2230"}]},
+          {"featureType": "landscape.man_made", "elementType": "geometry.stroke", "stylers": [{"color": "#263244"}]},
+          {"featureType": "landscape.man_made.building", "elementType": "geometry.fill", "stylers": [{"color": "#1f293b"}]},
+          {"featureType": "landscape.man_made.building", "elementType": "geometry.stroke", "stylers": [{"color": "#2c3b52"}]},
+          {"featureType": "poi", "elementType": "labels.icon", "stylers": [{"visibility": "on"}]},
+          {"featureType": "poi", "elementType": "labels.text.fill", "stylers": [{"color": "#d59563"}, {"visibility": "on"}]},
+          {"featureType": "poi", "elementType": "labels.text.stroke", "stylers": [{"color": "#131a26"}]},
+          {"featureType": "poi.business", "elementType": "all", "stylers": [{"visibility": "on"}]},
+          {"featureType": "poi.business", "elementType": "geometry.fill", "stylers": [{"color": "#222d40"}]},
+          {"featureType": "poi.business", "elementType": "geometry.stroke", "stylers": [{"color": "#33435c"}]},
+          {"featureType": "poi.business", "elementType": "labels.icon", "stylers": [{"visibility": "on"}]},
+          {"featureType": "poi.business", "elementType": "labels.text.fill", "stylers": [{"color": "#f3a669"}, {"visibility": "on"}]},
+          {"featureType": "poi.business", "elementType": "labels.text.stroke", "stylers": [{"color": "#131a26"}]},
+          {"featureType": "poi.attraction", "elementType": "labels.icon", "stylers": [{"visibility": "on"}]},
+          {"featureType": "poi.attraction", "elementType": "labels.text.fill", "stylers": [{"color": "#f3a669"}, {"visibility": "on"}]},
+          {"featureType": "poi.park", "elementType": "geometry", "stylers": [{"color": "#172b27"}]},
+          {"featureType": "poi.park", "elementType": "labels.text.fill", "stylers": [{"color": "#6b9a76"}]},
+          {"featureType": "road", "elementType": "geometry", "stylers": [{"color": "#283446"}]},
+          {"featureType": "road", "elementType": "geometry.stroke", "stylers": [{"color": "#1e2838"}]},
+          {"featureType": "road", "elementType": "labels.text.fill", "stylers": [{"color": "#9ca5b9"}]},
+          {"featureType": "road.highway", "elementType": "geometry", "stylers": [{"color": "#3b4d66"}]},
+          {"featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [{"color": "#243042"}]},
+          {"featureType": "road.highway", "elementType": "labels.text.fill", "stylers": [{"color": "#f3d19c"}]},
+          {"featureType": "transit", "elementType": "geometry", "stylers": [{"color": "#253042"}]},
+          {"featureType": "transit.station", "elementType": "labels.icon", "stylers": [{"visibility": "on"}]},
+          {"featureType": "transit.station", "elementType": "labels.text.fill", "stylers": [{"color": "#d59563"}]},
+          {"featureType": "water", "elementType": "geometry", "stylers": [{"color": "#0d1b2a"}]},
+          {"featureType": "water", "elementType": "labels.text.fill", "stylers": [{"color": "#515c6d"}]},
+          {"featureType": "water", "elementType": "labels.text.stroke", "stylers": [{"color": "#0d1b2a"}]}
+        ]
+    """.trimIndent()
+
+    /**
      * Documented FALLBACK — map it to [MapScreen]'s `styleUrl` parameter to
      * preview the map on a machine with no offline pack. Requires network, so it
      * must never be the shipping default.
@@ -133,6 +207,7 @@ object MapStyle {
     const val ID_PIN_NEXT: String = "tg-pin-next"
     const val ID_PIN_ACTIVE: String = "tg-pin-active"
     const val ID_PIN_DEFAULT: String = "tg-pin-default"
+    const val ID_NAV_ARROW: String = "tg-nav-arrow"
     /** Prefix that identifies every object this app owns in a style. */
     const val OWNED_PREFIX: String = "tg-"
 
@@ -148,6 +223,7 @@ object MapStyle {
         ID_PIN_DEFAULT,
         ID_PIN_NEXT,
         ID_PIN_ACTIVE,
+        ID_NAV_ARROW,
     )
 
     /**
@@ -160,6 +236,7 @@ object MapStyle {
         ID_PIN_DEFAULT,
         ID_PIN_NEXT,
         ID_PIN_ACTIVE,
+        ID_NAV_ARROW,
     )
 
     // -----------------------------------------------------------------------
@@ -178,6 +255,7 @@ object MapStyle {
     /** Registerable icon names, one per pin weight. */
     const val ICON_PIN_DEFAULT: String = "tg-pin-default"
     const val ICON_PIN_ACTIVE: String = "tg-pin-active"
+    const val ICON_NAV_ARROW: String = "tg-nav-arrow"
 
     /** Bitmap edge, including padding. (24 + 2*10) = 44. */
     const val ICON_SIZE_PX: Int = PIN_EDGE_PX + 2 * PIN_PAD_PX
@@ -191,19 +269,19 @@ object MapStyle {
     )
 
     fun defaultPinPalette(): PinPalette = PinPalette(
-        fill = GuideTokens.Surface,
-        ring = GuideTokens.Dark,
-        inner = GuideTokens.Primary,
-        chip = GuideTokens.Surface,
-        chipBorder = GuideTokens.Border,
+        fill = Color(0xFFFFFFFF),
+        ring = Color(0xFF121826),
+        inner = Color(0xFFFF5A36),
+        chip = Color(0xFFFFFFFF),
+        chipBorder = Color(0xFFE5E7EB),
     )
 
     fun activePinPalette(): PinPalette = PinPalette(
-        fill = GuideTokens.Primary,
-        ring = GuideTokens.Surface,
-        inner = GuideTokens.Surface,
-        chip = GuideTokens.Surface,
-        chipBorder = GuideTokens.Primary,
+        fill = Color(0xFFFF5A36),
+        ring = Color(0xFFFFFFFF),
+        inner = Color(0xFFFFFFFF),
+        chip = Color(0xFFFFFFFF),
+        chipBorder = Color(0xFFFF5A36),
     )
 
     // =======================================================================
@@ -317,24 +395,17 @@ object MapStyle {
  */
 object GuideColors {
 
-    /** The route's casing — the design system's text colour at low opacity. */
-    val ROUTE_BASE: String = hex(GuideTokens.Text)
+    /** The route's casing — Google Maps Navigation dark royal blue border. */
+    val ROUTE_BASE: String = "#1A73E8"
 
-    /** The route line itself — the warm highlight, the map's one loud colour. */
-    val ROUTE_ROUTE: String = hex(GuideTokens.Highlight)
+    /** The route line itself — Google Maps Navigation vibrant electric blue polyline. */
+    val ROUTE_ROUTE: String = "#4285F4"
 
     /** Label text on pins. */
-    val LABEL_TEXT: String = hex(GuideTokens.Text)
+    const val LABEL_TEXT: String = "#111827"
 
     /** Halo behind label text — the surface, so it works over any tile. */
-    val LABEL_HALO: String = hex(GuideTokens.Surface)
-
-    private fun hex(color: Color): String {
-        val r = (color.red * 255f + 0.5f).toInt()
-        val g = (color.green * 255f + 0.5f).toInt()
-        val b = (color.blue * 255f + 0.5f).toInt()
-        return String.format("#%02X%02X%02X", r, g, b)
-    }
+    const val LABEL_HALO: String = "#FFFFFF"
 }
 
 /**
@@ -414,14 +485,53 @@ object Raster {
 
             paint.style = Paint.Style.STROKE
             paint.strokeWidth = r * 0.24f
-            paint.color = GuideTokens.Surface.toArgb()
+            paint.color = android.graphics.Color.WHITE
             canvas.drawCircle(cx, cx, r * 0.72f, paint)
 
             paint.style = Paint.Style.FILL
-            paint.color = GuideTokens.Surface.toArgb()
+            paint.color = android.graphics.Color.WHITE
             canvas.drawCircle(cx, cx, r * 0.26f, paint)
         }
 
+        return bmp
+    }
+
+    /**
+     * Draw authentic Google Maps style navigation directional arrow puck.
+     * White disc base with soft shadow, enclosing a bold forward navigation chevron.
+     */
+    fun drawNavArrow(sizePx: Int): Bitmap {
+        val bmp = createBitmap(sizePx, sizePx)
+        val canvas = Canvas(bmp)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val cx = sizePx / 2f
+        val r = sizePx * 0.42f
+
+        // Soft drop shadow
+        paint.style = Paint.Style.FILL
+        paint.color = android.graphics.Color.argb(55, 18, 24, 38)
+        canvas.drawCircle(cx, cx + 2f, r, paint)
+
+        // White base circle with subtle rim
+        paint.color = android.graphics.Color.WHITE
+        canvas.drawCircle(cx, cx, r, paint)
+
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 2.5f
+        paint.color = android.graphics.Color.parseColor("#E0E0E0")
+        canvas.drawCircle(cx, cx, r, paint)
+
+        // Blue chevron/arrow pointing NORTH (0 deg)
+        val path = Path().apply {
+            moveTo(cx, cx - r * 0.65f) // top tip
+            lineTo(cx + r * 0.55f, cx + r * 0.55f) // bottom right
+            lineTo(cx, cx + r * 0.22f) // inner notch
+            lineTo(cx - r * 0.55f, cx + r * 0.55f) // bottom left
+            close()
+        }
+        paint.style = Paint.Style.FILL
+        paint.color = android.graphics.Color.parseColor("#1A73E8") // Google Maps Navigation Blue
+        canvas.drawPath(path, paint)
         return bmp
     }
 

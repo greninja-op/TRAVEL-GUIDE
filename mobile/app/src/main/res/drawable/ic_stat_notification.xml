@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notification small icon: authentic Travel Guide pin with audio narration waves.
+     Complies with Android status bar / notification drawer monochrome stencil specs.
+     Matches ic_launcher_foreground.xml geometry with fillType="evenOdd" so the center hole is clean. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Left narration wave -->
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M31,38 C27,42 27,48 31,52" />
+    <!-- Right narration wave -->
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M77,38 C81,42 81,48 77,52" />
+    <!-- Pin silhouette with clean center hole -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M54,28 C44.61,28 37,35.61 37,45 C37,58.5 54,80 54,80 C54,80 71,58.5 71,45 C71,35.61 63.39,28 54,28 Z M54,39 A6,6 0 1,0 54.01,39 Z" />
+</vector>

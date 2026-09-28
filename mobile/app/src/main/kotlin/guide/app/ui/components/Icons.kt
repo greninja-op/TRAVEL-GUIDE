@@ -208,6 +208,19 @@ object GuideIcons {
         moveTo(12f, 3f); lineTo(13.9f, 9.1f); lineTo(20f, 11f); lineTo(13.9f, 12.9f)
         lineTo(12f, 19f); lineTo(10.1f, 12.9f); lineTo(4f, 11f); lineTo(10.1f, 9.1f); close()
     }
+    val Star: ImageVector = icon("Star") {
+        moveTo(12f, 2f)
+        lineTo(15.09f, 8.26f)
+        lineTo(22f, 9.27f)
+        lineTo(17f, 14.14f)
+        lineTo(18.18f, 21.02f)
+        lineTo(12f, 17.77f)
+        lineTo(5.82f, 21.02f)
+        lineTo(7f, 14.14f)
+        lineTo(2f, 9.27f)
+        lineTo(8.91f, 8.26f)
+        close()
+    }
     /** No signal — antenna with a strike (connectivity state, not a radio button). */
     val SignalOff: ImageVector = icon("SignalOff") {        moveTo(4.9f, 19.1f)
         curveTo(3.1f, 17.3f, 2f, 14.8f, 2f, 12f)
@@ -234,6 +247,30 @@ object GuideIcons {
         horizontalLineTo(18f)
         arcToRelative(2f, 2f, 0f, false, false, 2f, -2f)
         verticalLineTo(17f)
+    }
+
+    /** Sun icon for light mode (Lucide 24x24). */
+    val Sun: ImageVector = icon("Sun") {
+        moveTo(12f, 16f)
+        arcToRelative(4f, 4f, 0f, true, false, 0f, -8f)
+        arcToRelative(4f, 4f, 0f, false, false, 0f, 8f)
+        close()
+        moveTo(12f, 2f); verticalLineTo(4f)
+        moveTo(12f, 20f); verticalLineTo(22f)
+        moveTo(4.93f, 4.93f); lineTo(6.34f, 6.34f)
+        moveTo(17.66f, 17.66f); lineTo(19.07f, 19.07f)
+        moveTo(2f, 12f); horizontalLineTo(4f)
+        moveTo(20f, 12f); horizontalLineTo(22f)
+        moveTo(4.93f, 19.07f); lineTo(6.34f, 17.66f)
+        moveTo(17.66f, 6.34f); lineTo(19.07f, 4.93f)
+    }
+
+    /** Moon icon for dark mode (Lucide 24x24). */
+    val Moon: ImageVector = icon("Moon") {
+        moveTo(21f, 12.79f)
+        arcTo(9f, 9f, 0f, true, true, 11.21f, 3f)
+        arcTo(7f, 7f, 0f, false, false, 21f, 12.79f)
+        close()
     }
 
     // -----------------------------------------------------------------------
@@ -429,6 +466,27 @@ object GuideIcons {
         moveTo(4f, 21f)
         curveToRelative(0f, -3.3f, 3.6f, -6f, 8f, -6f)
         curveToRelative(4.4f, 0f, 8f, 2.7f, 8f, 6f)
+    }
+
+    /** Notification Bell icon */
+    val Bell: ImageVector = icon("Bell") {
+        moveTo(18f, 8f)
+        arcTo(6f, 6f, 0f, false, false, 6f, 8f)
+        curveTo(6f, 15f, 3f, 17f, 3f, 17f)
+        horizontalLineTo(21f)
+        curveTo(21f, 17f, 18f, 15f, 18f, 8f)
+        moveTo(10.3f, 21f)
+        arcTo(2f, 2f, 0f, false, false, 13.7f, 21f)
+    }
+
+    /** Notification Bell Off icon */
+    val BellOff: ImageVector = icon("BellOff") {
+        moveTo(13.73f, 21f)
+        arcTo(2f, 2f, 0f, false, true, 10.27f, 21f)
+        moveTo(18.63f, 13f)
+        curveTo(19f, 12f, 19f, 10f, 19f, 8f)
+        arcTo(7f, 7f, 0f, false, false, 7f, 2.5f)
+        moveTo(2f, 2f); lineTo(22f, 22f)
     }
 }
 

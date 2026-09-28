@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- DESIGN-TOKENS.md finalized palette -->
-    <color name="primary">#2F5D50</color>
-    <color name="highlight">#C97B4A</color>
-    <color name="bg">#FAFAF7</color>
-    <color name="ic_launcher_background">#2F5D50</color>
+    <!-- Luxury Travel Palette -->
+    <color name="primary">#FF5A36</color>
+    <color name="dark">#121826</color>
+    <color name="highlight">#F59E0B</color>
+    <color name="success">#10B981</color>
+    <color name="bg">#F8F9FA</color>
+    <color name="border">#E5E7EB</color>
+    <color name="white">#FFFFFF</color>
+    <color name="text_main">#111827</color>
+    <color name="text_sub">#6B7280</color>
+    <color name="primary_wash">#14FF5A36</color>
+    <color name="success_wash">#1410B981</color>
+    <color name="ic_launcher_background">#121826</color>
 </resources>

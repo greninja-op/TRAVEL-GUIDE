@@ -85,10 +85,10 @@ fun RoutesScreen(
             Column {
                 Text("Routes & day plans", style = GuideTokens.Heading, maxLines = Lines.Single)
                 Text(
-                    text = "Both walks start and end at Vasco Square, so you can leave whenever " +
-                        "you like and pick the rest up tomorrow.",
+                    text = "Curated walking tours and day itineraries.",
                     style = GuideTokens.Chrome,
-                    maxLines = Lines.Supporting,
+                    color = GuideTokens.Text2,
+                    maxLines = Lines.Single,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = GuideTokens.Space.xs),
                 )

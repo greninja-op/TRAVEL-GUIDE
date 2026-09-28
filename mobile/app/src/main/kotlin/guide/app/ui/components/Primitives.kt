@@ -102,8 +102,8 @@ fun CategoryChip(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
 ) {
-    val bg = if (selected) GuideTokens.Dark else GuideTokens.Surface
-    val fg = if (selected) GuideTokens.Surface else GuideTokens.Text
+    val bg = if (selected) GuideTokens.Primary else GuideTokens.Surface
+    val fg = if (selected) Color.White else GuideTokens.Text2
     val border = if (selected) null else BorderStroke(1.dp, GuideTokens.Border)
 
     Surface(
@@ -123,7 +123,7 @@ fun CategoryChip(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (selected) GuideTokens.Primary else GuideTokens.Text2,
+                    tint = if (selected) Color.White else GuideTokens.Text2,
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(Modifier.width(6.dp))
@@ -207,7 +207,9 @@ fun GuideButton(
             bg = GuideTokens.Primary; fg = GuideTokens.OnPrimary; border = null
         }
         GuideButtonVariant.Dark -> {
-            bg = GuideTokens.Dark; fg = GuideTokens.Surface; border = null
+            bg = if (GuideTokens.IsDark) GuideTokens.Surface2 else GuideTokens.Dark
+            fg = Color.White
+            border = null
         }
         GuideButtonVariant.Tonal -> {
             bg = GuideTokens.PrimaryWash; fg = GuideTokens.Primary; border = null

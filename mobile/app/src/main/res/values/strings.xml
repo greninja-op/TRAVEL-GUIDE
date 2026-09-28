@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Travel Guide</string>
+    <string name="accessibility_desc">Allows Travel Guide to quietly detect your active destination from Google Maps to prepare on-device audio guide stories along your route.</string>
+    <string name="google_maps_key" translatable="false">AIzaSyB6bM4OQRQlTmojK4W9-VzGQAlZBLDqkZY</string>
+    <string name="sarvam_api_key" translatable="false">sk_cvud4nm8_1RkO8MjGQNmFgyNaOQOTnFzV</string>
 </resources>

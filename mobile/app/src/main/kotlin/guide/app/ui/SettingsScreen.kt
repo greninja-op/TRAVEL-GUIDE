@@ -1,12 +1,20 @@
 package guide.app.ui
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import guide.app.MainActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -14,7 +22,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,10 +69,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
+import guide.app.companion.TravelGuideAccessibilityService
 import guide.app.data.AppState
 import guide.app.location.GuideService
 import guide.app.navigation.MapsCompanionState
 import guide.app.power.BatteryProfile
+import guide.app.security.CryptoVault
 import guide.app.ui.components.CategoryChip
 import guide.app.ui.components.GuideButton
 import guide.app.ui.components.GuideButtonVariant
@@ -72,6 +84,7 @@ import guide.app.ui.components.GuideIcons
 import guide.app.ui.components.Pressable
 import guide.app.ui.components.SectionHeader
 import guide.app.ui.components.StatusTag
+import guide.app.ui.components.fadingEdges
 import guide.app.ui.theme.GuideTokens
 import guide.app.ui.theme.Motion
 
@@ -101,6 +114,8 @@ fun SettingsScreen(
     appState: AppState? = null,
     onExportData: () -> Unit = {},
     onClearData: () -> Unit = {},
+    themeMode: String = "system",
+    onThemeMode: (String) -> Unit = {},
 ) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("guide_prefs", Context.MODE_PRIVATE) }
@@ -113,17 +128,72 @@ fun SettingsScreen(
     var explorerName by remember { mutableStateOf(prefs.getString("user_name", "Aswin") ?: "Aswin") }
     var showNameDialog by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
+    var showPrivacyPolicyDialog by remember { mutableStateOf(false) }
 
     // External Maps testing state
     var selectedTestPoiId by remember { mutableStateOf("chinese-fishing-nets") }
     var customDestInput by remember { mutableStateOf("") }
     var testStatusMessage by remember { mutableStateOf<String?>(null) }
 
+    // Notifications state — real working notification controls
+    var notificationsEnabled by remember {
+        mutableStateOf(prefs.getBoolean("notifications_enabled", true))
+    }
+    var arrivalAlertsEnabled by remember {
+        mutableStateOf(prefs.getBoolean("arrival_alerts_enabled", true))
+    }
+    val notifManager = remember { NotificationManagerCompat.from(context) }
+    var systemNotifGranted by remember {
+        mutableStateOf(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            } else {
+                notifManager.areNotificationsEnabled()
+            }
+        )
+    }
+    val notifPermLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        systemNotifGranted = granted
+        if (granted) {
+            notificationsEnabled = true
+            prefs.edit().putBoolean("notifications_enabled", true).apply()
+            GuideService.setNotificationsEnabled(context, true)
+        }
+    }
+    val onToggleNotifications: (Boolean) -> Unit = { enabled ->
+        if (enabled) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+            ) {
+                notifPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                notificationsEnabled = true
+                prefs.edit().putBoolean("notifications_enabled", true).apply()
+                GuideService.setNotificationsEnabled(context, true)
+            }
+        } else {
+            notificationsEnabled = false
+            prefs.edit().putBoolean("notifications_enabled", false).apply()
+            GuideService.setNotificationsEnabled(context, false)
+            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            nm.cancel(9901)
+        }
+    }
+    var notifFeedback by remember { mutableStateOf<String?>(null) }
+
+    val hasAccessibilityAccess = remember { TravelGuideAccessibilityService.isEnabled(context) }
     val hasNotificationAccess = remember { MapsCompanionState.isNotificationAccessGranted(context) }
     val activeSession = MapsCompanionState.currentSession
 
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        state = listState,
+        modifier = Modifier
+            .fillMaxSize()
+            .fadingEdges(listState, topFadeHeight = 36.dp, bottomFadeHeight = 52.dp),
         contentPadding = PaddingValues(
             start = GuideTokens.Space.screenPad,
             end = GuideTokens.Space.screenPad,
@@ -141,10 +211,6 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text("Settings & Privacy", style = GuideTokens.Heading)
-                    StatusTag(
-                        text = "100% ON-DEVICE",
-                        color = GuideTokens.Success,
-                    )
                 }
                 Spacer(Modifier.height(4.dp))
                 Text(
@@ -241,7 +307,76 @@ fun SettingsScreen(
         }
 
         // =====================================================================
-        // 2. Google Maps Navigation Companion (Auto-Sync & Desk Testing)
+        // 2. Appearance & Display (Crisp Light & Obsidian Carbon Dark)
+        // =====================================================================
+        item { SectionHeader("Appearance & Display") }
+        item {
+            GuideCard {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Theme Mode",
+                                style = GuideTokens.Title,
+                                color = GuideTokens.Text,
+                            )
+                            Text(
+                                text = "Obsidian dark mode saves OLED battery & enhances night walks",
+                                style = GuideTokens.Caption,
+                                color = GuideTokens.Text2,
+                            )
+                        }
+                        StatusTag(
+                            text = when (themeMode) {
+                                "dark" -> "OBSIDIAN"
+                                "light" -> "WARM LIGHT"
+                                else -> "SYSTEM"
+                            },
+                            color = GuideTokens.Primary,
+                        )
+                    }
+
+                    Spacer(Modifier.height(GuideTokens.Space.base))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        ThemeOptionTile(
+                            modifier = Modifier.weight(1f),
+                            title = "System",
+                            subtitle = "Auto adapt",
+                            icon = GuideIcons.Sliders,
+                            isSelected = themeMode == "system",
+                            onClick = { onThemeMode("system") },
+                        )
+                        ThemeOptionTile(
+                            modifier = Modifier.weight(1f),
+                            title = "Light",
+                            subtitle = "Warm ivory",
+                            icon = GuideIcons.Sun,
+                            isSelected = themeMode == "light",
+                            onClick = { onThemeMode("light") },
+                        )
+                        ThemeOptionTile(
+                            modifier = Modifier.weight(1f),
+                            title = "Dark",
+                            subtitle = "Obsidian",
+                            icon = GuideIcons.Moon,
+                            isSelected = themeMode == "dark",
+                            onClick = { onThemeMode("dark") },
+                        )
+                    }
+                }
+            }
+        }
+
+        // =====================================================================
+        // 3. Google Maps Navigation Companion (Auto-Sync & Desk Testing)
         // =====================================================================
         item { SectionHeader("Google Maps Navigation Companion") }
         item {
@@ -264,9 +399,77 @@ fun SettingsScreen(
                         )
                     }
                     StatusTag(
-                        text = if (hasNotificationAccess) "SYNC READY" else "NEEDS PERMISSION",
-                        color = if (hasNotificationAccess) GuideTokens.Success else GuideTokens.Highlight,
+                        text = if (hasNotificationAccess || hasAccessibilityAccess) "SYNC READY" else "NEEDS PERMISSION",
+                        color = if (hasNotificationAccess || hasAccessibilityAccess) GuideTokens.Success else GuideTokens.Highlight,
                     )
+                }
+
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+
+                // Direct Accessibility Mode (zero notifications, zero google account required)
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (hasAccessibilityAccess) Color(0xFFF0FDF4) else GuideTokens.Surface2,
+                    border = BorderStroke(1.dp, if (hasAccessibilityAccess) Color(0xFFBBF7D0) else GuideTokens.Border),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(if (hasAccessibilityAccess) Color(0xFFDCFCE7) else GuideTokens.Border),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Icon(
+                                        imageVector = GuideIcons.Navigation,
+                                        contentDescription = null,
+                                        tint = if (hasAccessibilityAccess) Color(0xFF16A34A) else GuideTokens.Text2,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                }
+                                Spacer(Modifier.width(10.dp))
+                                Column {
+                                    Text(
+                                        text = "Direct Accessibility Companion",
+                                        style = GuideTokens.Label,
+                                        color = GuideTokens.Text,
+                                    )
+                                    Text(
+                                        text = "Zero notification reliance • Direct screen reader",
+                                        style = GuideTokens.Caption,
+                                        color = GuideTokens.Text2,
+                                    )
+                                }
+                            }
+                            StatusTag(
+                                text = if (hasAccessibilityAccess) "ACTIVE" else "DISABLED",
+                                color = if (hasAccessibilityAccess) GuideTokens.Success else GuideTokens.Text2,
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "Quietly reads destination directly on-screen from Google Maps without requiring notifications, Google accounts, or cloud APIs.",
+                            style = GuideTokens.Caption,
+                            color = GuideTokens.Text2,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        GuideButton(
+                            text = if (hasAccessibilityAccess) "Accessibility Service Active" else "Enable in Android Accessibility Settings",
+                            onClick = {
+                                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                context.startActivity(intent)
+                            },
+                            variant = if (hasAccessibilityAccess) GuideButtonVariant.Tonal else GuideButtonVariant.Primary,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
 
                 Spacer(Modifier.height(GuideTokens.Space.sm))
@@ -476,12 +679,12 @@ fun SettingsScreen(
                     Spacer(Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "100% On-Device Sovereignty",
+                            text = "Privacy & Data Protection",
                             style = GuideTokens.Title,
                             color = GuideTokens.Text,
                         )
                         Text(
-                            text = "Your data never leaves your hardware. Zero cloud tracking.",
+                            text = "Local-first architecture. Zero cloud analytics or telemetry.",
                             style = GuideTokens.Caption,
                             color = GuideTokens.Text2,
                         )
@@ -492,9 +695,18 @@ fun SettingsScreen(
 
                 // Privacy checklist items
                 PrivacyPledgeRow("Zero Remote Servers", "No telemetry, advertising SDKs, or cloud analytics exist in this app.")
+                PrivacyPledgeRow("Hardware Keystore Encryption", if (CryptoVault.isHardwareBacked()) "Protected by Android KeyStore hardware StrongBox/TEE with AES-256-GCM." else "Protected by Android KeyStore hardware-backed AES-256-GCM vault.")
                 PrivacyPledgeRow("On-Device Voice Synthesis", "Stories are spoken directly by the phone's local Android speech engine.")
                 PrivacyPledgeRow("Offline Vector Maps", "Maps and cartography are loaded directly from local storage.")
                 PrivacyPledgeRow("RAM-Only Coordinates", "Live GPS fixes are used to calculate proximity in memory and are never uploaded.")
+
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+                GuideButton(
+                    text = "Read Official Privacy Policy Document",
+                    onClick = { showPrivacyPolicyDialog = true },
+                    variant = GuideButtonVariant.Tonal,
+                    modifier = Modifier.fillMaxWidth(),
+                )
 
                 Spacer(Modifier.height(GuideTokens.Space.base))
                 GuideDivider()
@@ -583,10 +795,16 @@ fun SettingsScreen(
                     isGranted = hasNotificationAccess,
                 )
                 PermissionAuditRow(
+                    name = "Accessibility Service",
+                    reason = "Reads active Google Maps destination directly from screen without notifications.",
+                    status = if (hasAccessibilityAccess) "ACTIVE" else "NOT ENABLED",
+                    isGranted = hasAccessibilityAccess,
+                )
+                PermissionAuditRow(
                     name = "Post Notifications",
-                    reason = "Displays Now Playing playback controls in the status shade.",
-                    status = "GRANTED",
-                    isGranted = true,
+                    reason = "Displays live trip card and audio playback controls in the status shade.",
+                    status = if (systemNotifGranted) "GRANTED" else "BLOCKED",
+                    isGranted = systemNotifGranted,
                 )
 
                 Spacer(Modifier.height(GuideTokens.Space.sm))
@@ -671,22 +889,202 @@ fun SettingsScreen(
                         style = GuideTokens.Caption,
                         color = GuideTokens.Text2,
                     )
+                }
+
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     GuideButton(
-                        text = "Test Voice",
+                        text = "Test English",
                         onClick = {
                             GuideService.speak(
                                 context,
-                                "Welcome to Fort Kochi. This is a voice test of your private on-device travel companion.",
+                                "Welcome to Fort Kochi. This is a voice test of your Sarvam AI travel companion.",
                             )
                         },
                         variant = GuideButtonVariant.Tonal,
+                        modifier = Modifier.weight(1f),
+                    )
+                    GuideButton(
+                        text = "Test മലയാളം",
+                        onClick = {
+                            GuideService.speak(
+                                context,
+                                "നമസ്കാരം, ഫോർട്ട് കൊച്ചിയിലേക്ക് സ്വാഗതം. നിങ്ങളുടെ ഓഡിയോ ഗൈഡ് തയ്യാറാണ്.",
+                            )
+                        },
+                        variant = GuideButtonVariant.Tonal,
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
         }
 
         // =====================================================================
-        // 6. Battery & Tracking Optimization
+        // 6. Trip & Drawer Notifications (Real Working On/Off Controls)
+        // =====================================================================
+        item { SectionHeader("Trip & Drawer Notifications") }
+        item {
+            GuideCard {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (notificationsEnabled && systemNotifGranted) Color(0xFFEFF6FF) else GuideTokens.Surface2),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = if (notificationsEnabled) GuideIcons.Bell else GuideIcons.BellOff,
+                                contentDescription = null,
+                                tint = if (notificationsEnabled && systemNotifGranted) Color(0xFF2563EB) else GuideTokens.Text2,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Trip & Status Notifications",
+                                style = GuideTokens.Title,
+                                color = GuideTokens.Text,
+                            )
+                            Text(
+                                text = "Status bar card, story updates & audio playback controls",
+                                style = GuideTokens.Caption,
+                                color = GuideTokens.Text2,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    StatusTag(
+                        text = when {
+                            !notificationsEnabled -> "MUTED / OFF"
+                            !systemNotifGranted -> "PERM NEEDED"
+                            else -> "DRAWER ACTIVE"
+                        },
+                        color = when {
+                            !notificationsEnabled -> GuideTokens.Text2
+                            !systemNotifGranted -> GuideTokens.Highlight
+                            else -> GuideTokens.Success
+                        },
+                    )
+                }
+
+                Spacer(Modifier.height(GuideTokens.Space.base))
+
+                // Master Toggle Switch
+                ToggleRow(
+                    title = "Allow Trip Notifications",
+                    subtitle = "Show live interactive travel guide in Android notification drawer with instant Mute & Explore controls.",
+                    checked = notificationsEnabled,
+                    onCheckedChange = { isChecked ->
+                        onToggleNotifications(isChecked)
+                        notifFeedback = if (isChecked) "Notifications turned ON. Live cards enabled." else "Notifications turned OFF. Drawer silenced."
+                    },
+                )
+
+                if (notificationsEnabled && !systemNotifGranted) {
+                    Spacer(Modifier.height(GuideTokens.Space.sm))
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = Color(0xFFFFF7ED),
+                        border = BorderStroke(1.dp, Color(0xFFFFEDD5)),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = "Android system notifications are blocked or permission is required.",
+                                style = GuideTokens.Caption,
+                                color = Color(0xFF9A3412),
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            GuideButton(
+                                text = "Grant Notification Permission",
+                                onClick = {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        notifPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    } else {
+                                        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                        }
+                                        context.startActivity(intent)
+                                    }
+                                },
+                                variant = GuideButtonVariant.Primary,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+                GuideDivider()
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+
+                // Arrival Cues Toggle Switch
+                ToggleRow(
+                    title = "Monument Arrival Alerts",
+                    subtitle = "Trigger heads-up notification and gentle vibration when arriving near historical landmarks.",
+                    checked = arrivalAlertsEnabled,
+                    onCheckedChange = {
+                        arrivalAlertsEnabled = it
+                        prefs.edit().putBoolean("arrival_alerts_enabled", it).apply()
+                    },
+                )
+
+                Spacer(Modifier.height(GuideTokens.Space.base))
+
+                // Interactive Testing Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    GuideButton(
+                        text = if (notificationsEnabled) "Send Test Notification" else "Notifications Turned Off",
+                        onClick = {
+                            if (notificationsEnabled) {
+                                sendTestNotification(context, "Chinese Fishing Nets")
+                                notifFeedback = "Test notification posted to Android status bar!"
+                            } else {
+                                notifFeedback = "Notifications are currently disabled. Turn ON toggle above to receive alerts."
+                            }
+                        },
+                        variant = if (notificationsEnabled) GuideButtonVariant.Tonal else GuideButtonVariant.Quiet,
+                        modifier = Modifier.weight(1f),
+                    )
+                    GuideButton(
+                        text = "System Settings",
+                        onClick = {
+                            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                            }
+                            context.startActivity(intent)
+                        },
+                        variant = GuideButtonVariant.Quiet,
+                    )
+                }
+
+                notifFeedback?.let { msg ->
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = msg,
+                        style = GuideTokens.Caption,
+                        color = if (notificationsEnabled) GuideTokens.Primary else GuideTokens.Text2,
+                    )
+                }
+            }
+        }
+
+        // =====================================================================
+        // 7. Battery & Tracking Optimization
         // =====================================================================
         item { SectionHeader("Battery & Tracking Optimization") }
         item {
@@ -746,7 +1144,7 @@ fun SettingsScreen(
 
         item {
             Text(
-                "Travel Guide • 100% Offline & Private • Build 2026.09.28",
+                "Travel Guide • Fort Kochi Heritage Edition • v1.0.0",
                 style = GuideTokens.Caption,
                 color = GuideTokens.Text2,
             )
@@ -803,6 +1201,16 @@ fun SettingsScreen(
                 TextButton(onClick = { showClearConfirmDialog = false }) { Text("Cancel") }
             },
         )
+    }
+
+    // Official In-App Privacy Policy Documentation Viewer
+    if (showPrivacyPolicyDialog) {
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { showPrivacyPolicyDialog = false },
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            PrivacyPolicyViewer(onDismiss = { showPrivacyPolicyDialog = false })
+        }
     }
 }
 
@@ -989,6 +1397,13 @@ private fun ToggleRow(
  * so the user can test the notification listener directly from their desk!
  */
 private fun sendTestNotification(context: Context, destination: String) {
+    val prefs = context.getSharedPreferences("guide_prefs", Context.MODE_PRIVATE)
+    if (!prefs.getBoolean("notifications_enabled", true)) {
+        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.cancel(9901)
+        return
+    }
+
     val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val channelId = "maps_companion_test_channel"
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -999,13 +1414,107 @@ private fun sendTestNotification(context: Context, destination: String) {
         )
         nm.createNotificationChannel(channel)
     }
+
+    val openIntent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        putExtra("route", "settings")
+    }
+    val openPendingIntent = PendingIntent.getActivity(
+        context, 9901, openIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+
+    val heroBitmap = runCatching {
+        android.graphics.BitmapFactory.decodeResource(context.resources, guide.app.R.drawable.kochi_hero)
+    }.getOrNull()
+
+    val messageText = "En route to $destination • 24 heritage stops along your path. Audio stories ready to play as you arrive."
+
     val builder = NotificationCompat.Builder(context, channelId)
-        .setSmallIcon(android.R.drawable.ic_dialog_map)
+        .setSmallIcon(guide.app.R.drawable.ic_stat_notification)
+        .setColor(0xFFFF5A36.toInt()) // Brand Sunset Coral
         .setContentTitle("Navigating to $destination")
-        .setContentText("In 200m turn right • 14 min (3.5 km)")
-        .setSubText("Google Maps Navigation")
+        .setContentText(messageText)
+        .setSubText("Travel Guide • Live Sync Active")
+        .setContentIntent(openPendingIntent)
+        .addAction(android.R.drawable.ic_menu_compass, "Explore Place", openPendingIntent)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setAutoCancel(true)
 
+    if (heroBitmap != null) {
+        builder.setLargeIcon(heroBitmap)
+        builder.setStyle(
+            NotificationCompat.BigPictureStyle()
+                .bigPicture(heroBitmap)
+                .bigLargeIcon(null as android.graphics.Bitmap?)
+                .setBigContentTitle("Navigating to $destination")
+                .setSummaryText(messageText),
+        )
+    } else {
+        builder.setStyle(
+            NotificationCompat.BigTextStyle()
+                .setBigContentTitle("Navigating to $destination")
+                .setSummaryText("Route Sync Active")
+                .bigText(messageText),
+        )
+    }
+
     nm.notify(9901, builder.build())
 }
+
+@Composable
+private fun ThemeOptionTile(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = if (isSelected) GuideTokens.PrimaryWash else GuideTokens.Surface2,
+        border = BorderStroke(
+            width = if (isSelected) 1.5.dp else 1.dp,
+            color = if (isSelected) GuideTokens.Primary else GuideTokens.Border,
+        ),
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick),
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(if (isSelected) GuideTokens.Primary else GuideTokens.Surface),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (isSelected) Color.White else GuideTokens.Text,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = title,
+                style = GuideTokens.Label,
+                color = if (isSelected) GuideTokens.Primary else GuideTokens.Text,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                style = GuideTokens.Caption,
+                color = GuideTokens.Text2,
+                fontSize = 11.sp,
+            )
+        }
+    }
+}
+

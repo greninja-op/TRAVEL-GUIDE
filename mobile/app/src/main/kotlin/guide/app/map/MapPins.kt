@@ -149,12 +149,13 @@ object MapPins {
      */
     private var cachedDefaultBitmap: Bitmap? = null
     private var cachedActiveBitmap: Bitmap? = null
+    private var cachedNavArrowBitmap: Bitmap? = null
 
     private var currentPins: List<Pin> = emptyList()
     private var currentTapListener: PinTapListener? = null
     private var clickListenerAttached = false
 
-    private fun getOrCreateDefaultBitmap(): Bitmap =
+    internal fun getOrCreateDefaultBitmap(): Bitmap =
         cachedDefaultBitmap ?: Raster.drawPin(
             sizePx = MapStyle.ICON_SIZE_PX,
             edge = MapStyle.PIN_EDGE_PX,
@@ -164,7 +165,7 @@ object MapPins {
             chipCornerPx = CHIP_CORNER_DP * MapStyle.ICON_DENSITY,
         ).also { cachedDefaultBitmap = it }
 
-    private fun getOrCreateActiveBitmap(): Bitmap =
+    internal fun getOrCreateActiveBitmap(): Bitmap =
         cachedActiveBitmap ?: Raster.drawPin(
             sizePx = MapStyle.ICON_SIZE_PX,
             edge = MapStyle.PIN_EDGE_PX,
@@ -174,6 +175,67 @@ object MapPins {
             chipCornerPx = CHIP_CORNER_DP * MapStyle.ICON_DENSITY,
         ).also { cachedActiveBitmap = it }
 
+    internal fun getOrCreateNavArrowBitmap(): Bitmap =
+        cachedNavArrowBitmap ?: Raster.drawNavArrow(
+            sizePx = (38 * MapStyle.ICON_DENSITY).toInt(),
+        ).also { cachedNavArrowBitmap = it }
+
+    /**
+     * Render vector markers and polyline on Google Maps SDK.
+     */
+    fun renderGoogleMap(
+        map: com.google.android.gms.maps.GoogleMap,
+        pins: List<Pin>,
+        route: List<com.google.android.gms.maps.model.LatLng> = emptyList(),
+        activeId: String? = null,
+        nextId: String? = null,
+        fitToPins: Boolean = false,
+    ) {
+        map.clear()
+
+        // 1. Draw Route: Sunset coral walking route polyline
+        if (route.size >= 2) {
+            val polylineOpts = com.google.android.gms.maps.model.PolylineOptions()
+                .color(0xFFFF5A36.toInt()) // Sunset Coral brand accent
+                .width(16f)
+                .geodesic(true)
+                .jointType(com.google.android.gms.maps.model.JointType.ROUND)
+                .startCap(com.google.android.gms.maps.model.RoundCap())
+                .endCap(com.google.android.gms.maps.model.RoundCap())
+            route.forEach { pt ->
+                polylineOpts.add(pt)
+            }
+            map.addPolyline(polylineOpts)
+        }
+
+        // 2. Add Pins as Markers with Custom High-DPI Bitmaps
+        pins.forEach { pin ->
+            val isActive = pin.id == activeId
+            val isNext = pin.id == nextId
+            val bmp = if (isActive || isNext) getOrCreateActiveBitmap() else getOrCreateDefaultBitmap()
+            val marker = map.addMarker(
+                com.google.android.gms.maps.model.MarkerOptions()
+                    .position(com.google.android.gms.maps.model.LatLng(pin.lat, pin.lng))
+                    .title(pin.name)
+                    .icon(com.google.android.gms.maps.model.BitmapDescriptorFactory.fromBitmap(bmp))
+                    .anchor(0.5f, 1.0f)
+            )
+            marker?.tag = pin.id
+        }
+
+        // 3. Fit bounds if requested
+        if (fitToPins && (pins.isNotEmpty() || route.isNotEmpty())) {
+            val builder = com.google.android.gms.maps.model.LatLngBounds.Builder()
+            pins.forEach { builder.include(com.google.android.gms.maps.model.LatLng(it.lat, it.lng)) }
+            route.forEach { builder.include(it) }
+            try {
+                map.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(builder.build(), 120))
+            } catch (_: Exception) {
+                map.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(com.google.android.gms.maps.model.LatLng(9.9656, 76.2423), 15.5f))
+            }
+        }
+    }
+
     fun render(
         context: Context,
         map: MapLibreMap,
@@ -182,10 +244,12 @@ object MapPins {
         route: List<LatLng> = emptyList(),
         activeId: String? = null,
         nextId: String? = null,
+        userPosition: LatLng? = null,
+        headingDeg: Float? = null,
         onPinTap: PinTapListener? = null,
         fitToPins: Boolean = true,
     ) {
-        // --- 1. Route: casing under fill (update if exists, add if new) ------
+        // --- 1. Route: Google Maps turn-by-turn navigation blue polyline -----
         val routeSource = style.getSource(MapStyle.ID_ROUTE_SCALE) as? GeoJsonSource
         if (route.size >= 2) {
             val routeGeo = FeatureCollection.fromFeature(Feature.fromGeometry(lineGeometry(route)))
@@ -193,21 +257,23 @@ object MapPins {
                 routeSource.setGeoJson(routeGeo)
             } else {
                 style.addSource(GeoJsonSource(MapStyle.ID_ROUTE_SCALE, routeGeo))
+                // Dark outer border / casing
                 style.addLayer(
                     LineLayer(MapStyle.ID_ROUTE_BASE, MapStyle.ID_ROUTE_SCALE).withProperties(
                         PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
                         PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
                         PropertyFactory.lineColor(GuideColors.ROUTE_BASE),
-                        PropertyFactory.lineWidth(9f),
-                        PropertyFactory.lineOpacity(0.30f),
+                        PropertyFactory.lineWidth(8.5f),
+                        PropertyFactory.lineOpacity(0.95f),
                     ),
                 )
+                // Vibrant electric blue navigation polyline
                 style.addLayer(
                     LineLayer(MapStyle.ID_ROUTE_ROUTE, MapStyle.ID_ROUTE_SCALE).withProperties(
                         PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
                         PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
                         PropertyFactory.lineColor(GuideColors.ROUTE_ROUTE),
-                        PropertyFactory.lineWidth(4.5f),
+                        PropertyFactory.lineWidth(5.5f),
                     ),
                 )
             }
@@ -215,12 +281,15 @@ object MapPins {
             routeSource.setGeoJson(FeatureCollection.fromFeatures(emptyList()))
         }
 
-        // --- 2. Register cached pin icons once per style ---------------------
+        // --- 2. Register cached icons once per style -------------------------
         if (style.getImage(MapStyle.ICON_PIN_DEFAULT) == null) {
             style.addImage(MapStyle.ICON_PIN_DEFAULT, getOrCreateDefaultBitmap())
         }
         if (style.getImage(MapStyle.ICON_PIN_ACTIVE) == null) {
             style.addImage(MapStyle.ICON_PIN_ACTIVE, getOrCreateActiveBitmap())
+        }
+        if (style.getImage(MapStyle.ICON_NAV_ARROW) == null) {
+            style.addImage(MapStyle.ICON_NAV_ARROW, getOrCreateNavArrowBitmap())
         }
 
         // --- 3. Update or add pin layers per state ---------------------------
@@ -230,6 +299,33 @@ object MapPins {
         updateOrAddPinLayer(style, State.DEFAULT, byState[State.DEFAULT], MapStyle.ID_PIN_DEFAULT)
         updateOrAddPinLayer(style, State.NEXT, byState[State.NEXT], MapStyle.ID_PIN_NEXT)
         updateOrAddPinLayer(style, State.ACTIVE, byState[State.ACTIVE], MapStyle.ID_PIN_ACTIVE)
+
+        // --- 4. Navigation Directional Arrow Puck ----------------------------
+        val arrowSource = style.getSource(MapStyle.ID_NAV_ARROW) as? GeoJsonSource
+        if (userPosition != null) {
+            val arrowGeo = FeatureCollection.fromFeature(
+                Feature.fromGeometry(Point.fromLngLat(userPosition.longitude, userPosition.latitude))
+            )
+            if (arrowSource != null) {
+                arrowSource.setGeoJson(arrowGeo)
+                val layer = style.getLayer(MapStyle.ID_NAV_ARROW) as? SymbolLayer
+                layer?.setProperties(PropertyFactory.iconRotate(headingDeg ?: 0f))
+            } else {
+                style.addSource(GeoJsonSource(MapStyle.ID_NAV_ARROW, arrowGeo))
+                style.addLayer(
+                    SymbolLayer(MapStyle.ID_NAV_ARROW, MapStyle.ID_NAV_ARROW).withProperties(
+                        PropertyFactory.iconImage(MapStyle.ICON_NAV_ARROW),
+                        PropertyFactory.iconSize(1.0f),
+                        PropertyFactory.iconRotate(headingDeg ?: 0f),
+                        PropertyFactory.iconRotationAlignment(Property.ICON_ROTATION_ALIGNMENT_MAP),
+                        PropertyFactory.iconAllowOverlap(true),
+                        PropertyFactory.iconIgnorePlacement(true),
+                    ),
+                )
+            }
+        } else if (arrowSource != null) {
+            arrowSource.setGeoJson(FeatureCollection.fromFeatures(emptyList()))
+        }
 
         // --- 4. Tap handling with a single listener --------------------------
         currentPins = pins
@@ -311,17 +407,25 @@ object MapPins {
         val next = state == State.NEXT
         val visited = state == State.VISITED
 
-        val iconSize = when (state) {
+        val baseScale = when (state) {
             State.ACTIVE, State.NEXT -> PIN_SCALE_FOCUS
             State.DEFAULT -> PIN_SCALE_DEFAULT
             State.VISITED -> PIN_SCALE_VISITED
         }
 
+        val sizeExpression = Expression.interpolate(
+            Expression.linear(),
+            Expression.zoom(),
+            Expression.stop(11.0f, baseScale * 0.40f),
+            Expression.stop(14.0f, baseScale * 0.65f),
+            Expression.stop(16.5f, baseScale),
+        )
+
         val layer = SymbolLayer(sourceId, sourceId).withProperties(
             PropertyFactory.iconImage(
                 if (active) MapStyle.ICON_PIN_ACTIVE else MapStyle.ICON_PIN_DEFAULT,
             ),
-            PropertyFactory.iconSize(iconSize),
+            PropertyFactory.iconSize(sizeExpression),
             PropertyFactory.iconAnchor(Property.ICON_ANCHOR_BOTTOM),
             PropertyFactory.iconOpacity(if (visited) 0.55f else 1f),
             PropertyFactory.iconAllowOverlap(visited),

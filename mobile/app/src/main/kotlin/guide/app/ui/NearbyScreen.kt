@@ -3,7 +3,9 @@ package guide.app.ui
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,9 +22,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import guide.app.ui.components.fadingEdges
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -77,9 +84,13 @@ fun NearbyScreen(
     var layer by rememberSaveable { mutableStateOf<String?>(null) }
     val shown = remember(rows, layer) { if (layer == null) rows else rows.filter { it.layer == layer } }
     val filters = remember { FILTERS }
+    val listState = rememberLazyListState()
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        state = listState,
+        modifier = Modifier
+            .fillMaxSize()
+            .fadingEdges(listState, topFadeHeight = 36.dp, bottomFadeHeight = 52.dp),
         contentPadding = PaddingValues(
             start = GuideTokens.Space.screenPad,
             end = GuideTokens.Space.screenPad,
@@ -93,9 +104,10 @@ fun NearbyScreen(
             Column {
                 Text("Nearby", style = GuideTokens.Heading, maxLines = Lines.Single)
                 Text(
-                    text = "Sorted by how close you are. The guide narrates the top one as you walk.",
+                    text = "Places near your path, sorted by distance.",
                     style = GuideTokens.Chrome,
-                    maxLines = Lines.Supporting,
+                    color = GuideTokens.Text2,
+                    maxLines = Lines.Single,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = GuideTokens.Space.xs),
                 )
@@ -228,26 +240,15 @@ private fun NearbyPoiCard(row: NearbyRow, onClick: () -> Unit) {
         ) {
             Box(
                 modifier = Modifier
-                    .size(44.dp)
-                    .background(
-                        color = when (row.layer) {
-                            "food" -> GuideTokens.HighlightWash
-                            "stay" -> GuideTokens.SuccessWash
-                            else -> GuideTokens.PrimaryWash
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                    ),
-                contentAlignment = Alignment.Center,
+                    .size(54.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(1.dp, GuideTokens.Border, RoundedCornerShape(12.dp)),
             ) {
-                Icon(
-                    imageVector = layerIcon(row.layer),
-                    contentDescription = layerWord(row.layer),
-                    tint = when (row.layer) {
-                        "food" -> GuideTokens.Highlight
-                        "stay" -> GuideTokens.Success
-                        else -> GuideTokens.Primary
-                    },
-                    modifier = Modifier.size(22.dp),
+                Image(
+                    painter = painterResource(id = PoiImageResolver.getDrawableForPoi(row.id)),
+                    contentDescription = row.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
             Spacer(Modifier.size(GuideTokens.Space.md))
@@ -278,16 +279,21 @@ private fun NearbyPoiCard(row: NearbyRow, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Spacer(Modifier.size(GuideTokens.Space.sm))
+            val badgeText = when {
+                row.detail.contains("km") -> row.detail.substringBefore(" ·")
+                row.detail.contains("m ") || row.detail.endsWith("m") -> row.detail.substringBefore(" ·")
+                else -> "Explore"
+            }
             Surface(
                 shape = RoundedCornerShape(GuideTokens.ChipRadius),
                 color = GuideTokens.Surface2,
+                border = BorderStroke(1.dp, GuideTokens.Border),
             ) {
                 Text(
-                    text = row.detail.substringBefore(" ·"),
+                    text = badgeText,
                     style = GuideTokens.Caption,
-                    color = GuideTokens.Dark,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    color = GuideTokens.Text,
+                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
                     maxLines = 1,
                 )
             }

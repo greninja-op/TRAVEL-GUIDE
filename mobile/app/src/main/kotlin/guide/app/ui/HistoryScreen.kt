@@ -35,6 +35,7 @@ import guide.app.ui.components.GuideCard
 import guide.app.ui.components.GuideDivider
 import guide.app.ui.components.StatusTag
 import guide.app.ui.components.GuideIcons
+import guide.app.ui.components.fadingEdges
 import guide.app.ui.theme.GuideTokens
 import guide.app.ui.theme.Lines
 
@@ -59,9 +60,13 @@ fun HistoryScreen(
 ) {
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
     var draft by rememberSaveable { mutableStateOf("") }
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        state = listState,
+        modifier = Modifier
+            .fillMaxSize()
+            .fadingEdges(listState, topFadeHeight = 36.dp, bottomFadeHeight = 52.dp),
         contentPadding = PaddingValues(
             start = GuideTokens.Space.screenPad,
             end = GuideTokens.Space.screenPad,
@@ -75,12 +80,13 @@ fun HistoryScreen(
                 Text("Trip history", style = GuideTokens.Heading, maxLines = Lines.Single)
                 Text(
                     text = if (visits.isEmpty()) {
-                        "Everything the guide told you as you walked, in the order you heard it."
+                        "Places visited and audio stories heard along your journey."
                     } else {
                         visitCountLabel(visits.size) + " · newest first"
                     },
                     style = GuideTokens.Chrome,
-                    maxLines = Lines.Supporting,
+                    color = GuideTokens.Text2,
+                    maxLines = Lines.Single,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = GuideTokens.Space.xs),
                 )

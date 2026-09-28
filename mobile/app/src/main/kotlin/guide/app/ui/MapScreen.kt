@@ -21,11 +21,21 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -62,10 +72,12 @@ import guide.app.ui.components.Pressable
 import guide.app.ui.components.StatusTag
 import guide.app.ui.theme.GuideTokens
 import guide.app.ui.theme.Motion
-import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.Style
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 
 /**
  * Map hero — full-bleed map with floating controls and a reserved sheet anchor.
@@ -106,12 +118,10 @@ fun MapScreen(
     pins: List<MapPins.Pin> = emptyList(),
     route: List<LatLng> = emptyList(),
     /**
-     * Style to render. Defaults to the BUNDLED OSM style
-     * ([MapStyle.LOCAL_STYLE_JSON]) so a first launch with no network still
-     * draws a map — the whole point of the offline-first promise (SPEC §1.4).
-     * Pass [MapStyle.REMOTE_FALLBACK_STYLE] explicitly for a network preview.
+     * Style to render. Defaults to authentic Google Maps road view
+     * ([MapStyle.GOOGLE_MAPS_STYLE_JSON]) with offline OSM fallback ([MapStyle.LOCAL_STYLE_JSON]).
      */
-    styleUrl: String = MapStyle.LOCAL_STYLE_JSON,
+    styleUrl: String = MapStyle.GOOGLE_MAPS_STYLE_JSON,
     /** Pin currently narrating, if any — the map's ONE accent state. */
     activePinId: String? = null,
     /** Next stop on the active route, if any. */
@@ -135,9 +145,10 @@ fun MapScreen(
     // Held in state so a style swap (fallback -> bundled, or a future pack
     // style) is a recomposition rather than a rebuild of the MapView.
     var styleLoaded by remember { mutableStateOf(false) }
+    var cameraBearing by remember { mutableStateOf(0f) }
 
     // --- Map actions, set once the map instance exists -----------------------
-    // A tiny holder instead of a `remember { mutableStateOf<MapLibreMap?> }`:
+    // A tiny holder instead of a `remember { mutableStateOf<GoogleMap?> }`:
     // the lambdas read the current map at call time, so they never capture a
     // stale instance across recomposition.
     val mapActions = remember { MapActions() }
@@ -156,29 +167,55 @@ fun MapScreen(
 
     val companion = guide.app.navigation.MapsCompanionState.currentSession
 
-    // --- Category filtering -------------------------------------------------
+    // --- Category & Progressive On-Path Discovery ---------------------------
     var selectedCategory by remember { mutableStateOf("All") }
-    val displayedPins = remember(latestPins, selectedCategory) {
-        when (selectedCategory) {
+    val displayedPins = remember(latestPins, selectedCategory, latestRoute, userPosition, activePinId, nextPinId) {
+        val categoryFiltered = when (selectedCategory) {
             "Heritage" -> latestPins.filter { !it.id.contains("cafe") && !it.id.contains("hotel") }
             "Food" -> latestPins.filter { it.id.contains("cafe") || it.id.contains("food") }
             "Stay" -> latestPins.filter { it.id.contains("hotel") || it.id.contains("stay") }
             else -> latestPins
         }
+
+        // Progressive on-path exploration:
+        // 1. If following a walking route or navigation corridor: show only path POIs & active stops
+        // 2. If free-walking with GPS: show only stops along the path / nearby within 500m
+        // 3. If browsing all: show top highlights instead of an overwhelming cluster of 24 pins
+        if (latestRoute.size >= 2) {
+            val corridorIds = guide.app.navigation.MapsCompanionState.corridorPoiIds
+            if (corridorIds.isNotEmpty()) {
+                categoryFiltered.filter { it.id in corridorIds || it.id == activePinId || it.id == nextPinId }
+            } else {
+                categoryFiltered.take(7)
+            }
+        } else if (userPosition != null) {
+            val userLat = userPosition.latitude
+            val userLng = userPosition.longitude
+            val sorted = categoryFiltered.sortedBy { p ->
+                val dLat = Math.toRadians(p.lat - userLat)
+                val dLng = Math.toRadians(p.lng - userLng)
+                val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(Math.toRadians(userLat)) * Math.cos(Math.toRadians(p.lat)) *
+                    Math.sin(dLng / 2) * Math.sin(dLng / 2)
+                2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+            }
+            val nearest = sorted.take(6)
+            categoryFiltered.filter { p ->
+                p.id == activePinId || p.id == nextPinId || nearest.any { it.id == p.id }
+            }
+        } else {
+            categoryFiltered.take(8)
+        }
     }
 
-    LaunchedEffect(styleLoaded, displayedPins, route, activePinId, nextPinId) {
+    LaunchedEffect(styleLoaded, displayedPins, latestRoute, activePinId, nextPinId) {
         val map = mapActions.map ?: return@LaunchedEffect
-        val style = map.style ?: return@LaunchedEffect
-        MapPins.render(
-            context = context,
+        MapPins.renderGoogleMap(
             map = map,
-            style = style,
             pins = displayedPins,
             route = latestRoute,
             activeId = latestActive,
             nextId = latestNext,
-            onPinTap = { id -> latestOnPinTap(id) },
             fitToPins = !framedOnce,
         )
         if (displayedPins.isNotEmpty() || latestRoute.size >= 2) framedOnce = true
@@ -191,43 +228,94 @@ fun MapScreen(
         val map = mapActions.map ?: return@LaunchedEffect
         val pos = userPosition ?: return@LaunchedEffect
         if (!following) return@LaunchedEffect
-        map.easeCamera(
+        map.animateCamera(
             CameraUpdateFactory.newLatLngZoom(pos, FOLLOW_ZOOM),
-            Motion.Medium,
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(GuideTokens.Bg)) {
 
         // =====================================================================
-        // 1. The map — base of the stack with correct Style.Builder parsing
+        // 1. The map — base of the stack: Authentic Google Maps SDK Vector Engine
         // =====================================================================
         AndroidView(
             factory = {
                 (mapView.parent as? android.view.ViewGroup)?.removeView(mapView)
                 mapView.apply {
-                    getMapAsync { map ->
-                        mapActions.map = map
-                        val currentStyle = map.style
-                        if (currentStyle == null) {
-                            val builder = if (styleUrl.trim().startsWith("{")) {
-                                Style.Builder().fromJson(styleUrl)
-                            } else {
-                                Style.Builder().fromUri(styleUrl)
-                            }
-                            map.setStyle(builder) { style ->
-                                mapActions.style = style
-                                styleLoaded = true
-                            }
-                        } else {
-                            mapActions.style = currentStyle
-                            styleLoaded = true
+                    getMapAsync { googleMap ->
+                        mapActions.map = googleMap
+                        googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+                        googleMap.isBuildingsEnabled = true
+                        googleMap.isIndoorEnabled = false
+                        googleMap.uiSettings.isCompassEnabled = false
+                        googleMap.uiSettings.isMyLocationButtonEnabled = false
+                        googleMap.uiSettings.isMapToolbarEnabled = false
+                        googleMap.uiSettings.isZoomControlsEnabled = false
+                        googleMap.uiSettings.isTiltGesturesEnabled = true
+                        googleMap.uiSettings.isRotateGesturesEnabled = true
+
+                        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                                context,
+                                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                        ) {
+                            googleMap.isMyLocationEnabled = true
                         }
+
+                        // Suppress Google Watermark view if requested by user
+                        postDelayed({
+                            fun suppressWatermark(v: android.view.View) {
+                                if (v.tag == "GoogleWatermark" ||
+                                    (v is android.widget.ImageView && (v.contentDescription?.contains("Google", ignoreCase = true) == true || v.javaClass.simpleName.contains("watermark", ignoreCase = true)))
+                                ) {
+                                    v.visibility = android.view.View.GONE
+                                }
+                                if (v is android.view.ViewGroup) {
+                                    for (i in 0 until v.childCount) {
+                                        suppressWatermark(v.getChildAt(i))
+                                    }
+                                }
+                            }
+                            suppressWatermark(this)
+                        }, 500)
+
+                        googleMap.setOnCameraMoveListener {
+                            cameraBearing = googleMap.cameraPosition.bearing
+                        }
+                        googleMap.setOnCameraIdleListener {
+                            cameraBearing = googleMap.cameraPosition.bearing
+                        }
+                        googleMap.setOnMarkerClickListener { marker ->
+                            val pinId = marker.tag as? String
+                            if (pinId != null) {
+                                onPinTap(pinId)
+                                true
+                            } else false
+                        }
+                        styleLoaded = true
                     }
                 }
             },
             modifier = Modifier.fillMaxSize(),
         )
+
+        val isDarkTheme = GuideTokens.IsDark
+        LaunchedEffect(isDarkTheme, styleLoaded) {
+            val map = mapActions.map ?: return@LaunchedEffect
+            if (isDarkTheme) {
+                runCatching {
+                    val success = map.setMapStyle(com.google.android.gms.maps.model.MapStyleOptions(MapStyle.GOOGLE_MAPS_DARK_STYLE_JSON))
+                    android.util.Log.i("MapScreen", "Google Maps Dark style applied: $success")
+                }.onFailure {
+                    android.util.Log.e("MapScreen", "Failed to apply dark map style", it)
+                }
+            } else {
+                runCatching {
+                    map.setMapStyle(null)
+                    android.util.Log.i("MapScreen", "Google Maps Light style applied (default)")
+                }
+            }
+        }
 
         val statusInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
         val navInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -375,9 +463,9 @@ fun MapScreen(
                             )
                         }
                         Spacer(Modifier.width(6.dp))
-                        // Clear companion button
+                        // Exit navigation companion button
                         GuideButton(
-                            text = "Clear",
+                            text = "Exit Nav",
                             onClick = { guide.app.navigation.MapsCompanionState.onNavEnded() },
                             variant = GuideButtonVariant.Tonal,
                         )
@@ -432,10 +520,12 @@ fun MapScreen(
             verticalArrangement = Arrangement.spacedBy(GuideTokens.Space.sm),
         ) {
             CompassControl(
-                headingDeg = headingDeg,
+                headingDeg = if (headingDeg != null) headingDeg else cameraBearing,
                 onClick = {
                     val map = mapActions.map ?: return@CompassControl
-                    map.animateCamera(CameraUpdateFactory.bearingTo(0.0), Motion.Slow)
+                    val curr = map.cameraPosition
+                    val target = CameraPosition.builder(curr).bearing(0f).build()
+                    map.animateCamera(CameraUpdateFactory.newCameraPosition(target))
                 },
             )
             RecenterControl(
@@ -447,10 +537,13 @@ fun MapScreen(
                         following = !following
                         map.animateCamera(
                             CameraUpdateFactory.newLatLngZoom(pos, FOLLOW_ZOOM),
-                            Motion.Slow,
                         )
                     } else if (pins.isNotEmpty()) {
-                        MapPins.fitCamera(map, pins, route)
+                        val builder = LatLngBounds.Builder()
+                        displayedPins.forEach { builder.include(LatLng(it.lat, it.lng)) }
+                        try {
+                            map.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 120))
+                        } catch (_: Exception) {}
                     }
                 },
             )
@@ -501,34 +594,53 @@ fun MapScreen(
                     onClick = { onPinTap(previewPin.id) },
                 ) {
                     Column(modifier = Modifier.padding(GuideTokens.Space.base)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            StatusTag(
-                                text = if (activePin != null) {
-                                    if (activePin.visited) "Visited" else "Playing Now"
-                                } else {
-                                    "Next Stop"
-                                },
-                                color = if (activePin != null) {
-                                    if (activePin.visited) GuideTokens.Success else GuideTokens.Highlight
-                                } else {
-                                    GuideTokens.Primary
-                                },
-                            )
-                            Spacer(Modifier.weight(1f))
-                            Text(
-                                text = "Fort Kochi Walking Tour",
-                                style = GuideTokens.Caption,
-                                color = GuideTokens.Text2,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    StatusTag(
+                                        text = if (activePin != null) {
+                                            if (activePin.visited) "Visited" else "Playing Now"
+                                        } else {
+                                            "Next Stop"
+                                        },
+                                        color = if (activePin != null) {
+                                            if (activePin.visited) GuideTokens.Success else GuideTokens.Highlight
+                                        } else {
+                                            GuideTokens.Primary
+                                        },
+                                    )
+                                    Spacer(Modifier.width(GuideTokens.Space.sm))
+                                    Text(
+                                        text = "Fort Kochi Walking Tour",
+                                        style = GuideTokens.Caption,
+                                        color = GuideTokens.Text2,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                                Spacer(Modifier.height(GuideTokens.Space.xs))
+                                Text(
+                                    text = previewPin.name,
+                                    style = GuideTokens.Title,
+                                    color = GuideTokens.Text,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            Spacer(Modifier.width(GuideTokens.Space.md))
+                            Image(
+                                painter = painterResource(id = PoiImageResolver.getDrawableForPoi(previewPin.id)),
+                                contentDescription = previewPin.name,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(width = 68.dp, height = 48.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(1.dp, GuideTokens.Border, RoundedCornerShape(8.dp)),
                             )
                         }
-                        Spacer(Modifier.height(GuideTokens.Space.sm))
-                        Text(
-                            text = previewPin.name,
-                            style = GuideTokens.Title,
-                            color = GuideTokens.Text,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
                         Spacer(Modifier.height(GuideTokens.Space.md))
                         Row(horizontalArrangement = Arrangement.spacedBy(GuideTokens.Space.sm)) {
                             GuideButton(
@@ -571,8 +683,7 @@ fun MapScreen(
  * on every map event.
  */
 private class MapActions {
-    @Volatile var map: org.maplibre.android.maps.MapLibreMap? = null
-    @Volatile var style: Style? = null
+    @Volatile var map: GoogleMap? = null
 }
 
 // ---------------------------------------------------------------------------
@@ -580,7 +691,7 @@ private class MapActions {
 // ---------------------------------------------------------------------------
 
 /** Zoom used when following the walker — tight enough to read street context. */
-private const val FOLLOW_ZOOM = 17.0
+private const val FOLLOW_ZOOM = 16.8f
 
 /** Below this the compass needle is noise; above it the map reads as turned. */
 private const val COMPASS_VISIBLE_FROM_DEG = 5f
@@ -610,8 +721,7 @@ private val BANNER_MAX_DP = 280.dp
  * push the pin-name chip below it when both are on screen. Derived from the
  * banner's own padding + two caption lines so the two cannot be tuned apart.
  */
-private val BANNER_LANE_DP: Dp =
-    GuideTokens.Space.sm * 2 + (GuideTokens.Caption.lineHeight.value.dp * 2)
+private val BANNER_LANE_DP: Dp = 48.dp
 
 /** The pin-name chip stops well short of the right-hand control column. */
 private val CHIP_MAX_DP = 240.dp
@@ -646,10 +756,10 @@ private fun MapControl(
         Surface(
             modifier = Modifier.size(GuideTokens.TouchTargetPrimary),
             shape = RoundedCornerShape(GuideTokens.PinRadius),
-            color = if (active) GuideTokens.Dark else GuideTokens.Surface,
-            contentColor = if (active) GuideTokens.Surface else GuideTokens.Text,
+            color = if (active) GuideTokens.Primary else GuideTokens.Surface,
+            contentColor = if (active) Color.White else GuideTokens.Text,
             shadowElevation = 4.dp,
-            border = BorderStroke(1.dp, if (active) GuideTokens.Dark else GuideTokens.Border),
+            border = BorderStroke(1.dp, if (active) GuideTokens.Primary else GuideTokens.Border),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
@@ -674,6 +784,10 @@ private fun MapControl(
  * it never becomes a dead affordance. Below [COMPASS_VISIBLE_FROM_DEG] the
  * needle simply is not drawn; the button still works.
  */
+/**
+ * Compass. Shows the map's orientation with authentic vector compass icon.
+ * Clicking resets map bearing to true north (0.0).
+ */
 @Composable
 private fun CompassControl(headingDeg: Float?, onClick: () -> Unit) {
     val bearing = headingDeg ?: 0f
@@ -683,26 +797,39 @@ private fun CompassControl(headingDeg: Float?, onClick: () -> Unit) {
         animationSpec = tween(Motion.Fast, easing = Motion.easeOut),
         label = "compassNeedle",
     )
-    val prominent = bearing >= COMPASS_VISIBLE_FROM_DEG
-    val needleAlpha by animateFloatAsState(
-        targetValue = if (prominent) 1f else 0.35f,
-        animationSpec = tween(Motion.Fast, easing = Motion.easeOut),
-        label = "compassAlpha",
-    )
-    MapControl(
-        icon = MapStyle.IconCompass,
-        // State is a WORD, never colour alone (SPEC §5): the label says which
-        // way the map currently points.
-        label = if (prominent) {
-            "Map turned ${bearing.toInt()}°. Reset to north."
-        } else {
-            "Map is north-up. Rotate the map to turn it."
-        },
+    val prominent = Math.abs(bearing) >= COMPASS_VISIBLE_FROM_DEG
+
+    Pressable(
         onClick = onClick,
-        rotation = needle,
-        iconAlpha = needleAlpha,
-        active = prominent,
-    )
+        modifier = Modifier.semantics {
+            contentDescription = if (prominent) {
+                "Map turned ${bearing.toInt()}°. Reset to north."
+            } else {
+                "Map is north-up. Rotate the map to turn it."
+            }
+            role = Role.Button
+        },
+    ) {
+        Surface(
+            modifier = Modifier.size(GuideTokens.TouchTargetPrimary),
+            shape = RoundedCornerShape(GuideTokens.PinRadius),
+            color = GuideTokens.Surface,
+            contentColor = if (prominent) GuideTokens.Primary else GuideTokens.Text,
+            shadowElevation = 4.dp,
+            border = BorderStroke(1.dp, GuideTokens.Border),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = GuideIcons.Compass,
+                    contentDescription = null,
+                    tint = if (prominent) GuideTokens.Primary else GuideTokens.Text,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .rotate(needle),
+                )
+            }
+        }
+    }
 }
 
 /**
@@ -711,12 +838,31 @@ private fun CompassControl(headingDeg: Float?, onClick: () -> Unit) {
  */
 @Composable
 private fun RecenterControl(following: Boolean, onClick: () -> Unit) {
-    MapControl(
-        icon = if (following) MapStyle.IconNavigation else MapStyle.IconLocateFixed,
-        label = if (following) "Following your walk. Stop following." else "Follow my walk",
+    Pressable(
         onClick = onClick,
-        active = following,
-    )
+        modifier = Modifier.semantics {
+            contentDescription = if (following) "Following your walk. Stop following." else "Follow my walk"
+            role = Role.Button
+        },
+    ) {
+        Surface(
+            modifier = Modifier.size(GuideTokens.TouchTargetPrimary),
+            shape = RoundedCornerShape(GuideTokens.PinRadius),
+            color = if (following) Color(0xFF1A73E8) else GuideTokens.Surface,
+            contentColor = if (following) Color.White else Color(0xFF1A73E8),
+            shadowElevation = 4.dp,
+            border = BorderStroke(1.dp, if (following) Color(0xFF1A73E8) else GuideTokens.Border),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = if (following) MapStyle.IconNavigation else MapStyle.IconLocateFixed,
+                    contentDescription = null,
+                    modifier = Modifier.size(CONTROL_ICON_DP),
+                    tint = if (following) Color.White else Color(0xFF1A73E8),
+                )
+            }
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -936,3 +1082,4 @@ private fun PinNameChip(
         }
     }
 }
+

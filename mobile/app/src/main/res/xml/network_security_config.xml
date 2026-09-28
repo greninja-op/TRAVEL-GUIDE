@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Deny cleartext HTTP traffic across entire application -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- System trusted CAs only. Disallow user-installed certs to prevent MitM interception -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Specific configuration for trusted backend API endpoints -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.sarvam.ai</domain>
+        <domain includeSubdomains="true">maps.googleapis.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

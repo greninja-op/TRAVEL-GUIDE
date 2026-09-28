@@ -35,6 +35,7 @@ import guide.app.ui.components.GuideDivider
 import guide.app.ui.components.SectionHeader
 import guide.app.ui.components.StatusTag
 import guide.app.ui.components.GuideIcons
+import guide.app.ui.components.fadingEdges
 import guide.app.ui.theme.GuideTokens
 import guide.app.ui.theme.Lines
 import guide.app.ui.theme.Motion
@@ -60,8 +61,13 @@ fun PacksScreen(
     onDownloadCity: () -> Unit,
     onDelete: (String) -> Unit,
 ) {
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        state = listState,
+        modifier = Modifier
+            .fillMaxSize()
+            .fadingEdges(listState, topFadeHeight = 36.dp, bottomFadeHeight = 52.dp),
         contentPadding = PaddingValues(
             start = GuideTokens.Space.screenPad,
             end = GuideTokens.Space.screenPad,
@@ -74,10 +80,10 @@ fun PacksScreen(
             Column {
                 Text("Offline packs", style = GuideTokens.Heading, maxLines = Lines.Single)
                 Text(
-                    text = "A pack is the text; the map tiles are the picture. With both on " +
-                        "this device the guide runs end to end with the network switched off.",
+                    text = "Downloaded city guides for exploring without mobile data.",
                     style = GuideTokens.Chrome,
-                    maxLines = Lines.Summary,
+                    color = GuideTokens.Text2,
+                    maxLines = Lines.Single,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = GuideTokens.Space.xs),
                 )
@@ -103,12 +109,11 @@ fun PacksScreen(
                     )
                 }
                 Text(
-                    text = "Finding you, naming what you're looking at, and speaking the story " +
-                        "all happen on the phone. Downloading the Kochi tiles is the last piece — " +
-                        "after that, airplane mode changes nothing.",
+                    text = "Stories, audio, and maps run entirely on-device without cellular data or Wi-Fi.",
                     style = GuideTokens.Body,
-                    maxLines = Lines.Unbounded,
-                    modifier = Modifier.padding(top = GuideTokens.Space.md),
+                    color = GuideTokens.Text2,
+                    maxLines = Lines.Supporting,
+                    modifier = Modifier.padding(top = GuideTokens.Space.xs),
                 )
             }
         }

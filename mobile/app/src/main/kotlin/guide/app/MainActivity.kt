@@ -4,24 +4,44 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,9 +52,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import guide.app.companion.TravelGuideAccessibilityService
 import guide.app.data.AppState
 import guide.app.extras.Events
 import guide.app.location.GuideService
@@ -47,9 +73,10 @@ import guide.app.ui.HistoryScreen
 import guide.app.ui.MapScreen
 import guide.app.ui.NearbyScreen
 import guide.app.ui.PacksScreen
+import guide.app.ui.PermissionGateScreen
 import guide.app.ui.PhrasebookScreen
 import guide.app.ui.PoiDetailScreen
-import guide.app.ui.RoutesScreen
+import guide.app.ui.PrivacyPolicyViewer
 import guide.app.ui.SettingsScreen
 import guide.app.ui.VoiceSettings
 import guide.app.ui.components.EmptyState
@@ -57,7 +84,9 @@ import guide.app.ui.components.GuideIcons
 import guide.app.ui.components.GuideNavBar
 import guide.app.ui.theme.GuideTokens
 import kotlinx.coroutines.awaitCancellation
-import org.maplibre.android.maps.MapView
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.MapsInitializer
+import com.google.android.gms.maps.model.LatLng
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -67,22 +96,80 @@ import java.time.format.DateTimeFormatter
  * LocationTracker + Narrator attach in GuideService; screens here own layout
  * and callbacks only. MapView lifecycle is forwarded below (all callbacks).
  */
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     private var mapView: MapView? = null
     private var appState: AppState? = null
+    private val isAppLocked = mutableStateOf(false)
+
+    fun authenticateWithBiometrics(onSuccess: () -> Unit = {}) {
+        val executor = ContextCompat.getMainExecutor(this)
+        val biometricPrompt = BiometricPrompt(
+            this,
+            executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    isAppLocked.value = false
+                    window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+                    onSuccess()
+                }
+
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    super.onAuthenticationError(errorCode, errString)
+                }
+
+                override fun onAuthenticationFailed() {
+                    super.onAuthenticationFailed()
+                }
+            },
+        )
+
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Unlock Travel Guide")
+            .setSubtitle("Confirm your identity with biometric authentication or device PIN")
+            .setAllowedAuthenticators(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+            )
+            .build()
+
+        biometricPrompt.authenticate(promptInfo)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enforceHighRefreshRate()
+
+        // Security Hardening (OWASP M8, CWE-1021: Tapjacking & Overlay Prevention)
+        window.decorView.filterTouchesWhenObscured = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            runCatching {
+                val method = window.javaClass.getMethod("setHideOverlayWindows", Boolean::class.javaPrimitiveType)
+                method.invoke(window, true)
+            }
+        }
+
+        val prefs = getSharedPreferences("guide_prefs", MODE_PRIVATE)
+        val appLockEnabled = prefs.getBoolean("app_lock_enabled", false)
+        isAppLocked.value = appLockEnabled
+        if (appLockEnabled) {
+            // Task Snapshot & Screen Leakage Protection (CWE-200)
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+            authenticateWithBiometrics()
+        }
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
                 android.graphics.Color.TRANSPARENT,
                 android.graphics.Color.TRANSPARENT,
             ),
-            navigationBarStyle = SystemBarStyle.light(
+            navigationBarStyle = SystemBarStyle.auto(
                 android.graphics.Color.WHITE,
-                android.graphics.Color.WHITE,
+                android.graphics.Color.parseColor("#131A26"),
             ),
         )
+        runCatching {
+            MapsInitializer.initialize(applicationContext, MapsInitializer.Renderer.LATEST) { }
+        }
         val map = MapView(this).apply {
             onCreate(savedInstanceState)
         }
@@ -93,6 +180,8 @@ class MainActivity : ComponentActivity() {
                 initialRoute = route,
                 mapView = map,
                 onAppStateReady = { appState = it },
+                isLocked = isAppLocked.value,
+                onUnlock = { authenticateWithBiometrics() },
             )
         }
         handleNavigationIntent(intent)
@@ -114,10 +203,13 @@ class MainActivity : ComponentActivity() {
         val app = appState
         val action = intent.action
         if (action == android.content.Intent.ACTION_SEND && intent.type?.startsWith("text/") == true) {
-            val text = intent.getStringExtra(android.content.Intent.EXTRA_TEXT).orEmpty()
+            val rawText = intent.getStringExtra(android.content.Intent.EXTRA_TEXT).orEmpty()
+            // Security Bounds & Sanitization (OWASP M4, CWE-20): Clamp length and strip control chars
+            val text = rawText.take(250)
             val firstLine = text.lines().firstOrNull { it.isNotBlank() && !it.startsWith("http") }
                 ?: text.substringBefore("http").trim()
-            val dest = firstLine.ifBlank { "Destination from Google Maps" }
+            val dest = firstLine.replace(Regex("""[^\w\s.,'#\-]"""), " ").trim().take(80)
+                .ifBlank { "Destination from Google Maps" }
             guide.app.navigation.MapsCompanionState.onNavStarted(
                 destinationName = dest,
                 etaOrDistance = "Synced from Google Maps",
@@ -126,18 +218,25 @@ class MainActivity : ComponentActivity() {
             app?.updateCompanionCorridor()
         } else if (action == android.content.Intent.ACTION_VIEW && intent.data?.scheme == "geo") {
             val uri = intent.data ?: return
-            val schemeSpecific = uri.schemeSpecificPart
-            val query = uri.getQueryParameter("q")
-            val label = query?.substringAfter('(')?.substringBefore(')')
+            val schemeSpecific = uri.schemeSpecificPart.orEmpty().take(120)
+            val query = uri.getQueryParameter("q")?.take(120)
+            val rawLabel = query?.substringAfter('(')?.substringBefore(')')
                 ?: query?.replace('+', ' ')
                 ?: "Destination from Google Maps"
+            val label = rawLabel.replace(Regex("""[^\w\s.,'#\-]"""), " ").trim().take(80)
+                .ifBlank { "Destination from Google Maps" }
             val coords = schemeSpecific.substringBefore('?').split(',')
-            val lat = coords.getOrNull(0)?.toDoubleOrNull()
-            val lng = coords.getOrNull(1)?.toDoubleOrNull()
+            val rawLat = coords.getOrNull(0)?.toDoubleOrNull()
+            val rawLng = coords.getOrNull(1)?.toDoubleOrNull()
+
+            // Strict geographic coordinate bounds verification
+            val validLat = rawLat?.takeIf { !it.isNaN() && !it.isInfinite() && it in -90.0..90.0 }
+            val validLng = rawLng?.takeIf { !it.isNaN() && !it.isInfinite() && it in -180.0..180.0 }
+
             guide.app.navigation.MapsCompanionState.onNavStarted(
                 destinationName = label,
-                destinationLat = lat,
-                destinationLng = lng,
+                destinationLat = validLat,
+                destinationLng = validLng,
                 etaOrDistance = "Synced from Google Maps",
                 source = guide.app.navigation.CompanionSource.SHARED_INTENT,
             )
@@ -152,7 +251,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        enforceHighRefreshRate()
         mapView?.onResume()
+        val prefs = getSharedPreferences("guide_prefs", MODE_PRIVATE)
+        if (prefs.getBoolean("app_lock_enabled", false) && isAppLocked.value) {
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+            authenticateWithBiometrics()
+        }
     }
 
     override fun onPause() {
@@ -162,6 +267,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         mapView?.onStop()
+        val prefs = getSharedPreferences("guide_prefs", MODE_PRIVATE)
+        if (prefs.getBoolean("app_lock_enabled", false)) {
+            isAppLocked.value = true
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+        }
         super.onStop()
     }
 
@@ -174,6 +284,35 @@ class MainActivity : ComponentActivity() {
         super.onSaveInstanceState(outState)
         mapView?.onSaveInstanceState(outState)
     }
+
+    /**
+     * Unlocks the full 120 FPS / high refresh rate pipeline.
+     * Prevents OEM / MIUI dynamic display throttling from capping the app at 60Hz.
+     */
+    private fun enforceHighRefreshRate() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val disp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                display
+            } else {
+                @Suppress("DEPRECATION")
+                windowManager.defaultDisplay
+            }
+            val modes = disp?.supportedModes ?: emptyArray()
+            // Find highest refresh rate mode (targeting 120Hz mode, or max available >= 90Hz)
+            val bestMode = modes
+                .filter { it.refreshRate >= 118.0f }
+                .maxByOrNull { it.refreshRate }
+                ?: modes.maxByOrNull { it.refreshRate }
+
+            val params = window.attributes
+            if (bestMode != null) {
+                params.preferredDisplayModeId = bestMode.modeId
+            }
+            @Suppress("DEPRECATION")
+            params.preferredRefreshRate = bestMode?.refreshRate ?: 120f
+            window.attributes = params
+        }
+    }
 }
 
 // Navigation destinations live in ui/components/NavBar.kt (NavItem) so the bar
@@ -184,35 +323,105 @@ fun GuideApp(
     initialRoute: String? = null,
     mapView: MapView,
     onAppStateReady: (AppState) -> Unit = {},
+    isLocked: Boolean = false,
+    onUnlock: () -> Unit = {},
 ) {
-    MaterialTheme {
-        val context = LocalContext.current
-        val prefs = remember { context.getSharedPreferences("guide_prefs", android.content.Context.MODE_PRIVATE) }
-        var consented by rememberSaveable { mutableStateOf(prefs.getBoolean("consented", true)) }
-        if (!consented) {
-            Surface(color = GuideTokens.Bg) {
-                ConsentScreen(
-                    onAcknowledgeForeground = {
-                        consented = true
-                        prefs.edit().putBoolean("consented", true).apply()
-                    },
-                    onLater = {
-                        consented = true
-                        prefs.edit().putBoolean("consented", true).apply()
-                    },
-                )
-            }
-            return@MaterialTheme
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("guide_prefs", android.content.Context.MODE_PRIVATE) }
+    var themeMode by remember { mutableStateOf(prefs.getString("theme_mode", "system") ?: "system") }
+    val systemDark = androidx.compose.foundation.isSystemInDarkTheme()
+    val isDark = when (themeMode) {
+        "dark" -> true
+        "light" -> false
+        else -> systemDark
+    }
+
+    guide.app.ui.theme.GuideTheme(darkTheme = isDark) {
+        if (isLocked) {
+            AppLockScreen(onUnlock = onUnlock)
+            return@GuideTheme
         }
-        val nav = rememberNavController()
-        var current by remember { mutableStateOf(initialRoute ?: "map") }
-        LaunchedEffect(initialRoute) {
-            if (!initialRoute.isNullOrEmpty() && initialRoute != "map") {
-                nav.navigate(initialRoute)
-            }
-        }
+
         var profile by remember { mutableStateOf(BatteryProfile.BALANCED) }
 
+        fun checkLocationGranted(): Boolean {
+            return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        }
+
+        var hasLocationPerm by remember { mutableStateOf(checkLocationGranted()) }
+        var hasAccessibilityPerm by remember { mutableStateOf(TravelGuideAccessibilityService.isEnabled(context)) }
+        var dismissedGate by rememberSaveable { mutableStateOf(false) }
+        var showPrivacyViewer by remember { mutableStateOf(false) }
+
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    val locGranted = checkLocationGranted()
+                    hasLocationPerm = locGranted
+                    hasAccessibilityPerm = TravelGuideAccessibilityService.isEnabled(context)
+                    if (locGranted) {
+                        GuideService.start(context, profile)
+                    }
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
+        val permLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions(),
+        ) { grants ->
+            val granted = grants[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            hasLocationPerm = granted
+            if (granted) {
+                GuideService.start(context, profile)
+            }
+        }
+
+        // If required location permission is missing, display Permission Gate
+        if (!hasLocationPerm && !dismissedGate) {
+            if (showPrivacyViewer) {
+                PrivacyPolicyViewer(onDismiss = { showPrivacyViewer = false })
+            } else {
+                PermissionGateScreen(
+                    hasLocationPermission = hasLocationPerm,
+                    hasAccessibilityPermission = hasAccessibilityPerm,
+                    onRequestLocation = {
+                        permLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                            ),
+                        )
+                    },
+                    onContinueToMap = { dismissedGate = true },
+                    onViewPrivacyPolicy = { showPrivacyViewer = true },
+                )
+            }
+            return@GuideTheme
+        }
+        val nav = rememberNavController()
+        val navBackStackEntry by nav.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route ?: "map"
+        val activeTab = when {
+            currentRoute.startsWith("poi/") -> "map"
+            currentRoute.startsWith("phrasebook") -> "nearby"
+            else -> currentRoute
+        }
+
+        LaunchedEffect(initialRoute) {
+            if (!initialRoute.isNullOrEmpty() && initialRoute != "map") {
+                kotlinx.coroutines.delay(120)
+                nav.navigate(initialRoute) {
+                    launchSingleTop = true
+                }
+            }
+        }
         // The one seam between the engine's data and the screens. Built once,
         // scoped to the composition. Before this, every screen received
         // emptyList()/{} and could only ever show its empty state.
@@ -227,9 +436,8 @@ fun GuideApp(
         // Live narration state, mirrored from the service.
         var activePoiId by remember { mutableStateOf<String?>(null) }
         var seeingAnswer by remember { mutableStateOf<String?>(null) }
-        var userPos by remember { mutableStateOf<org.maplibre.android.geometry.LatLng?>(null) }
+        var userPos by remember { mutableStateOf<LatLng?>(null) }
         var downloadProgress by remember { mutableStateOf<Pair<Long, Long>?>(null) }
-        var dayPlanMinutes by rememberSaveable { mutableStateOf(120) }
         // No events asset ships with the beta pack, so this is empty by design
         // — the Local Events layer lights up when a pack update carries them
         // (SPEC §3.2). Filtering through the real API keeps the shape correct.
@@ -255,41 +463,17 @@ fun GuideApp(
             }
         }
 
-        // SPEC §1 + §1.1: consent is what starts tracking — not app launch.
-        // Foreground-only until background is separately opted into in Settings.
-        // Runtime permission is requested first; the service starts only on grant.
-        val permLauncher = rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions(),
-        ) { grants ->
-            if (grants[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-                grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-            ) {
-                GuideService.start(context, profile)
-            }
-        }
-        LaunchedEffect(Unit) {
-            val fine = ContextCompat.checkSelfPermission(
-                context, Manifest.permission.ACCESS_FINE_LOCATION,
-            ) == PackageManager.PERMISSION_GRANTED
-            if (fine) {
-                GuideService.start(context, profile)
-            } else {
-                permLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                    ),
-                )
-            }
-        }
         // Android 13+: the persistent notification needs POST_NOTIFICATIONS.
+        val notifLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) {}
         LaunchedEffect(Unit) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 ContextCompat.checkSelfPermission(
                     context, Manifest.permission.POST_NOTIFICATIONS,
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                permLauncher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
+                notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
 
@@ -309,7 +493,7 @@ fun GuideApp(
             try {
                 tracker.start(profile) { fix ->
                     app.onFix(fix.lat, fix.lng)
-                    userPos = org.maplibre.android.geometry.LatLng(fix.lat, fix.lng)
+                    userPos = LatLng(fix.lat, fix.lng)
                 }
                 awaitCancellation()
             } finally {
@@ -342,24 +526,19 @@ fun GuideApp(
         }
 
         val window = (context as? android.app.Activity)?.window
-        LaunchedEffect(nav) {
-            nav.addOnDestinationChangedListener { _, destination, _ ->
-                current = destination.route ?: "map"
-            }
-        }
-        LaunchedEffect(current) {
+        LaunchedEffect(currentRoute, isDark) {
             if (window != null) {
                 val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-                insetsController.isAppearanceLightNavigationBars = true
-                if (current == "map" || current.startsWith("poi/")) {
+                insetsController.isAppearanceLightNavigationBars = !isDark
+                if (currentRoute == "map" || currentRoute.startsWith("poi/")) {
                     window.statusBarColor = android.graphics.Color.TRANSPARENT
-                    insetsController.isAppearanceLightStatusBars = true
+                    insetsController.isAppearanceLightStatusBars = !isDark
                 } else {
-                    window.statusBarColor = android.graphics.Color.parseColor("#F8F9FA")
-                    insetsController.isAppearanceLightStatusBars = true
+                    window.statusBarColor = if (isDark) android.graphics.Color.parseColor("#0B0F17") else android.graphics.Color.parseColor("#F8F9FA")
+                    insetsController.isAppearanceLightStatusBars = !isDark
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    window.navigationBarColor = android.graphics.Color.WHITE
+                    window.navigationBarColor = if (isDark) android.graphics.Color.parseColor("#131A26") else android.graphics.Color.WHITE
                 }
             }
         }
@@ -368,15 +547,25 @@ fun GuideApp(
             containerColor = GuideTokens.Bg,
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
-                if (!current.startsWith("poi/")) {
+                if (!currentRoute.startsWith("poi/")) {
                     GuideNavBar(
-                        current = current,
+                        current = activeTab,
                         onSelect = { tab ->
-                            current = tab
-                            nav.navigate(tab) {
-                                popUpTo(nav.graph.startDestinationId) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
+                            if (tab == "map") {
+                                if (!nav.popBackStack("map", inclusive = false)) {
+                                    nav.navigate("map") {
+                                        popUpTo(nav.graph.findStartDestination().id) { inclusive = false }
+                                        launchSingleTop = true
+                                    }
+                                }
+                            } else {
+                                nav.navigate(tab) {
+                                    popUpTo(nav.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
                         },
                     )
@@ -389,9 +578,77 @@ fun GuideApp(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(GuideTokens.Bg)
                     .padding(bottom = navPad),
             ) {
-                NavHost(navController = nav, startDestination = "map") {
+                NavHost(
+                    navController = nav,
+                    startDestination = "map",
+                    enterTransition = {
+                        val isDetailPush = targetState.destination.route?.startsWith("poi/") == true ||
+                            targetState.destination.route?.startsWith("phrasebook") == true
+                        if (isDetailPush) {
+                            slideIntoContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                                animationSpec = tween(durationMillis = 340, easing = FastOutSlowInEasing),
+                            ) + fadeIn(animationSpec = tween(durationMillis = 240))
+                        } else {
+                            fadeIn(
+                                animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                            ) + scaleIn(
+                                initialScale = 0.98f,
+                                animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                            )
+                        }
+                    },
+                    exitTransition = {
+                        val isDetailPush = targetState.destination.route?.startsWith("poi/") == true ||
+                            targetState.destination.route?.startsWith("phrasebook") == true
+                        if (isDetailPush) {
+                            slideOutOfContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                                animationSpec = tween(durationMillis = 340, easing = FastOutSlowInEasing),
+                                targetOffset = { fullWidth -> fullWidth / 4 },
+                            ) + fadeOut(animationSpec = tween(durationMillis = 240))
+                        } else {
+                            fadeOut(
+                                animationSpec = tween(durationMillis = 160, easing = FastOutLinearInEasing),
+                            )
+                        }
+                    },
+                    popEnterTransition = {
+                        val isDetailPop = initialState.destination.route?.startsWith("poi/") == true ||
+                            initialState.destination.route?.startsWith("phrasebook") == true
+                        if (isDetailPop) {
+                            slideIntoContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+                                initialOffset = { fullWidth -> fullWidth / 4 },
+                            ) + fadeIn(animationSpec = tween(durationMillis = 200))
+                        } else {
+                            fadeIn(
+                                animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                            ) + scaleIn(
+                                initialScale = 0.98f,
+                                animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                            )
+                        }
+                    },
+                    popExitTransition = {
+                        val isDetailPop = initialState.destination.route?.startsWith("poi/") == true ||
+                            initialState.destination.route?.startsWith("phrasebook") == true
+                        if (isDetailPop) {
+                            slideOutOfContainer(
+                                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+                            ) + fadeOut(animationSpec = tween(durationMillis = 200))
+                        } else {
+                            fadeOut(
+                                animationSpec = tween(durationMillis = 160, easing = FastOutLinearInEasing),
+                            )
+                        }
+                    },
+                ) {
                     composable("map") {
                         MapScreen(
                             mapView = mapView,
@@ -414,14 +671,6 @@ fun GuideApp(
                                 seeingAnswer = seeingAnswer,
                                 onSeeingTap = onSeeingTap,
                                 onRowTap = { id -> nav.navigate("poi/$id") },
-                            )
-                        }
-                    }
-                    composable("routes") {
-                        Box(modifier = Modifier.fillMaxSize().padding(top = statusPad)) {
-                            RoutesScreen(
-                                routes = app.routes,
-                                onPickPlan = { minutes -> dayPlanMinutes = minutes },
                             )
                         }
                     }
@@ -473,6 +722,11 @@ fun GuideApp(
                                 appState = app,
                                 onExportData = { exportTrip(context, app) },
                                 onClearData = { app.clearAllData() },
+                                themeMode = themeMode,
+                                onThemeMode = { newMode ->
+                                    themeMode = newMode
+                                    prefs.edit().putString("theme_mode", newMode).apply()
+                                },
                             )
                         }
                     }
@@ -552,7 +806,8 @@ private fun exportTrip(context: android.content.Context, app: AppState) {
             },
             notes = app.visits.mapNotNull { v -> v.note?.let { v.poiId to it } }.toMap(),
         )
-        val file = java.io.File(context.cacheDir, "trip-${System.currentTimeMillis()}.md")
+        val exportDir = java.io.File(context.cacheDir, "exports").apply { mkdirs() }
+        val file = java.io.File(exportDir, "trip-${System.currentTimeMillis()}.md")
         file.writeText(body)
         val uri = androidx.core.content.FileProvider.getUriForFile(
             context, "${context.packageName}.fileprovider", file,
@@ -567,5 +822,67 @@ private fun exportTrip(context: android.content.Context, app: AppState) {
                 addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
             },
         )
+    }
+}
+
+/**
+ * Biometric authentication security screen displayed when App Lock is active.
+ * Ensures zero access to private travel notes, location history, or voice preferences.
+ */
+@Composable
+private fun AppLockScreen(
+    onUnlock: () -> Unit,
+) {
+    LaunchedEffect(Unit) {
+        onUnlock()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(GuideTokens.Bg)
+            .padding(GuideTokens.Space.xl),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Surface(
+                modifier = Modifier.size(72.dp),
+                shape = RoundedCornerShape(20.dp),
+                color = GuideTokens.PrimaryWash,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = GuideIcons.Lock,
+                        contentDescription = "Locked",
+                        tint = GuideTokens.Primary,
+                        modifier = Modifier.size(36.dp),
+                    )
+                }
+            }
+            Spacer(Modifier.height(GuideTokens.Space.lg))
+            Text(
+                text = "Travel Guide Locked",
+                style = GuideTokens.Title,
+                color = GuideTokens.Text,
+            )
+            Spacer(Modifier.height(GuideTokens.Space.xs))
+            Text(
+                text = "Biometric protection is enabled for your travel journal and visit history.",
+                style = GuideTokens.Chrome,
+                color = GuideTokens.Text2,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.padding(horizontal = GuideTokens.Space.sm),
+            )
+            Spacer(Modifier.height(GuideTokens.Space.xl))
+            guide.app.ui.components.GuideButton(
+                text = "Unlock with Fingerprint or PIN",
+                onClick = onUnlock,
+                variant = guide.app.ui.components.GuideButtonVariant.Primary,
+            )
+        }
     }
 }
