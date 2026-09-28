@@ -232,6 +232,26 @@ class GuideService : Service() {
                         card.name, card.summary, card.funFacts.firstOrNull(),
                     ), onRoute = true)
                 }
+
+                // If Google Maps Navigation Companion is active, prioritize POIs along the route corridor
+                val corridorIds = guide.app.navigation.MapsCompanionState.corridorPoiIds
+                if (corridorIds.isNotEmpty()) {
+                    for (cId in corridorIds) {
+                        if (cId in arrivals) continue
+                        val cCard = byId[cId] ?: continue
+                        val radius = (cCard.radiusM.toDouble()).takeIf { it > 0.0 } ?: 60.0
+                        val dist = guide.core.Geo.distanceM(fix.lat, fix.lng, cCard.lat, cCard.lng)
+                        if (dist <= radius * 1.25) {
+                            arrivals[cId] = fix.atS
+                            val n = narrator ?: continue
+                            n.enqueue(
+                                cId,
+                                n.storyText(cCard.name, cCard.summary, cCard.funFacts.firstOrNull()),
+                                onRoute = true,
+                            )
+                        }
+                    }
+                }
             }
         }
     }

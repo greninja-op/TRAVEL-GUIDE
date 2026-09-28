@@ -100,7 +100,7 @@ object MapStyle {
             {
               "id": "background",
               "type": "background",
-              "paint": { "background-color": $BACKGROUND_COLOR }
+              "paint": { "background-color": "$BACKGROUND_COLOR" }
             },
             {
               "id": "osm-tiles",
@@ -164,28 +164,6 @@ object MapStyle {
 
     // -----------------------------------------------------------------------
     // Pin icon registry (MapLibre `icon-image`).
-    //
-    // Touch-target math, because this is the defect the audit called out
-    // (circleRadius 7 -> ~14px, far under the 44dp minimum):
-    // MapLibre renders a symbol at its intrinsic bitmap size scaled by
-    // `iconSize`, inside a padded quad. The PAD is part of the icon and part of
-    // the tap target — but it is invisible.
-    //   bitmap  = (24 + 2*10) = 44px @ 1x   -> touches the 44px floor bare
-    //   shipped = 44 * (drawable density = 3) at baseline, so MapLibre's
-    //             density normalisation renders it at exactly 44dp on a 3x phone
-    //   drawn   = 44 * 0.75 (DEFAULT_PIN_SIZE) = 33dp of visible pin
-    //                       * 1.16 (ACTIVE bump)  = 38dp at the largest state
-    //   target  = 44 * 0.75 = 33dp ... so DEFAULT_PIN_SIZE must not go below
-    //             1.0 if this bitmap is regenerated with a smaller pad.
-    // Two properties of that math matter and are load-bearing:
-    //   1. `iconImage` is SINGLE-VALUED per layer, so each pin state is its own
-    //      GeoJsonSource + SymbolLayer pair. Data-driven `icon-image` would need
-    //      an `image`-type property or a sprite sheet; this is more layer objects
-    //      and zero style-spec risk.
-    //   2. `iconSize` CAN carry the state difference while `iconImage` stays
-    //      uniform across the layers — that keeps ONE icon bitmap per visual
-    //      weight, and the per-state shape change is the marker's own glyph
-    //      (pin vs. smaller dot) drawn into the bitmap by [Raster.drawPin].
     // -----------------------------------------------------------------------
 
     /** Canvas density the registry bitmaps are generated at. */
@@ -204,35 +182,28 @@ object MapStyle {
     /** Bitmap edge, including padding. (24 + 2*10) = 44. */
     const val ICON_SIZE_PX: Int = PIN_EDGE_PX + 2 * PIN_PAD_PX
 
-    /**
-     * Pixel-palette for the raster pin icons, resolved from the design system
-     * by the caller ([MapPins] passes [GuideTokens] values in). Bitmap drawing
-     * cannot read Compose Colors, so they are handed over explicitly rather than
-     * re-typed as hex — that keeps the "no hardcoded colour" rule intact.
-     */
     class PinPalette(
         val fill: Color,
         val ring: Color,
         val inner: Color,
-        /** Tint of the label chip behind the pin glyph. */
         val chip: Color,
         val chipBorder: Color,
     )
 
     fun defaultPinPalette(): PinPalette = PinPalette(
         fill = GuideTokens.Surface,
-        ring = GuideTokens.Primary,
+        ring = GuideTokens.Dark,
         inner = GuideTokens.Primary,
-        chip = GuideTokens.Surface1,
+        chip = GuideTokens.Surface,
         chipBorder = GuideTokens.Border,
     )
 
     fun activePinPalette(): PinPalette = PinPalette(
-        fill = GuideTokens.Highlight,
-        ring = GuideTokens.OnPrimary,
-        inner = GuideTokens.OnPrimary,
-        chip = GuideTokens.Surface1,
-        chipBorder = GuideTokens.Border,
+        fill = GuideTokens.Primary,
+        ring = GuideTokens.Surface,
+        inner = GuideTokens.Surface,
+        chip = GuideTokens.Surface,
+        chipBorder = GuideTokens.Primary,
     )
 
     // =======================================================================
@@ -404,22 +375,10 @@ object Raster {
 
         val cx = sizePx / 2f
         val r = edge / 2f
-
-        // --- Label chip: a rounded plate the glyph sits on -------------------
-        // Inset on one side so the chip reads as a callout, not a box.
-        val chip = RectF(
-            cx - r * 1.05f,
-            cx - r * 1.05f,
-            cx + r * 1.05f,
-            cx + r * 1.05f,
-        )
+        // --- Soft drop shadow -----------------------------------------------
         paint.style = Paint.Style.FILL
-        paint.color = palette.chip.toArgb()
-        canvas.drawRoundRect(chip, chipCornerPx, chipCornerPx, paint)
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 1f * (edge / 24f)
-        paint.color = palette.chipBorder.toArgb()
-        canvas.drawRoundRect(chip, chipCornerPx, chipCornerPx, paint)
+        paint.color = android.graphics.Color.argb(40, 18, 24, 38)
+        canvas.drawCircle(cx, cx + r * 0.12f, r * 0.72f, paint)
 
         // --- Marker ----------------------------------------------------------
         if (filled) {
@@ -427,41 +386,39 @@ object Raster {
             val headCy = cx - r * 0.18f
             paint.style = Paint.Style.FILL
             paint.color = palette.fill.toArgb()
-            canvas.drawCircle(cx, headCy, r * 0.72f, paint)
+            canvas.drawCircle(cx, headCy, r * 0.75f, paint)
 
             val tail = Path().apply {
-                moveTo(cx - r * 0.50f, headCy + r * 0.36f)
+                moveTo(cx - r * 0.52f, headCy + r * 0.36f)
                 lineTo(cx, cx + r * 0.98f) // anchor tip = the geographic point
-                lineTo(cx + r * 0.50f, headCy + r * 0.36f)
+                lineTo(cx + r * 0.52f, headCy + r * 0.36f)
                 close()
             }
             canvas.drawPath(tail, paint)
 
-            // Ring so the marker separates from the tile beneath it.
+            // Crisp white ring
             paint.style = Paint.Style.STROKE
-            paint.strokeWidth = r * 0.20f
+            paint.strokeWidth = r * 0.18f
             paint.color = palette.ring.toArgb()
-            canvas.drawCircle(cx, headCy, r * 0.72f, paint)
+            canvas.drawCircle(cx, headCy, r * 0.75f, paint)
 
             // Centre dot — the "filled" half of the shape difference.
             paint.style = Paint.Style.FILL
             paint.color = palette.inner.toArgb()
             canvas.drawCircle(cx, headCy, r * 0.28f, paint)
         } else {
-            // Hollow dot: ring only. Reads lighter and smaller than the
-            // teardrop, which is exactly the point — state is legible in
-            // silhouette, before colour.
+            // Elegant circular marker with crisp white rim
             paint.style = Paint.Style.FILL
-            paint.color = GuideTokens.Surface.toArgb()
-            canvas.drawCircle(cx, cx, r * 0.74f, paint)
+            paint.color = palette.fill.toArgb()
+            canvas.drawCircle(cx, cx, r * 0.72f, paint)
 
             paint.style = Paint.Style.STROKE
-            paint.strokeWidth = r * 0.30f
-            paint.color = palette.ring.toArgb()
-            canvas.drawCircle(cx, cx, r * 0.74f, paint)
+            paint.strokeWidth = r * 0.24f
+            paint.color = GuideTokens.Surface.toArgb()
+            canvas.drawCircle(cx, cx, r * 0.72f, paint)
 
             paint.style = Paint.Style.FILL
-            paint.color = palette.inner.toArgb()
+            paint.color = GuideTokens.Surface.toArgb()
             canvas.drawCircle(cx, cx, r * 0.26f, paint)
         }
 

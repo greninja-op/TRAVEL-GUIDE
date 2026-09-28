@@ -66,6 +66,7 @@ fun SettingsScreen(
     onQuiet: (Boolean) -> Unit,
     autoPlay: Boolean,
     onAutoPlay: (Boolean) -> Unit,
+    onSimulateMapsRoute: () -> Unit = {},
 ) {
     var quiet by remember { mutableStateOf(quietEnabled) }
     var auto by remember { mutableStateOf(autoPlay) }
@@ -154,6 +155,73 @@ fun SettingsScreen(
                     subtitle = "Starts a story when you reach a stop, without asking.",
                     checked = auto,
                     onCheckedChange = { auto = it; onAutoPlay(it) },
+                )
+            }
+        }
+
+        // ---- External Maps Companion ----------------------------------------
+        item { SectionHeader("External Maps Companion") }
+        item {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val hasAccess = remember { guide.app.navigation.MapsCompanionState.isNotificationAccessGranted(context) }
+            val activeSession = guide.app.navigation.MapsCompanionState.currentSession
+
+            GuideCard {
+                Text(
+                    text = "Google Maps Auto-Sync",
+                    style = GuideTokens.Title,
+                    color = GuideTokens.Text,
+                )
+                Spacer(Modifier.height(GuideTokens.Space.xs))
+                Text(
+                    text = "When you start turn-by-turn navigation in Google Maps, Travel Guide automatically extracts your destination, calculates the route corridor, and pre-arms audio stories for historical spots along your path.",
+                    style = GuideTokens.Caption,
+                    color = GuideTokens.Text2,
+                )
+                Spacer(Modifier.height(GuideTokens.Space.md))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    StatusTag(
+                        text = if (hasAccess) "SYNC READY" else "ACCESS NEEDED",
+                        color = if (hasAccess) GuideTokens.Success else GuideTokens.Highlight,
+                    )
+                    GuideButton(
+                        text = if (hasAccess) "Check Settings" else "Grant Access",
+                        onClick = {
+                            val intent = android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                            context.startActivity(intent)
+                        },
+                        variant = if (hasAccess) GuideButtonVariant.Tonal else GuideButtonVariant.Primary,
+                    )
+                }
+
+                if (activeSession != null) {
+                    Spacer(Modifier.height(GuideTokens.Space.sm))
+                    GuideDivider(modifier = Modifier.padding(vertical = GuideTokens.Space.xs))
+                    Text(
+                        text = "Active: Navigating to ${activeSession.destinationName}",
+                        style = GuideTokens.Label,
+                        color = GuideTokens.Primary,
+                    )
+                    Text(
+                        text = activeSession.etaOrDistance ?: "Corridor active",
+                        style = GuideTokens.Caption,
+                        color = GuideTokens.Text2,
+                    )
+                }
+
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+                GuideDivider(modifier = Modifier.padding(vertical = GuideTokens.Space.xs))
+
+                GuideButton(
+                    text = "Simulate Google Maps Route (Test)",
+                    onClick = onSimulateMapsRoute,
+                    variant = GuideButtonVariant.Tonal,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }

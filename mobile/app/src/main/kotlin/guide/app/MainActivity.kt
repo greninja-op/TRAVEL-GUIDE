@@ -5,12 +5,18 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -25,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -62,10 +69,71 @@ import java.time.format.DateTimeFormatter
  */
 class MainActivity : ComponentActivity() {
     private var mapView: MapView? = null
+    private var appState: AppState? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { GuideApp(onMapView = { mapView = it }) }
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(
+                android.graphics.Color.TRANSPARENT,
+                android.graphics.Color.TRANSPARENT,
+            ),
+            navigationBarStyle = SystemBarStyle.light(
+                android.graphics.Color.WHITE,
+                android.graphics.Color.WHITE,
+            ),
+        )
+        val route = intent?.getStringExtra("route")
+        setContent {
+            GuideApp(
+                initialRoute = route,
+                onMapView = { mapView = it },
+                onAppStateReady = { appState = it },
+            )
+        }
+        handleNavigationIntent(intent)
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleNavigationIntent(intent)
+    }
+
+    private fun handleNavigationIntent(intent: android.content.Intent?) {
+        if (intent == null) return
+        val app = appState
+        val action = intent.action
+        if (action == android.content.Intent.ACTION_SEND && intent.type?.startsWith("text/") == true) {
+            val text = intent.getStringExtra(android.content.Intent.EXTRA_TEXT).orEmpty()
+            val firstLine = text.lines().firstOrNull { it.isNotBlank() && !it.startsWith("http") }
+                ?: text.substringBefore("http").trim()
+            val dest = firstLine.ifBlank { "Destination from Google Maps" }
+            guide.app.navigation.MapsCompanionState.onNavStarted(
+                destinationName = dest,
+                etaOrDistance = "Synced from Google Maps",
+                source = guide.app.navigation.CompanionSource.SHARED_INTENT,
+            )
+            app?.updateCompanionCorridor()
+        } else if (action == android.content.Intent.ACTION_VIEW && intent.data?.scheme == "geo") {
+            val uri = intent.data ?: return
+            val schemeSpecific = uri.schemeSpecificPart
+            val query = uri.getQueryParameter("q")
+            val label = query?.substringAfter('(')?.substringBefore(')')
+                ?: query?.replace('+', ' ')
+                ?: "Destination from Google Maps"
+            val coords = schemeSpecific.substringBefore('?').split(',')
+            val lat = coords.getOrNull(0)?.toDoubleOrNull()
+            val lng = coords.getOrNull(1)?.toDoubleOrNull()
+            guide.app.navigation.MapsCompanionState.onNavStarted(
+                destinationName = label,
+                destinationLat = lat,
+                destinationLng = lng,
+                etaOrDistance = "Synced from Google Maps",
+                source = guide.app.navigation.CompanionSource.SHARED_INTENT,
+            )
+            app?.updateCompanionCorridor()
+        }
     }
 
     override fun onStart() {
@@ -103,27 +171,43 @@ class MainActivity : ComponentActivity() {
 // and the routes can never drift apart.
 
 @Composable
-fun GuideApp(onMapView: (MapView) -> Unit = {}) {
+fun GuideApp(
+    initialRoute: String? = null,
+    onMapView: (MapView) -> Unit = {},
+    onAppStateReady: (AppState) -> Unit = {},
+) {
     MaterialTheme {
-        var consented by rememberSaveable { mutableStateOf(false) }
+        val context = LocalContext.current
+        val prefs = remember { context.getSharedPreferences("guide_prefs", android.content.Context.MODE_PRIVATE) }
+        var consented by rememberSaveable { mutableStateOf(prefs.getBoolean("consented", true)) }
         if (!consented) {
             Surface(color = GuideTokens.Bg) {
                 ConsentScreen(
-                    onAcknowledgeForeground = { consented = true },
-                    onLater = { consented = true }, // explore UI only; no location until granted
+                    onAcknowledgeForeground = {
+                        consented = true
+                        prefs.edit().putBoolean("consented", true).apply()
+                    },
+                    onLater = {
+                        consented = true
+                        prefs.edit().putBoolean("consented", true).apply()
+                    },
                 )
             }
             return@MaterialTheme
         }
         val nav = rememberNavController()
-        var current by remember { mutableStateOf("map") }
+        var current by remember { mutableStateOf(initialRoute ?: "map") }
+        LaunchedEffect(initialRoute) {
+            if (!initialRoute.isNullOrEmpty() && initialRoute != "map") {
+                nav.navigate(initialRoute)
+            }
+        }
         var profile by remember { mutableStateOf(BatteryProfile.BALANCED) }
-        val context = LocalContext.current
 
         // The one seam between the engine's data and the screens. Built once,
         // scoped to the composition. Before this, every screen received
         // emptyList()/{} and could only ever show its empty state.
-        val app = remember { AppState(context) }
+        val app = remember { AppState(context).also { onAppStateReady(it) } }
 
         // Settings that the service must also know about (they change how the
         // guide behaves while it runs, not just what the screen shows).
@@ -248,30 +332,55 @@ fun GuideApp(onMapView: (MapView) -> Unit = {}) {
             nav.navigate("nearby")
         }
 
+        val window = (context as? android.app.Activity)?.window
+        LaunchedEffect(nav) {
+            nav.addOnDestinationChangedListener { _, destination, _ ->
+                current = destination.route ?: "map"
+            }
+        }
+        LaunchedEffect(current) {
+            if (window != null) {
+                val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+                insetsController.isAppearanceLightNavigationBars = true
+                if (current == "map" || current.startsWith("poi/")) {
+                    window.statusBarColor = android.graphics.Color.TRANSPARENT
+                    insetsController.isAppearanceLightStatusBars = true
+                } else {
+                    window.statusBarColor = android.graphics.Color.parseColor("#F8F9FA")
+                    insetsController.isAppearanceLightStatusBars = true
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    window.navigationBarColor = android.graphics.Color.WHITE
+                }
+            }
+        }
+
         Scaffold(
             containerColor = GuideTokens.Bg,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
-                // Real icons + labels, tonal surface, animated selection.
-                // The mute control lives in the player sheet (where the audio
-                // is), not here — it used to sit above the NavHost in a Column,
-                // stealing vertical space from every screen and pushing the
-                // map/content down (a direct cause of the overflow defects).
-                GuideNavBar(
-                    current = current,
-                    onSelect = { tab ->
-                        current = tab
-                        nav.navigate(tab) {
-                            popUpTo(nav.graph.startDestinationId) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                )
+                if (!current.startsWith("poi/")) {
+                    GuideNavBar(
+                        current = current,
+                        onSelect = { tab ->
+                            current = tab
+                            nav.navigate(tab) {
+                                popUpTo(nav.graph.startDestinationId) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                    )
+                }
             },
         ) { pad ->
-            Surface(
-                modifier = Modifier.fillMaxSize().padding(pad),
-                color = GuideTokens.Bg,
+            val statusPad = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+            val navPad = pad.calculateBottomPadding()
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = navPad),
             ) {
                 NavHost(navController = nav, startDestination = "map") {
                     composable("map") {
@@ -280,6 +389,7 @@ fun GuideApp(onMapView: (MapView) -> Unit = {}) {
                             offRoute = false,
                             seeingAnswer = null,
                             onSeeingTap = { nav.navigate("nearby") },
+                            onPinTap = { id -> nav.navigate("poi/$id") },
                             pins = app.pins(),
                             route = app.routePoints(),
                             userPosition = userPos,
@@ -287,89 +397,102 @@ fun GuideApp(onMapView: (MapView) -> Unit = {}) {
                         )
                     }
                     composable("nearby") {
-                        NearbyScreen(
-                            rows = app.nearby,
-                            events = events,
-                            seeingAnswer = seeingAnswer,
-                            onSeeingTap = onSeeingTap,
-                            onRowTap = { id -> nav.navigate("poi/$id") },
-                        )
+                        Box(modifier = Modifier.fillMaxSize().padding(top = statusPad)) {
+                            NearbyScreen(
+                                rows = app.nearby,
+                                events = events,
+                                seeingAnswer = seeingAnswer,
+                                onSeeingTap = onSeeingTap,
+                                onRowTap = { id -> nav.navigate("poi/$id") },
+                            )
+                        }
                     }
                     composable("routes") {
-                        RoutesScreen(
-                            routes = app.routes,
-                            onPickPlan = { minutes -> dayPlanMinutes = minutes },
-                        )
+                        Box(modifier = Modifier.fillMaxSize().padding(top = statusPad)) {
+                            RoutesScreen(
+                                routes = app.routes,
+                                onPickPlan = { minutes -> dayPlanMinutes = minutes },
+                            )
+                        }
                     }
                     composable("packs") {
-                        PacksScreen(
-                            packs = app.packs,
-                            downloadProgress = downloadProgress,
-                            // Download is a real offline-tile fetch; wire the
-                            // progress callback so the bar reflects it rather
-                            // than sitting idle.
-                            onDownloadCity = {
-                                OfflinePackHelper.downloadCity(
-                                    context = context,
-                                    styleUrl = MapStyle.LOCAL_STYLE_JSON,
-                                    onProgress = { done, total ->
-                                        downloadProgress = done to total
-                                    },
-                                    onDone = { downloadProgress = null },
-                                )
-                            },
-                            onDelete = { /* bundled pack is never evicted */ },
-                        )
+                        Box(modifier = Modifier.fillMaxSize().padding(top = statusPad)) {
+                            PacksScreen(
+                                packs = app.packs,
+                                downloadProgress = downloadProgress,
+                                onDownloadCity = {
+                                    OfflinePackHelper.downloadCity(
+                                        context = context,
+                                        styleUrl = MapStyle.LOCAL_STYLE_JSON,
+                                        onProgress = { done, total ->
+                                            downloadProgress = done to total
+                                        },
+                                        onDone = { downloadProgress = null },
+                                    )
+                                },
+                                onDelete = { /* bundled pack is never evicted */ },
+                            )
+                        }
                     }
                     composable("history") {
-                        HistoryScreen(
-                            visits = app.visits,
-                            onSaveNote = { poiId, text -> app.saveNote(poiId, text) },
-                            onExport = { exportTrip(context, app) },
-                        )
+                        Box(modifier = Modifier.fillMaxSize().padding(top = statusPad)) {
+                            HistoryScreen(
+                                visits = app.visits,
+                                onSaveNote = { poiId, text -> app.saveNote(poiId, text) },
+                                onExport = { exportTrip(context, app) },
+                            )
+                        }
                     }
                     composable("settings") {
-                        Column {
-                            SettingsScreen(
-                                profile = profile,
-                                onProfile = {
-                                    profile = it
-                                    // Re-arm the tracker at the new battery
-                                    // profile so the choice takes effect now,
-                                    // not at the next app start.
-                                    GuideService.setProfile(context, it)
-                                },
-                                backgroundOptIn = backgroundOptIn,
-                                onBackgroundOptIn = onBackgroundOptIn,
-                                quietEnabled = quiet,
-                                onQuiet = { quiet = it; GuideService.setQuiet(context, it) },
-                                autoPlay = autoPlay,
-                                onAutoPlay = { autoPlay = it; GuideService.setAutoPlay(context, it) },
-                            )
-                            VoiceSettings(onRate = { rate -> GuideService.setSpeechRate(context, rate) })
+                        Box(modifier = Modifier.fillMaxSize().padding(top = statusPad)) {
+                            Column {
+                                SettingsScreen(
+                                    profile = profile,
+                                    onProfile = {
+                                        profile = it
+                                        GuideService.setProfile(context, it)
+                                    },
+                                    backgroundOptIn = backgroundOptIn,
+                                    onBackgroundOptIn = onBackgroundOptIn,
+                                    quietEnabled = quiet,
+                                    onQuiet = { quiet = it; GuideService.setQuiet(context, it) },
+                                    autoPlay = autoPlay,
+                                    onAutoPlay = { autoPlay = it; GuideService.setAutoPlay(context, it) },
+                                    onSimulateMapsRoute = {
+                                        app.simulateCompanionSession("chinese-fishing-nets")
+                                    },
+                                )
+                                VoiceSettings(onRate = { rate -> GuideService.setSpeechRate(context, rate) })
+                            }
                         }
                     }
                     composable("phrasebook") {
-                        PhrasebookScreen(onSpeak = { phrase -> GuideService.speak(context, phrase) })
+                        Box(modifier = Modifier.fillMaxSize().padding(top = statusPad)) {
+                            PhrasebookScreen(onSpeak = { phrase -> GuideService.speak(context, phrase) })
+                        }
                     }
                     composable("poi/{id}") { entry ->
                         val id = entry.arguments?.getString("id").orEmpty()
                         val card = app.card(id)
                         if (card == null) {
-                            // A deep link to an unknown id is a real case (a
-                            // stale link, a pack that changed) — say so rather
-                            // than rendering a blank screen.
-                            EmptyState(
-                                title = "That place isn't in this pack",
-                                body = "It may have been renamed or moved in a newer pack version.",
-                                icon = GuideIcons.Compass,
-                            )
+                            Box(modifier = Modifier.fillMaxSize().padding(top = statusPad)) {
+                                EmptyState(
+                                    title = "That place isn't in this pack",
+                                    body = "It may have been renamed or moved in a newer pack version.",
+                                    icon = GuideIcons.Compass,
+                                )
+                            }
                         } else {
                             PoiDetailScreen(
                                 card = card,
                                 hoursText = card.hours,
                                 openNow = isOpenNow(card.hours),
                                 onAddNote = { nav.navigate("history") },
+                                onBack = { nav.popBackStack() },
+                                onStartAudio = {
+                                    activePoiId = id
+                                    GuideService.speak(context, "${card.name}. ${card.summary}")
+                                },
                             )
                         }
                     }

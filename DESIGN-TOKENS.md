@@ -12,34 +12,34 @@ authentic icons (`ICONS-ASSETS/system-and-ui/lucide/icons` for UI glyphs —
 the single family; brand marks per the ICONS-ASSETS hierarchy), run
 `DesignSoul/checklist.md` before finishing.
 
-## Direction (finalized)
+## Direction (Updated 2026-09-28 — Luxury Travel App Aesthetic)
 
-Calm outdoor-readable light theme: near-white base, one deep accent, one
-warm highlight for "you are here / playing now". No gradients, max shadow
-`0 1px 3px rgba(0,0,0,0.06)`, one icon family (Phosphor or Lucide regular).
+AirBnB Luxe & Wanderlust modern travel inspiration: crisp off-white canvas,
+sunset coral brand accent (`#FF5A36`), midnight carbon (`#121826`) high contrast,
+radiant amber (`#F59E0B`) audio/review highlight, emerald green (`#10B981`) open status,
+18dp card radii with subtle elevation, circular 44dp map controls, and floating dock navigation.
 
-## Draft tokens
+## Active tokens
 
 | Token | Value | Use |
 |---|---|---|
-| `--bg` | `#FAFAF7` | app background |
-| `--surface` | `#FFFFFF` | cards, 1px `#E9E6E0` border |
-| `--primary` | `#2F5D50` | main accent (headers, active states) |
-| `--highlight` | `#C97B4A` | sparing: now-playing, nearby marker |
-| `--text` | `#1F1D1B` | primary text |
-| `--text-2` | `#6B6862` | secondary text |
-| `--danger` | `#B3453A` | destructive |
+| `--bg` | `#F8F9FA` | crisp, airy off-white canvas |
+| `--surface` | `#FFFFFF` | pure white cards, 1px `#E5E7EB` border |
+| `--primary` | `#FF5A36` | sunset coral brand accent (buttons, active pills) |
+| `--dark` | `#121826` | midnight carbon (high-contrast chips, dark buttons) |
+| `--highlight` | `#F59E0B` | radiant amber (audio playing, guide pulse, ratings) |
+| `--success` | `#10B981` | emerald green (open now, verified checkmarks) |
+| `--text` | `#111827` | deep charcoal primary text for high readability |
+| `--text-2` | `#6B7280` | slate grey secondary text |
+| `--danger` | `#EF4444` | warning / destructive |
 
-## Type (draft)
+## Type
 
-- Headings: Inter 600; Body/place stories: readable serif (Lora / Source
-  Serif 4) 17–18px; Chrome: Inter 400–500
+- Headings: Inter 600; Body/place stories: readable serif (Lora) 17–18px; Chrome: Inter 400–500
 - Scale ONLY: 12 / 14 / 16 / 18 / 24 / 32 / 40
 
 ## Components (build once, reuse)
 
-- One bottom-sheet player, one POI card, one map-pin style — never
-  re-implement per screen
-- Radius: 10px cards/inputs, 8px buttons, 999px pills for tags only
-- Motion: press 96% + opacity 100ms; page 200ms slide/fade; narration
-  state changes animate, nothing decorative
+- One bottom-sheet player, one POI card, one map-pin style
+- Radius: 18px cards, 14px buttons, 24px sheets, 999px pills/tags
+- Motion: press 96% + opacity 100ms; page 200ms slide/fade; spring toggles

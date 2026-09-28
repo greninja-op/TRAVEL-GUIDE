@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -81,6 +82,7 @@ fun GuideNavBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .navigationBarsPadding()
                     .padding(
                         horizontal = GuideTokens.Space.sm,
                         vertical = GuideTokens.Space.xs,
@@ -127,6 +129,7 @@ private fun NavBarItem(
         onClick = onClick,
         modifier = modifier,
         role = Role.Tab,
+        withRipple = false,
     ) {
         Column(
             modifier = Modifier
@@ -138,10 +141,10 @@ private fun NavBarItem(
                 // Active pill behind the glyph.
                 Box(
                     modifier = Modifier
-                        .width(56.dp)
+                        .width(48.dp)
                         .height(28.dp)
                         .clip(RoundedCornerShape(GuideTokens.PinRadius))
-                        .background(GuideTokens.PrimaryWash.copy(alpha = pillAlpha)),
+                        .background(GuideTokens.Primary.copy(alpha = 0.14f * pillAlpha)),
                 )
                 Icon(
                     imageVector = item.icon,

@@ -23,3 +23,7 @@ demo-out/
 
 # Workspace-local toolchain (JDK etc.) — never committed
 .tools/
+
+# Temporary device screencaps
+*.png
+**/*.png

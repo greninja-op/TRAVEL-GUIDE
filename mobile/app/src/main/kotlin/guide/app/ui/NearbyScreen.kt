@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -216,42 +217,77 @@ private fun countLabel(n: Int): String =
 
 @Composable
 private fun NearbyPoiCard(row: NearbyRow, onClick: () -> Unit) {
-    GuideCard {
-        GuideRow(
-            title = row.name,
-            supporting = row.detail,
-            onClick = onClick,
-            leading = {
-                // A tonal disc rather than a bare glyph: it holds the layer
-                // identity at a glance without stealing width from the name.
-                Box(
-                    modifier = Modifier
-                        .size(GuideTokens.TouchTarget)
-                        .background(
-                            color = GuideTokens.PrimaryWash,
-                            shape = RoundedCornerShape(GuideTokens.PinRadius),
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = layerIcon(row.layer),
-                        contentDescription = layerWord(row.layer),
-                        tint = GuideTokens.Primary,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-            },
-            trailing = {
-                // Distance is the sort key, so it earns the trailing slot.
+    GuideCard(onClick = onClick) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(
+                        color = when (row.layer) {
+                            "food" -> GuideTokens.HighlightWash
+                            "stay" -> GuideTokens.SuccessWash
+                            else -> GuideTokens.PrimaryWash
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = layerIcon(row.layer),
+                    contentDescription = layerWord(row.layer),
+                    tint = when (row.layer) {
+                        "food" -> GuideTokens.Highlight
+                        "stay" -> GuideTokens.Success
+                        else -> GuideTokens.Primary
+                    },
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            Spacer(Modifier.size(GuideTokens.Space.md))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = row.detail.substringBefore(" ·"),
-                    style = GuideTokens.Label,
-                    color = GuideTokens.Primary,
-                    maxLines = Lines.Single,
+                    text = layerWord(row.layer).uppercase(),
+                    style = GuideTokens.Caption,
+                    color = when (row.layer) {
+                        "food" -> GuideTokens.Highlight
+                        "stay" -> GuideTokens.Success
+                        else -> GuideTokens.Primary
+                    },
+                )
+                Spacer(Modifier.size(2.dp))
+                Text(
+                    text = row.name,
+                    style = GuideTokens.Title,
+                    color = GuideTokens.Text,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-            },
-        )
+                Spacer(Modifier.size(2.dp))
+                Text(
+                    text = row.detail,
+                    style = GuideTokens.Chrome,
+                    color = GuideTokens.Text2,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Spacer(Modifier.size(GuideTokens.Space.sm))
+            Surface(
+                shape = RoundedCornerShape(GuideTokens.ChipRadius),
+                color = GuideTokens.Surface2,
+            ) {
+                Text(
+                    text = row.detail.substringBefore(" ·"),
+                    style = GuideTokens.Caption,
+                    color = GuideTokens.Dark,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    maxLines = 1,
+                )
+            }
+        }
     }
 }
 

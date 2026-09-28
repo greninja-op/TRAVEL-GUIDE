@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -54,21 +55,85 @@ import guide.app.ui.theme.Motion
  * 10dp radius. `raised = true` steps the tone lighter instead of adding a
  * second shadow.
  */
+/**
+ * The one card in the app. Clean white surface, 1px border, 18dp radius,
+ * and subtle soft elevation.
+ */
 @Composable
 fun GuideCard(
     modifier: Modifier = Modifier,
     raised: Boolean = false,
     padding: PaddingValues = PaddingValues(GuideTokens.Space.cardPad),
+    onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (pressed && onClick != null) Motion.PressScale else 1f,
+        animationSpec = Motion.spring(),
+        label = "cardScale",
+    )
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .scale(scale),
         shape = RoundedCornerShape(GuideTokens.CardRadius),
         color = if (raised) GuideTokens.Surface2 else GuideTokens.Surface1,
         border = BorderStroke(1.dp, GuideTokens.Border),
+        shadowElevation = if (raised) 6.dp else 2.dp,
         contentColor = GuideTokens.Text,
+        onClick = onClick ?: {},
+        enabled = onClick != null,
+        interactionSource = interaction,
     ) {
         Column(modifier = Modifier.padding(padding)) { content() }
+    }
+}
+
+/**
+ * Category chip — modern pill tag as featured in the reference designs.
+ */
+@Composable
+fun CategoryChip(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+) {
+    val bg = if (selected) GuideTokens.Dark else GuideTokens.Surface
+    val fg = if (selected) GuideTokens.Surface else GuideTokens.Text
+    val border = if (selected) null else BorderStroke(1.dp, GuideTokens.Border)
+
+    Surface(
+        shape = RoundedCornerShape(GuideTokens.ChipRadius),
+        color = bg,
+        contentColor = fg,
+        border = border,
+        shadowElevation = if (selected) 3.dp else 1.dp,
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (selected) GuideTokens.Primary else GuideTokens.Text2,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(Modifier.width(6.dp))
+            }
+            Text(
+                text = text,
+                style = GuideTokens.Caption,
+                color = fg,
+            )
+        }
     }
 }
 
@@ -82,6 +147,7 @@ fun Pressable(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     role: Role = Role.Button,
+    withRipple: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val interaction = remember { MutableInteractionSource() }
@@ -104,7 +170,7 @@ fun Pressable(
                 if (enabled) {
                     Modifier.clickable(
                         interactionSource = interaction,
-                        indication = ripple(color = GuideTokens.StatePress, bounded = true),
+                        indication = if (withRipple) ripple(color = GuideTokens.StatePress, bounded = true) else null,
                         role = role,
                         onClick = onClick,
                     )
@@ -120,11 +186,9 @@ fun Pressable(
 }
 
 /**
- * The one button. Three variants; all share radius, height, motion and the
- * 48dp primary target. Label never wraps (single-line by design) but the
- * button grows rather than clipping.
+ * The one button. Variants: Primary (sunset coral), Dark (carbon black), Tonal, Quiet.
  */
-enum class GuideButtonVariant { Primary, Tonal, Quiet }
+enum class GuideButtonVariant { Primary, Dark, Tonal, Quiet }
 
 @Composable
 fun GuideButton(
@@ -142,11 +206,14 @@ fun GuideButton(
         GuideButtonVariant.Primary -> {
             bg = GuideTokens.Primary; fg = GuideTokens.OnPrimary; border = null
         }
+        GuideButtonVariant.Dark -> {
+            bg = GuideTokens.Dark; fg = GuideTokens.Surface; border = null
+        }
         GuideButtonVariant.Tonal -> {
             bg = GuideTokens.PrimaryWash; fg = GuideTokens.Primary; border = null
         }
         GuideButtonVariant.Quiet -> {
-            bg = Color.Transparent; fg = GuideTokens.Primary
+            bg = Color.Transparent; fg = GuideTokens.Text
             border = BorderStroke(1.dp, GuideTokens.Border)
         }
     }
@@ -159,12 +226,12 @@ fun GuideButton(
     Surface(
         modifier = modifier
             .heightIn(min = GuideTokens.TouchTargetPrimary)
-            .widthIn(min = GuideTokens.Space.huge + GuideTokens.Space.xl)
             .scale(scale),
         shape = RoundedCornerShape(GuideTokens.ButtonRadius),
         color = bg,
         contentColor = fg,
         border = border,
+        shadowElevation = if (variant == GuideButtonVariant.Primary || variant == GuideButtonVariant.Dark) 3.dp else 0.dp,
         onClick = onClick,
         enabled = enabled,
         interactionSource = interaction,

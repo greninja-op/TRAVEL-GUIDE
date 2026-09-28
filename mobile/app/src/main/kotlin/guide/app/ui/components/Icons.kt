@@ -59,6 +59,19 @@ object GuideIcons {
     val ChevronRight: ImageVector = icon("ChevronRight") {
         moveTo(9f, 18f); lineTo(15f, 12f); lineTo(9f, 6f)
     }
+    val ChevronLeft: ImageVector = icon("ChevronLeft") {
+        moveTo(15f, 18f); lineTo(9f, 12f); lineTo(15f, 6f)
+    }
+    val Heart: ImageVector = icon("Heart") {
+        moveTo(19f, 14f)
+        curveTo(20.5f, 12.5f, 21.5f, 10.5f, 21.5f, 8.5f)
+        arcTo(5.5f, 5.5f, 0f, false, false, 12f, 5f)
+        arcTo(5.5f, 5.5f, 0f, false, false, 2.5f, 8.5f)
+        curveTo(2.5f, 10.5f, 3.5f, 12.5f, 5f, 14f)
+        lineTo(12f, 21f)
+        lineTo(19f, 14f)
+        close()
+    }
     val ChevronDown: ImageVector = icon("ChevronDown") {
         moveTo(6f, 9f); lineTo(12f, 15f); lineTo(18f, 9f)
     }

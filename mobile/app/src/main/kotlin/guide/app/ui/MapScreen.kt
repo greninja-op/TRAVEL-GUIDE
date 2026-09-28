@@ -3,6 +3,7 @@ package guide.app.ui
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +21,11 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,9 +54,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import guide.app.map.MapPins
 import guide.app.map.MapStyle
+import guide.app.ui.components.CategoryChip
 import guide.app.ui.components.GuideButton
 import guide.app.ui.components.GuideButtonVariant
+import guide.app.ui.components.GuideIcons
 import guide.app.ui.components.Pressable
+import guide.app.ui.components.StatusTag
 import guide.app.ui.theme.GuideTokens
 import guide.app.ui.theme.Motion
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -146,36 +153,41 @@ fun MapScreen(
     // must not yank the viewport away from a user who has panned somewhere.
     var framedOnce by remember { mutableStateOf(false) }
 
-    LaunchedEffect(styleLoaded, pins, route, activePinId, nextPinId) {
+    // --- Category filtering -------------------------------------------------
+    var selectedCategory by remember { mutableStateOf("All") }
+    val displayedPins = remember(latestPins, selectedCategory) {
+        when (selectedCategory) {
+            "Heritage" -> latestPins.filter { !it.id.contains("cafe") && !it.id.contains("hotel") }
+            "Food" -> latestPins.filter { it.id.contains("cafe") || it.id.contains("food") }
+            "Stay" -> latestPins.filter { it.id.contains("hotel") || it.id.contains("stay") }
+            else -> latestPins
+        }
+    }
+
+    LaunchedEffect(styleLoaded, displayedPins, route, activePinId, nextPinId) {
         val map = mapActions.map ?: return@LaunchedEffect
         val style = map.style ?: return@LaunchedEffect
         MapPins.render(
             context = context,
             map = map,
             style = style,
-            pins = latestPins,
+            pins = displayedPins,
             route = latestRoute,
             activeId = latestActive,
             nextId = latestNext,
             onPinTap = { id -> latestOnPinTap(id) },
             fitToPins = !framedOnce,
         )
-        if (latestPins.isNotEmpty() || latestRoute.size >= 2) framedOnce = true
+        if (displayedPins.isNotEmpty() || latestRoute.size >= 2) framedOnce = true
     }
 
     // --- Camera animation ----------------------------------------------------
     var following by remember { mutableStateOf(false) }
 
-    // Follow-the-walker. Only fires while `following` is on, and only for a
-    // real fix, so the map never moves on its own (reference: "nothing else on
-    // this page moves on its own").
     LaunchedEffect(following, userPosition) {
         val map = mapActions.map ?: return@LaunchedEffect
         val pos = userPosition ?: return@LaunchedEffect
         if (!following) return@LaunchedEffect
-        // easeCamera: a short, continuous re-centre. `animateCamera` is for
-        // one-shot transitions; while following, updates arrive faster than a
-        // full animation, so an ease is the correct primitive.
         map.easeCamera(
             CameraUpdateFactory.newLatLngZoom(pos, FOLLOW_ZOOM),
             Motion.Medium,
@@ -185,14 +197,19 @@ fun MapScreen(
     Box(modifier = Modifier.fillMaxSize()) {
 
         // =====================================================================
-        // 1. The map — the only full-size child, and the base of the stack.
+        // 1. The map — base of the stack with correct Style.Builder parsing
         // =====================================================================
         AndroidView(
             factory = {
                 mapView.apply {
                     getMapAsync { map ->
                         mapActions.map = map
-                        map.setStyle(styleUrl) { style ->
+                        val builder = if (styleUrl.trim().startsWith("{")) {
+                            Style.Builder().fromJson(styleUrl)
+                        } else {
+                            Style.Builder().fromUri(styleUrl)
+                        }
+                        map.setStyle(builder) { style ->
                             mapActions.style = style
                             styleLoaded = true
                         }
@@ -202,22 +219,183 @@ fun MapScreen(
             modifier = Modifier.fillMaxSize(),
         )
 
-        // =====================================================================
-        // 2. Top cluster — recenter + compass, inset past the status bar.
-        //
-        // Pinned to TopEnd. Reserve the status bar AND the cluster's own
-        // gutter here, once, so no child needs an offset of its own.
-        // =====================================================================
         val statusInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
         val navInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
+        // =====================================================================
+        // 2. Floating Top Header & Filter Chips (AirBnB & Luxury Travel style)
+        // =====================================================================
         Column(
             modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(
-                    top = statusInset + GuideTokens.Space.base,
-                    end = GuideTokens.Space.screenPad,
-                ),
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(top = statusInset + GuideTokens.Space.sm)
+                .padding(horizontal = GuideTokens.Space.screenPad),
+            verticalArrangement = Arrangement.spacedBy(GuideTokens.Space.sm),
+        ) {
+            // Elevated Place & Audio Guide Pill Card
+            Surface(
+                shape = RoundedCornerShape(GuideTokens.CardRadius),
+                color = GuideTokens.Surface,
+                shadowElevation = 6.dp,
+                border = BorderStroke(1.dp, GuideTokens.Border),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(GuideTokens.PinRadius))
+                            .background(GuideTokens.PrimaryWash),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = MapStyle.IconMapPin,
+                            contentDescription = null,
+                            tint = GuideTokens.Primary,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Fort Kochi & Mattancherry",
+                            style = GuideTokens.Label,
+                            color = GuideTokens.Text,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = "${displayedPins.size} stops • Audio Guide Ready",
+                            style = GuideTokens.Caption,
+                            color = GuideTokens.Text2,
+                            maxLines = 1,
+                        )
+                    }
+                    // Audio Guide Pulse indicator
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(RoundedCornerShape(GuideTokens.PinRadius))
+                            .background(GuideTokens.Highlight),
+                    )
+                }
+            }
+
+            // Google Maps Navigation Companion banner (visible when turn-by-turn navigation is detected)
+            val companion = guide.app.navigation.MapsCompanionState.currentSession
+            if (companion != null) {
+                val corridorCount = guide.app.navigation.MapsCompanionState.corridorPoiIds.size
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = GuideTokens.Surface,
+                    shadowElevation = 6.dp,
+                    border = BorderStroke(1.dp, GuideTokens.Border),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(androidx.compose.ui.graphics.Color(0xFFE8F5E9)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = MapStyle.IconNavigation,
+                                contentDescription = null,
+                                tint = androidx.compose.ui.graphics.Color(0xFF2E7D32),
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                        Spacer(Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "MAPS COMPANION ACTIVE",
+                                    style = GuideTokens.Caption,
+                                    color = androidx.compose.ui.graphics.Color(0xFF2E7D32),
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .clip(RoundedCornerShape(3.dp))
+                                        .background(androidx.compose.ui.graphics.Color(0xFF2E7D32)),
+                                )
+                            }
+                            Text(
+                                text = "Navigating to ${companion.destinationName}",
+                                style = GuideTokens.Label,
+                                color = GuideTokens.Text,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                text = if (corridorCount > 0) {
+                                    "$corridorCount spots along path pre-loaded • ${companion.etaOrDistance ?: "Active"}"
+                                } else {
+                                    "Path armed • ${companion.etaOrDistance ?: "Active"}"
+                                },
+                                style = GuideTokens.Caption,
+                                color = GuideTokens.Text2,
+                                maxLines = 1,
+                            )
+                        }
+                        Spacer(Modifier.width(6.dp))
+                        // Clear companion button
+                        GuideButton(
+                            text = "Clear",
+                            onClick = { guide.app.navigation.MapsCompanionState.onNavEnded() },
+                            variant = GuideButtonVariant.Tonal,
+                        )
+                    }
+                }
+            }
+
+            // Horizontal Category Pills
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                CategoryChip(
+                    text = "All Stops (${pins.size})",
+                    selected = selectedCategory == "All",
+                    onClick = { selectedCategory = "All" },
+                )
+                CategoryChip(
+                    text = "Heritage",
+                    selected = selectedCategory == "Heritage",
+                    onClick = { selectedCategory = "Heritage" },
+                )
+                CategoryChip(
+                    text = "Food & Cafes",
+                    selected = selectedCategory == "Food",
+                    onClick = { selectedCategory = "Food" },
+                )
+                CategoryChip(
+                    text = "Stays",
+                    selected = selectedCategory == "Stay",
+                    onClick = { selectedCategory = "Stay" },
+                )
+            }
+        }
+
+        // =====================================================================
+        // 3. Right Cluster — Circular Compass & Recenter buttons
+        // =====================================================================
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = GuideTokens.Space.screenPad),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(GuideTokens.Space.md),
         ) {
@@ -225,12 +403,7 @@ fun MapScreen(
                 headingDeg = headingDeg,
                 onClick = {
                     val map = mapActions.map ?: return@CompassControl
-                    // North-up is the "reset orientation" gesture every map app
-                    // shares, so it animates with the large-surface token.
-                    map.animateCamera(
-                        CameraUpdateFactory.bearingTo(0.0),
-                        Motion.Slow,
-                    )
+                    map.animateCamera(CameraUpdateFactory.bearingTo(0.0), Motion.Slow)
                 },
             )
             RecenterControl(
@@ -244,98 +417,31 @@ fun MapScreen(
                             CameraUpdateFactory.newLatLngZoom(pos, FOLLOW_ZOOM),
                             Motion.Slow,
                         )
-                    } else {
-                        // No fix yet: fall back to framing the pins, which is
-                        // still a useful "where am I in the walk" answer and
-                        // never leaves the button dead (ux-laws: no silent
-                        // action). With neither a fix nor pins, do nothing
-                        // rather than move the camera to nowhere.
-                        if (pins.isNotEmpty()) {
-                            MapPins.fitCamera(map, pins, route)
-                        }
+                    } else if (pins.isNotEmpty()) {
+                        MapPins.fitCamera(map, pins, route)
                     }
                 },
             )
         }
 
-        // =====================================================================
-        // 3. Off-route banner — a status line, not a control. Pinned under the
-        //    top cluster region but on the LEFT, so it never collides with the
-        //    controls even at maximum width. It is the only text allowed to be
-        //    wide, hence the maxLines + ellipsis.
-        // =====================================================================
+        // Off-route banner if off walk
         if (offRoute) {
             OffRouteBanner(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(
-                        top = statusInset + GuideTokens.Space.base,
+                        top = statusInset + 110.dp,
                         start = GuideTokens.Space.screenPad,
-                        // Leaves the control column its own lane: at the 44dp
-                        // control width + gutter, the banner stops before it.
                         end = GuideTokens.Space.xxl + GuideTokens.Space.screenPad,
                     ),
             )
         }
 
         // =====================================================================
-        // 3b. Active-pin name chip — the marker LABEL, in Compose rather than
-        //     in the map style.
-        //
-        //     Why not a map label: a `text-field` symbol only renders when the
-        //     style declares a `glyphs` URL, and this style ships none (offline-
-        //     first would otherwise fetch glyph PBFs over the network). Drawing
-        //     it here costs no network, gets real Inter type at a readable size
-        //     with a proper shadow, and matches how Google/Apple Maps surface a
-        //     selected marker.
-        //
-        //     It shares the LEFT lane with the off-route banner (they are never
-        //     both meaningful at once, and the banner is above it), and stops
-        //     short of the right-hand control column so the two cannot overlap.
+        // 4. Bottom Region — Floating POI card or Floating Guide Action
         // =====================================================================
         val activePin = pins.firstOrNull { it.id == activePinId }
-        androidx.compose.animation.AnimatedVisibility(
-            visible = activePin != null,
-            enter = androidx.compose.animation.fadeIn(
-                androidx.compose.animation.core.tween(Motion.Medium),
-            ) + androidx.compose.animation.expandVertically(
-                animationSpec = androidx.compose.animation.core.tween(Motion.Medium),
-                expandFrom = Alignment.Top,
-            ),
-            exit = androidx.compose.animation.fadeOut(
-                androidx.compose.animation.core.tween(Motion.Exit),
-            ) + androidx.compose.animation.shrinkVertically(
-                animationSpec = androidx.compose.animation.core.tween(Motion.Exit),
-                shrinkTowards = Alignment.Top,
-            ),
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(
-                    // Clears the banner lane when the banner is showing.
-                    top = statusInset + GuideTokens.Space.base +
-                        if (offRoute) BANNER_LANE_DP else 0.dp,
-                    start = GuideTokens.Space.screenPad,
-                    end = GuideTokens.Space.xxl + GuideTokens.Space.screenPad,
-                ),
-        ) {
-            activePin?.let { pin ->
-                PinNameChip(
-                    name = pin.name,
-                    visited = pin.visited,
-                    isNext = pin.id == nextPinId,
-                )
-            }
-        }
 
-        // =====================================================================
-        // 4. Bottom region — "What am I seeing?", the answer, then the sheet
-        //    anchor. Pinned to BottomCenter and inset past the gesture bar.
-        //
-        // This column is the ONLY tall thing over the map, and it grows
-        // UPWARD from a bottom anchor, so it can never reach the top cluster:
-        // its own height is bounded by (sheet cap + answer cap + action), all
-        // of which carry explicit maxima below.
-        // =====================================================================
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -347,29 +453,79 @@ fun MapScreen(
                 ),
             verticalArrangement = Arrangement.spacedBy(GuideTokens.Space.md),
         ) {
-            // --- The seeing answer: transient, bounded, scroll-free ----------
-            // Capped at 3 lines and ellipsised. It is a glance answer, and the
-            // full story belongs to the POI card / player sheet.
             if (seeingAnswer != null) {
                 SeeingAnswerCard(text = seeingAnswer)
             }
 
-            // --- The one primary action on the map ---------------------------
-            GuideButton(
-                text = "What am I seeing?",
-                onClick = onSeeingTap,
-                variant = GuideButtonVariant.Primary,
-                icon = MapStyle.IconMapPin,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            // --- Sheet anchor -------------------------------------------------
-            // Empty by default. The host supplies NowPlayingSheet; the anchor
-            // exists so the sheet has a stable, inset-correct home and the map
-            // never has to know what the sheet contains.
-            sheet?.let {
-                SheetAnchor { it() }
+            val previewPin = activePin ?: pins.firstOrNull()
+            if (previewPin != null) {
+                // Luxury Snapping Preview Card (AirBnB / Sakhalin luxury aesthetic)
+                Surface(
+                    shape = RoundedCornerShape(GuideTokens.CardRadius),
+                    color = GuideTokens.Surface,
+                    shadowElevation = 8.dp,
+                    border = BorderStroke(1.dp, GuideTokens.Border),
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onPinTap(previewPin.id) },
+                ) {
+                    Column(modifier = Modifier.padding(GuideTokens.Space.base)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            StatusTag(
+                                text = if (activePin != null) {
+                                    if (activePin.visited) "Visited" else "Playing Now"
+                                } else {
+                                    "Next Stop"
+                                },
+                                color = if (activePin != null) {
+                                    if (activePin.visited) GuideTokens.Success else GuideTokens.Highlight
+                                } else {
+                                    GuideTokens.Primary
+                                },
+                            )
+                            Spacer(Modifier.weight(1f))
+                            Text(
+                                text = "Fort Kochi Walking Tour",
+                                style = GuideTokens.Caption,
+                                color = GuideTokens.Text2,
+                            )
+                        }
+                        Spacer(Modifier.height(GuideTokens.Space.sm))
+                        Text(
+                            text = previewPin.name,
+                            style = GuideTokens.Title,
+                            color = GuideTokens.Text,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Spacer(Modifier.height(GuideTokens.Space.md))
+                        Row(horizontalArrangement = Arrangement.spacedBy(GuideTokens.Space.sm)) {
+                            GuideButton(
+                                text = "What am I seeing?",
+                                onClick = onSeeingTap,
+                                variant = GuideButtonVariant.Primary,
+                                icon = GuideIcons.Navigation,
+                                modifier = Modifier.weight(1.2f),
+                            )
+                            GuideButton(
+                                text = "Story",
+                                onClick = { onPinTap(previewPin.id) },
+                                variant = GuideButtonVariant.Dark,
+                                modifier = Modifier.weight(0.8f),
+                            )
+                        }
+                    }
+                }
+            } else {
+                GuideButton(
+                    text = "What am I seeing?",
+                    onClick = onSeeingTap,
+                    variant = GuideButtonVariant.Primary,
+                    icon = GuideIcons.Navigation,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
+
+            sheet?.let { SheetAnchor { it() } }
         }
     }
 }
@@ -457,17 +613,16 @@ private fun MapControl(
     ) {
         Surface(
             modifier = Modifier.size(GuideTokens.TouchTargetPrimary),
-            shape = RoundedCornerShape(GuideTokens.ButtonRadius),
-            // Tonal elevation, not a shadow (reference: "elevation is tonal,
-            // one shadow maximum, map surfaces stay flat"). An active control
-            // steps UP a tone, which is how light surfaces read as raised here.
-            color = if (active) GuideTokens.PrimaryWash else GuideTokens.Surface3,
-            contentColor = if (active) GuideTokens.Primary else GuideTokens.Text,
+            shape = RoundedCornerShape(GuideTokens.PinRadius),
+            color = if (active) GuideTokens.Dark else GuideTokens.Surface,
+            contentColor = if (active) GuideTokens.Surface else GuideTokens.Text,
+            shadowElevation = 4.dp,
+            border = BorderStroke(1.dp, if (active) GuideTokens.Dark else GuideTokens.Border),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = null, // the Pressable already names it
+                    contentDescription = null,
                     modifier = Modifier
                         .size(CONTROL_ICON_DP)
                         .rotate(rotation)

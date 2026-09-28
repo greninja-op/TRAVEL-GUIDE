@@ -46,35 +46,38 @@ val Lora = FontFamily(
 object GuideTokens {
 
     // -----------------------------------------------------------------------
-    // Color — the 8 frozen hues (reference.html :root). No new hexes; every
-    // other surface/state is derived from these (alpha, or tonal lightening).
+    // Color — Warm luxury travel palette (inspired by AirBnB Luxe, Wanderlust)
     // -----------------------------------------------------------------------
-    val Bg = Color(0xFFFAFAF7)
-    val Surface = Color(0xFFFFFFFF)
-    val Border = Color(0xFFE9E6E0)
-    val Primary = Color(0xFF2F5D50)
-    val Highlight = Color(0xFFC97B4A)
-    val Text = Color(0xFF1F1D1B)
-    val Text2 = Color(0xFF6B6862)
-    val Danger = Color(0xFFB3453A)
+    val Bg = Color(0xFFF8F9FA)           // Crisp, airy off-white canvas
+    val Surface = Color(0xFFFFFFFF)      // Pure crisp white card/surface
+    val Border = Color(0xFFE5E7EB)       // Hairline subtle boundary
+    val Primary = Color(0xFFFF5A36)      // Sunset coral / warm terracotta brand accent
+    val PrimaryDark = Color(0xFFE04320)  // Deepened coral for active press
+    val Dark = Color(0xFF121826)         // Midnight carbon for prominent buttons/docks
+    val Highlight = Color(0xFFF59E0B)    // Radiant amber/gold for audio guide & ratings
+    val Success = Color(0xFF10B981)      // Emerald green for open now / active status
+    val Text = Color(0xFF111827)         // Deep charcoal text for high contrast readability
+    val Text2 = Color(0xFF6B7280)        // Slate grey secondary text
+    val TextMuted = Color(0xFF9CA3AF)    // Tertiary/caption text
+    val Danger = Color(0xFFEF4444)       // Vibrant warning red
 
     // -----------------------------------------------------------------------
-    // Tonal elevation — instead of stacking shadows, a higher surface is a
-    // slightly deeper tone. Derived from Bg/Surface, so still 8 hues.
-    // Level 0 = the page itself; 1-3 = card / raised / floating.
+    // Tonal elevation — higher surfaces are clean white with soft subtle elevation
     // -----------------------------------------------------------------------
-    val Surface0 = Bg           // page
-    val Surface1 = Surface      // resting card
-    val Surface2 = Color(0xFFF5F3EE) // raised: sheet, active row wash
-    val Surface3 = Color(0xFFEFECE6) // floating: nav bar, controls over map
+    val Surface0 = Bg                   // page
+    val Surface1 = Surface              // resting card
+    val Surface2 = Color(0xFFF1F3F5)    // raised: sheet, active row wash
+    val Surface3 = Color(0xFFE9ECEF)    // floating: nav bar, controls over map
 
-    // Alpha state layers (from the reference: no new hexes, ever)
-    val StateHover = Color(0x0D1F1D1B)   // text @ 5%
-    val StatePress = Color(0x1A1F1D1B)   // text @ 10%
-    val PrimaryWash = Color(0x1A2F5D50)  // primary @ 10%
-    val HighlightWash = Color(0x24C97B4A) // highlight @ 14%
-    val DangerWash = Color(0x1AB3453A)   // danger @ 10%
-    val Scrim = Color(0x521F1D1B)        // text @ 32% — modal/sheet backdrop
+    // Alpha state layers
+    val StateHover = Color(0x0A121826)   // carbon @ 4%
+    val StatePress = Color(0x14121826)   // carbon @ 8%
+    val PrimaryWash = Color(0x14FF5A36)  // coral @ 8%
+    val HighlightWash = Color(0x1EF59E0B) // amber @ 12%
+    val DangerWash = Color(0x14EF4444)   // danger @ 8%
+    val SuccessWash = Color(0x1410B981)  // success @ 8%
+    val DarkWash = Color(0x0F121826)     // carbon wash @ 6%
+    val Scrim = Color(0x66121826)        // carbon @ 40% — sheet backdrop
     val OnPrimary = Color(0xFFFFFFFF)
 
     // -----------------------------------------------------------------------
@@ -95,25 +98,15 @@ object GuideTokens {
         val cardPad = base
         val gutter = md
 
-        /**
-         * Inset for floating controls that sit over the map's edge (FABs,
-         * compass, the answer card). Deliberately its own token: `WindowInsets`
-         * needs a raw `Dp`, so screens were otherwise forced to hardcode a
-         * literal at the call site — the one place the "no hardcoded values"
-         * rule kept leaking. 12dp reads as intentional clearance without
-         * crowding the screen edge.
-         */
         val floatingInset = md
     }
 
     // -----------------------------------------------------------------------
-    // Radius — concentric: outer = inner + padding. Cards 10, buttons 8,
-    // pill for tags only (frozen). Sheet top corners use 16 (>= card, reads
-    // as a larger surface).
+    // Radius — generous modern rounded curves (18dp cards, 14dp buttons, 24dp sheets)
     // -----------------------------------------------------------------------
-    val CardRadius = 10.dp
-    val ButtonRadius = 8.dp
-    val SheetRadius = 16.dp
+    val CardRadius = 18.dp
+    val ButtonRadius = 14.dp
+    val SheetRadius = 24.dp
     val ChipRadius = 999.dp     // tags/pills only
     val PinRadius = 999.dp
 

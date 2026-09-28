@@ -22,10 +22,24 @@
         android:theme="@style/Theme.TravelGuide">
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Open geo: URIs (e.g. from Google Maps or external links) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="geo" />
+            </intent-filter>
+            <!-- Receive destinations shared directly from Google Maps via Share sheet -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
         <!-- Phase 1: foreground location service with persistent notification. -->
@@ -33,6 +47,17 @@
             android:name=".location.GuideService"
             android:foregroundServiceType="location"
             android:exported="false" />
+
+        <!-- Google Maps Turn-by-Turn Navigation Companion Listener -->
+        <service
+            android:name=".navigation.MapsCompanionService"
+            android:label="Travel Guide Maps Companion"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
 
         <!-- Trip export: hands the generated Markdown to the share sheet as a
              content:// URI, so the file is readable only by the app the user

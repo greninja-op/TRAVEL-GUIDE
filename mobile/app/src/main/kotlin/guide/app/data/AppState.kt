@@ -137,14 +137,11 @@ class AppState(context: Context) {
 
     // ---- Location ----------------------------------------------------------
 
-    /**
-     * Feed a fix from the foreground service. Re-sorts Nearby by real distance
-     * and rebuilds the route line, so the screens reflect where the user is.
-     */
     fun onFix(lat: Double, lng: Double) {
         lastLat = lat
         lastLng = lng
         refreshNearby()
+        updateCompanionCorridor()
     }
 
     private fun refreshNearby() {
@@ -153,9 +150,6 @@ class AppState(context: Context) {
         val sorted = if (lat != null && lng != null) {
             cards.sortedBy { Geo.distanceM(lat, lng, it.lat, it.lng) }
         } else {
-            // No fix yet: keep the pack's walking order rather than showing
-            // nothing. The row detail says "Distance unknown" instead of
-            // inventing a number.
             cards
         }
         nearby = sorted.map { c ->
@@ -170,6 +164,68 @@ class AppState(context: Context) {
             }
             NearbyRow(id = c.id, name = c.name, detail = detail, layer = c.layer)
         }
+    }
+
+    // ---- Google Maps Navigation Companion -----------------------------------
+
+    /**
+     * Compute corridor POIs between user location and destination when an external
+     * Google Maps navigation session is active.
+     */
+    fun updateCompanionCorridor() {
+        val session = guide.app.navigation.MapsCompanionState.currentSession ?: return
+        val originLat = lastLat ?: 9.9656
+        val originLng = lastLng ?: 76.2423
+
+        // Resolve destination coordinates: either explicit lat/lng or best-match POI card
+        val destCoords = if (session.destinationLat != null && session.destinationLng != null) {
+            Pair(session.destinationLat, session.destinationLng)
+        } else {
+            val matchedCard = cards.find {
+                it.name.contains(session.destinationName, ignoreCase = true) ||
+                    session.destinationName.contains(it.name, ignoreCase = true)
+            } ?: cards.firstOrNull()
+            matchedCard?.let { Pair(it.lat, it.lng) }
+        }
+
+        if (destCoords != null) {
+            guide.app.navigation.MapsCompanionState.updateCorridorPois(
+                originLat = originLat,
+                originLng = originLng,
+                destLat = destCoords.first,
+                destLng = destCoords.second,
+                allPois = cards.map {
+                    guide.app.navigation.CorridorCandidate(it.id, it.name, it.lat, it.lng)
+                },
+                maxCrossTrackM = 500.0,
+            )
+        }
+    }
+
+    /** POIs identified along the current Google Maps navigation route corridor. */
+    val corridorPois: List<PackLoader.PoiCard>
+        get() = cards.filter { it.id in guide.app.navigation.MapsCompanionState.corridorPoiIds }
+
+    /**
+     * Test / demo simulator for the Google Maps Companion feature.
+     * Activates a simulated route to a chosen destination so the user can test the
+     * pre-loaded corridor stories without leaving their desk.
+     */
+    fun simulateCompanionSession(destinationPoiId: String) {
+        val target = card(destinationPoiId) ?: cards.firstOrNull() ?: return
+        guide.app.navigation.MapsCompanionState.onNavStarted(
+            destinationName = target.name,
+            destinationLat = target.lat,
+            destinationLng = target.lng,
+            etaOrDistance = "15 min (3.8 km) · Google Maps",
+            nextManeuver = "In 350m turn right onto River Road",
+            source = guide.app.navigation.CompanionSource.SIMULATED,
+        )
+        updateCompanionCorridor()
+    }
+
+    fun clearCompanionSession() {
+        guide.app.navigation.MapsCompanionState.onNavEnded()
     }
 
     // ---- Visits & notes ----------------------------------------------------
