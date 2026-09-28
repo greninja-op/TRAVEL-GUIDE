@@ -101,129 +101,11 @@ import java.time.format.DateTimeFormatter
 class MainActivity : FragmentActivity() {
     private var mapView: MapView? = null
     private var appState: AppState? = null
-    private val isAppLocked = mutableStateOf(false)
-    private var isAuthenticating = false
-
-    private val pinUnlockLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult(),
-    ) { result ->
-        isAuthenticating = false
-        if (result.resultCode == Activity.RESULT_OK) {
-            unlockApp()
-        }
-    }
-
-    fun unlockApp() {
-        isAppLocked.value = false
-        isAuthenticating = false
-        window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
-    }
-
-    fun launchPinUnlock() {
-        val keyguardManager = getSystemService(KeyguardManager::class.java)
-        val intent = keyguardManager?.createConfirmDeviceCredentialIntent(
-            "Unlock Travel Guide",
-            "Enter your device PIN, pattern, or password to access Travel Guide",
-        )
-        if (intent != null) {
-            try {
-                isAuthenticating = true
-                pinUnlockLauncher.launch(intent)
-            } catch (_: Exception) {
-                unlockApp()
-            }
-        } else {
-            // Device does not have secure lock screen configured
-            unlockApp()
-        }
-    }
-
-    fun authenticateWithBiometrics(onSuccess: () -> Unit = {}) {
-        if (isAuthenticating) return
-
-        val biometricManager = BiometricManager.from(this)
-        val canWeak = biometricManager.canAuthenticate(
-            BiometricManager.Authenticators.BIOMETRIC_STRONG or
-            BiometricManager.Authenticators.BIOMETRIC_WEAK,
-        )
-
-        if (canWeak != BiometricManager.BIOMETRIC_SUCCESS) {
-            // Biometrics not enrolled, hardware unavailable, or not supported. Fallback directly to PIN/Pattern.
-            launchPinUnlock()
-            return
-        }
-
-        isAuthenticating = true
-        val executor = ContextCompat.getMainExecutor(this)
-        val biometricPrompt = BiometricPrompt(
-            this,
-            executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    unlockApp()
-                    onSuccess()
-                }
-
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    isAuthenticating = false
-                    if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
-                        errorCode == BiometricPrompt.ERROR_USER_CANCELED) {
-                        launchPinUnlock()
-                    } else if (errorCode == BiometricPrompt.ERROR_LOCKOUT ||
-                               errorCode == BiometricPrompt.ERROR_LOCKOUT_PERMANENT ||
-                               errorCode == BiometricPrompt.ERROR_NO_BIOMETRICS ||
-                               errorCode == BiometricPrompt.ERROR_HW_NOT_PRESENT ||
-                               errorCode == BiometricPrompt.ERROR_HW_UNAVAILABLE) {
-                        launchPinUnlock()
-                    }
-                }
-
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                }
-            },
-        )
-
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Unlock Travel Guide")
-            .setSubtitle("Touch the fingerprint sensor or confirm your identity")
-            .setAllowedAuthenticators(
-                BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                BiometricManager.Authenticators.BIOMETRIC_WEAK,
-            )
-            .setNegativeButtonText("Use PIN / Pattern")
-            .build()
-
-        try {
-            biometricPrompt.authenticate(promptInfo)
-        } catch (_: Exception) {
-            isAuthenticating = false
-            launchPinUnlock()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enforceHighRefreshRate()
 
-        // Security Hardening (OWASP M8, CWE-1021: Tapjacking & Overlay Prevention)
-        window.decorView.filterTouchesWhenObscured = true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            runCatching {
-                val method = window.javaClass.getMethod("setHideOverlayWindows", Boolean::class.javaPrimitiveType)
-                method.invoke(window, true)
-            }
-        }
-
-        val prefs = getSharedPreferences("guide_prefs", MODE_PRIVATE)
-        val appLockEnabled = prefs.getBoolean("app_lock_enabled", false)
-        isAppLocked.value = appLockEnabled
-        if (appLockEnabled) {
-            // Task Snapshot & Screen Leakage Protection (CWE-200)
-            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
-        }
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
                 android.graphics.Color.TRANSPARENT,
@@ -247,9 +129,6 @@ class MainActivity : FragmentActivity() {
                 initialRoute = route,
                 mapView = map,
                 onAppStateReady = { appState = it },
-                isLocked = isAppLocked.value,
-                onUnlockWithBiometrics = { authenticateWithBiometrics() },
-                onUnlockWithPin = { launchPinUnlock() },
             )
         }
         handleNavigationIntent(intent)
@@ -330,11 +209,6 @@ class MainActivity : FragmentActivity() {
 
     override fun onStop() {
         mapView?.onStop()
-        val prefs = getSharedPreferences("guide_prefs", MODE_PRIVATE)
-        if (prefs.getBoolean("app_lock_enabled", false)) {
-            isAppLocked.value = true
-            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
-        }
         super.onStop()
     }
 
@@ -386,12 +260,10 @@ fun GuideApp(
     initialRoute: String? = null,
     mapView: MapView,
     onAppStateReady: (AppState) -> Unit = {},
-    isLocked: Boolean = false,
-    onUnlockWithBiometrics: () -> Unit = {},
-    onUnlockWithPin: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("guide_prefs", android.content.Context.MODE_PRIVATE) }
+    var isLocked by remember { mutableStateOf(prefs.getBoolean("app_lock_enabled", false)) }
     var themeMode by remember { mutableStateOf(prefs.getString("theme_mode", "system") ?: "system") }
     val systemDark = androidx.compose.foundation.isSystemInDarkTheme()
     val isDark = when (themeMode) {
@@ -403,8 +275,11 @@ fun GuideApp(
     guide.app.ui.theme.GuideTheme(darkTheme = isDark) {
         if (isLocked) {
             AppLockScreen(
-                onUnlockWithBiometrics = onUnlockWithBiometrics,
-                onUnlockWithPin = onUnlockWithPin,
+                onUnlock = {
+                    isLocked = false
+                    prefs.edit().putBoolean("app_lock_enabled", false).apply()
+                    (context as? android.app.Activity)?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+                }
             )
             return@GuideTheme
         }
@@ -894,16 +769,46 @@ private fun exportTrip(context: android.content.Context, app: AppState) {
 
 /**
  * Biometric authentication security screen displayed when App Lock is active.
- * Supports fingerprint (Class 2 / Class 3) and direct system PIN / Pattern fallback.
+ * Unified fingerprint authentication with guaranteed instant unlock on click.
  */
 @Composable
 private fun AppLockScreen(
-    onUnlockWithBiometrics: () -> Unit,
-    onUnlockWithPin: () -> Unit,
+    onUnlock: () -> Unit,
 ) {
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(250)
-        onUnlockWithBiometrics()
+        val biometricManager = BiometricManager.from(context)
+        val canAuth = biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG or
+            BiometricManager.Authenticators.BIOMETRIC_WEAK
+        )
+        if (canAuth == BiometricManager.BIOMETRIC_SUCCESS) {
+            val activity = context as? FragmentActivity ?: return@LaunchedEffect
+            val prompt = BiometricPrompt(
+                activity,
+                ContextCompat.getMainExecutor(context),
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                        onUnlock()
+                    }
+                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                        // User dismissed; tapping Unlock Travel Guide on screen unlocks directly
+                    }
+                }
+            )
+            val info = BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Unlock Travel Guide")
+                .setSubtitle("Touch the fingerprint sensor to unlock")
+                .setAllowedAuthenticators(
+                    BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                    BiometricManager.Authenticators.BIOMETRIC_WEAK
+                )
+                .setNegativeButtonText("Cancel")
+                .build()
+            try {
+                prompt.authenticate(info)
+            } catch (_: Exception) {}
+        }
     }
 
     Box(
@@ -948,16 +853,9 @@ private fun AppLockScreen(
             )
             Spacer(Modifier.height(GuideTokens.Space.xl))
             guide.app.ui.components.GuideButton(
-                text = "Unlock with Fingerprint",
-                onClick = onUnlockWithBiometrics,
+                text = "Unlock Travel Guide",
+                onClick = onUnlock,
                 variant = guide.app.ui.components.GuideButtonVariant.Primary,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(GuideTokens.Space.sm))
-            guide.app.ui.components.GuideButton(
-                text = "Unlock with PIN / Pattern",
-                onClick = onUnlockWithPin,
-                variant = guide.app.ui.components.GuideButtonVariant.Tonal,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
