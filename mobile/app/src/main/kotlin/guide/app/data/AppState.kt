@@ -38,9 +38,7 @@ import java.util.Locale
  */
 class AppState(context: Context) {
 
-    private val db: GuideDb = Room.databaseBuilder(
-        context.applicationContext, GuideDb::class.java, "guide.db",
-    ).build()
+    private val db: GuideDb = GuideDb.getInstance(context)
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -76,11 +74,17 @@ class AppState(context: Context) {
     var visitedIds by mutableStateOf<Set<String>>(emptySet())
         private set
 
+    /** Cached pins for the map to prevent spurious recomposition loops. */
+    var cachedPins by mutableStateOf<List<MapPins.Pin>>(emptyList())
+        private set
+
     /** Pack inventory for the offline-packs screen. */
     val packs: List<PackRow>
 
     /** Routes from the pack, as the Routes screen wants them. */
     val routes: List<Trio>
+
+    private val cachedRoutePoints: List<org.maplibre.android.geometry.LatLng>
 
     init {
         val (version, loaded) = PackLoader.load(context)
@@ -91,6 +95,7 @@ class AppState(context: Context) {
         // The Heritage Loop is the pack's primary walking route; its stop order
         // is what "next stop" and the distance fallback both follow.
         order = loaded.map { it.id }
+        cachedRoutePoints = order.mapNotNull { id -> byId[id]?.let { org.maplibre.android.geometry.LatLng(it.lat, it.lng) } }
 
         val sizeBytes = runCatching {
             context.assets.open("packs/fort-kochi-walk-v1.json").available().toLong()
@@ -111,8 +116,20 @@ class AppState(context: Context) {
             ),
         )
 
+        recomputePins()
         refreshNearby()
         loadVisits()
+    }
+
+    private fun recomputePins() {
+        cachedPins = order.mapNotNull { id ->
+            byId[id]?.let { c ->
+                MapPins.Pin(
+                    id = c.id, name = c.name, lat = c.lat, lng = c.lng,
+                    visited = c.id in visitedIds,
+                )
+            }
+        }
     }
 
     /** Resolve a POI card by id — used by the detail screen and the sheet. */
@@ -121,19 +138,11 @@ class AppState(context: Context) {
     /** Display name for a POI id, falling back to the id so nothing renders blank. */
     fun name(id: String): String = byId[id]?.name ?: id
 
-    /** Pins for the map, in pack order, with visited state applied. */
-    fun pins(): List<MapPins.Pin> = order.mapNotNull { id ->
-        byId[id]?.let { c ->
-            MapPins.Pin(
-                id = c.id, name = c.name, lat = c.lat, lng = c.lng,
-                visited = c.id in visitedIds,
-            )
-        }
-    }
+    /** Pins for the map, in pack order, with visited state applied (stable reference). */
+    fun pins(): List<MapPins.Pin> = cachedPins
 
-    /** Route polyline: the pack order, as coordinates. */
-    fun routePoints(): List<org.maplibre.android.geometry.LatLng> =
-        order.mapNotNull { id -> byId[id]?.let { org.maplibre.android.geometry.LatLng(it.lat, it.lng) } }
+    /** Route polyline: the pack order, as coordinates (stable reference). */
+    fun routePoints(): List<org.maplibre.android.geometry.LatLng> = cachedRoutePoints
 
     // ---- Location ----------------------------------------------------------
 
@@ -236,6 +245,7 @@ class AppState(context: Context) {
             val n = raw.mapNotNull { v -> db.dao().note(v.poiId)?.let { it.poiId to it.text } }.toMap()
             notes = n
             visitedIds = raw.map { it.poiId }.toSet()
+            recomputePins()
             visits = raw.map { v ->
                 VisitRow(
                     poiId = v.poiId,

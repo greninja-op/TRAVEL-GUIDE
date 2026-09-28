@@ -210,7 +210,7 @@ class GuideService : Service() {
         val pack = guide.core.Pack("live", "live", version, pois, emptyList())
         engine = GuideEngine(pack)
         narrator = Narrator(this)
-        val db = Room.databaseBuilder(this, GuideDb::class.java, "guide.db").build()
+        val db = GuideDb.getInstance(this)
         val byId = cards.associateBy { it.id }
         tracker = LocationTracker(this).also { t ->
             t.start(profile) { fix ->

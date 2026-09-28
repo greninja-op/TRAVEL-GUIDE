@@ -83,15 +83,24 @@ class MainActivity : ComponentActivity() {
                 android.graphics.Color.WHITE,
             ),
         )
+        val map = MapView(this).apply {
+            onCreate(savedInstanceState)
+        }
+        mapView = map
         val route = intent?.getStringExtra("route")
         setContent {
             GuideApp(
                 initialRoute = route,
-                onMapView = { mapView = it },
+                mapView = map,
                 onAppStateReady = { appState = it },
             )
         }
         handleNavigationIntent(intent)
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView?.onLowMemory()
     }
 
     override fun onNewIntent(intent: android.content.Intent) {
@@ -173,7 +182,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GuideApp(
     initialRoute: String? = null,
-    onMapView: (MapView) -> Unit = {},
+    mapView: MapView,
     onAppStateReady: (AppState) -> Unit = {},
 ) {
     MaterialTheme {
@@ -226,10 +235,6 @@ fun GuideApp(
         // (SPEC §3.2). Filtering through the real API keeps the shape correct.
         val events = remember {
             Events.forDate(emptyList(), LocalDate.now().toString())
-        }
-
-        val mapView = remember {
-            MapView(context).also { onMapView(it) }
         }
 
         // Background location is a SEPARATE, plain-language opt-in (SPEC §1.1):
@@ -301,11 +306,15 @@ fun GuideApp(
                 return@LaunchedEffect
             }
             val tracker = LocationTracker(context)
-            tracker.start(profile) { fix ->
-                app.onFix(fix.lat, fix.lng)
-                userPos = org.maplibre.android.geometry.LatLng(fix.lat, fix.lng)
+            try {
+                tracker.start(profile) { fix ->
+                    app.onFix(fix.lat, fix.lng)
+                    userPos = org.maplibre.android.geometry.LatLng(fix.lat, fix.lng)
+                }
+                awaitCancellation()
+            } finally {
+                tracker.stop()
             }
-            awaitCancellation()
         }
 
         // "What am I seeing?" — the app's signature question. Answered from the

@@ -36,4 +36,18 @@ interface GuideDao {
 @Database(entities = [VisitEntity::class, NoteEntity::class], version = 1)
 abstract class GuideDb : RoomDatabase() {
     abstract fun dao(): GuideDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: GuideDb? = null
+
+        fun getInstance(context: android.content.Context): GuideDb =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: androidx.room.Room.databaseBuilder(
+                    context.applicationContext,
+                    GuideDb::class.java,
+                    "guide.db",
+                ).build().also { INSTANCE = it }
+            }
+    }
 }

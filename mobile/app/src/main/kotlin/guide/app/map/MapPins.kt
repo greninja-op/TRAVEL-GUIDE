@@ -147,6 +147,33 @@ object MapPins {
      *   its own camera (e.g. following the walker) — the map must not yank the
      *   viewport out from under a user who is being followed.
      */
+    private var cachedDefaultBitmap: Bitmap? = null
+    private var cachedActiveBitmap: Bitmap? = null
+
+    private var currentPins: List<Pin> = emptyList()
+    private var currentTapListener: PinTapListener? = null
+    private var clickListenerAttached = false
+
+    private fun getOrCreateDefaultBitmap(): Bitmap =
+        cachedDefaultBitmap ?: Raster.drawPin(
+            sizePx = MapStyle.ICON_SIZE_PX,
+            edge = MapStyle.PIN_EDGE_PX,
+            pad = MapStyle.PIN_PAD_PX,
+            palette = MapStyle.defaultPinPalette(),
+            filled = false,
+            chipCornerPx = CHIP_CORNER_DP * MapStyle.ICON_DENSITY,
+        ).also { cachedDefaultBitmap = it }
+
+    private fun getOrCreateActiveBitmap(): Bitmap =
+        cachedActiveBitmap ?: Raster.drawPin(
+            sizePx = MapStyle.ICON_SIZE_PX,
+            edge = MapStyle.PIN_EDGE_PX,
+            pad = MapStyle.PIN_PAD_PX,
+            palette = MapStyle.activePinPalette(),
+            filled = true,
+            chipCornerPx = CHIP_CORNER_DP * MapStyle.ICON_DENSITY,
+        ).also { cachedActiveBitmap = it }
+
     fun render(
         context: Context,
         map: MapLibreMap,
@@ -158,110 +185,72 @@ object MapPins {
         onPinTap: PinTapListener? = null,
         fitToPins: Boolean = true,
     ) {
-        // --- 1. Always start from a clean slate -----------------------------
-        // This single line is what makes the function idempotent: add and
-        // update become the same code path.
-        clear(style)
-
-        // --- 2. Route: casing under fill ------------------------------------
-        // Two layers over one source — a wide, dark "scale" line with a bright
-        // "route" line on top of it. The underside reads as an outline, which
-        // is what keeps a 3px line legible over busy OSM raster at every zoom
-        // without ever thickening the bright stroke. Draw order matters:
-        // scale -> base -> route, and pins are added after so they sit on top.
+        // --- 1. Route: casing under fill (update if exists, add if new) ------
+        val routeSource = style.getSource(MapStyle.ID_ROUTE_SCALE) as? GeoJsonSource
         if (route.size >= 2) {
-            style.addSource(
-                GeoJsonSource(
-                    MapStyle.ID_ROUTE_SCALE,
-                    FeatureCollection.fromFeature(
-                        Feature.fromGeometry(lineGeometry(route)),
+            val routeGeo = FeatureCollection.fromFeature(Feature.fromGeometry(lineGeometry(route)))
+            if (routeSource != null) {
+                routeSource.setGeoJson(routeGeo)
+            } else {
+                style.addSource(GeoJsonSource(MapStyle.ID_ROUTE_SCALE, routeGeo))
+                style.addLayer(
+                    LineLayer(MapStyle.ID_ROUTE_BASE, MapStyle.ID_ROUTE_SCALE).withProperties(
+                        PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                        PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                        PropertyFactory.lineColor(GuideColors.ROUTE_BASE),
+                        PropertyFactory.lineWidth(9f),
+                        PropertyFactory.lineOpacity(0.30f),
                     ),
-                ),
-            )
-            style.addLayer(
-                LineLayer(MapStyle.ID_ROUTE_BASE, MapStyle.ID_ROUTE_SCALE).withProperties(
-                    PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-                    PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-                    PropertyFactory.lineColor(GuideColors.ROUTE_BASE),
-                    PropertyFactory.lineWidth(9f),
-                    PropertyFactory.lineOpacity(0.30f),
-                ),
-            )
-            style.addLayer(
-                LineLayer(MapStyle.ID_ROUTE_ROUTE, MapStyle.ID_ROUTE_SCALE).withProperties(
-                    PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-                    PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-                    PropertyFactory.lineColor(GuideColors.ROUTE_ROUTE),
-                    // Slightly wider under the casing's centroid so the bright
-                    // line reads as the subject, not the outline.
-                    PropertyFactory.lineWidth(4.5f),
-                ),
-            )
+                )
+                style.addLayer(
+                    LineLayer(MapStyle.ID_ROUTE_ROUTE, MapStyle.ID_ROUTE_SCALE).withProperties(
+                        PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                        PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                        PropertyFactory.lineColor(GuideColors.ROUTE_ROUTE),
+                        PropertyFactory.lineWidth(4.5f),
+                    ),
+                )
+            }
+        } else if (routeSource != null) {
+            routeSource.setGeoJson(FeatureCollection.fromFeatures(emptyList()))
         }
 
-        if (pins.isEmpty()) {
-            // Valid and common: audit §3.4 notes every screen is currently fed
-            // `emptyList()`. Removing our objects and returning is the honest
-            // behaviour — no crash, no orphaned layer, no blank-looking state
-            // that is actually a duplicate-id exception.
-            return
+        // --- 2. Register cached pin icons once per style ---------------------
+        if (style.getImage(MapStyle.ICON_PIN_DEFAULT) == null) {
+            style.addImage(MapStyle.ICON_PIN_DEFAULT, getOrCreateDefaultBitmap())
+        }
+        if (style.getImage(MapStyle.ICON_PIN_ACTIVE) == null) {
+            style.addImage(MapStyle.ICON_PIN_ACTIVE, getOrCreateActiveBitmap())
         }
 
-        // --- 3. Register the pin icons (idempotent by name) ------------------
-        // Style.addImage replaces an existing image with the same id on the
-        // current stable MapLibre — and because every object is cleared and
-        // re-added together, re-registering cannot desync layers from images.
-        val defaultBitmap = Raster.drawPin(
-            sizePx = MapStyle.ICON_SIZE_PX,
-            edge = MapStyle.PIN_EDGE_PX,
-            pad = MapStyle.PIN_PAD_PX,
-            palette = MapStyle.defaultPinPalette(),
-            filled = false,
-            chipCornerPx = CHIP_CORNER_DP * MapStyle.ICON_DENSITY,
-        )
-        val activeBitmap = Raster.drawPin(
-            sizePx = MapStyle.ICON_SIZE_PX,
-            edge = MapStyle.PIN_EDGE_PX,
-            pad = MapStyle.PIN_PAD_PX,
-            palette = MapStyle.activePinPalette(),
-            filled = true,
-            chipCornerPx = CHIP_CORNER_DP * MapStyle.ICON_DENSITY,
-        )
-        style.addImage(MapStyle.ICON_PIN_DEFAULT, defaultBitmap)
-        style.addImage(MapStyle.ICON_PIN_ACTIVE, activeBitmap)
-
-        // --- 4. One source + one layer per state -----------------------------
-        // `iconImage` is a single value per layer, so states are expressed as
-        // separate layers. Order = paint order, back to front.
+        // --- 3. Update or add pin layers per state ---------------------------
         val byState: Map<State, List<Pin>> = pins.groupBy { pinState(it, activeId, nextId) }
 
-        addPinLayer(style, State.VISITED, byState[State.VISITED], MapStyle.ID_PIN_VISITED)
-        addPinLayer(style, State.DEFAULT, byState[State.DEFAULT], MapStyle.ID_PIN_DEFAULT)
-        addPinLayer(style, State.NEXT, byState[State.NEXT], MapStyle.ID_PIN_NEXT)
-        addPinLayer(style, State.ACTIVE, byState[State.ACTIVE], MapStyle.ID_PIN_ACTIVE)
+        updateOrAddPinLayer(style, State.VISITED, byState[State.VISITED], MapStyle.ID_PIN_VISITED)
+        updateOrAddPinLayer(style, State.DEFAULT, byState[State.DEFAULT], MapStyle.ID_PIN_DEFAULT)
+        updateOrAddPinLayer(style, State.NEXT, byState[State.NEXT], MapStyle.ID_PIN_NEXT)
+        updateOrAddPinLayer(style, State.ACTIVE, byState[State.ACTIVE], MapStyle.ID_PIN_ACTIVE)
 
-        // --- 5. Tap handling -------------------------------------------------
-        if (onPinTap != null) {
+        // --- 4. Tap handling with a single listener --------------------------
+        currentPins = pins
+        currentTapListener = onPinTap
+        if (!clickListenerAttached) {
             map.addOnMapClickListener { latLng ->
-                // Nearest pin within a generous radius. The hit test is done in
-                // METRES, not by reading back MapLibre's projected symbol quads:
-                // queryRenderedFeatures would give the visual bounds, but it
-                // needs a screen point, and converting a touch LatLng to a
-                // symbol's padded quad is exactly the kind of style-spec
-                // assumption that breaks silently. A distance test is honest
-                // about what it is and cannot silently stop matching.
-                val hit = pins.minByOrNull { distanceMeters(latLng, it) } ?: return@addOnMapClickListener false
+                val listener = currentTapListener ?: return@addOnMapClickListener false
+                val activePins = currentPins
+                val hit = activePins.minByOrNull { distanceMeters(latLng, it) } ?: return@addOnMapClickListener false
                 if (distanceMeters(latLng, hit) <= TAP_RADIUS_M) {
-                    onPinTap.onPinTap(hit.id)
+                    listener.onPinTap(hit.id)
                     true
                 } else {
                     false
                 }
             }
+            clickListenerAttached = true
         }
 
-        // --- 6. Camera -------------------------------------------------------
-        if (fitToPins) {
+        // --- 5. Camera -------------------------------------------------------
+        if (fitToPins && (pins.isNotEmpty() || route.size >= 2)) {
             fitCamera(map, pins, route)
         }
     }
@@ -269,11 +258,9 @@ object MapPins {
     /**
      * Remove every object this app owns from [style]. Idempotent and safe to
      * call on a style that has none of them.
-     *
-     * Sources are removed AFTER their layers (a source cannot be removed while
-     * a layer still references it), and images last.
      */
     fun clear(style: Style) {
+        clickListenerAttached = false
         for (id in MapStyle.OWNED_LAYER_IDS) {
             style.getLayer(id)?.let { style.removeLayer(it) }
         }
@@ -284,11 +271,6 @@ object MapPins {
 
     /**
      * Move the camera to frame [pins] (and [route] when it extends beyond them).
-     *
-     * Called from [render], which runs on the MapLibre callback thread, so this
-     * uses the synchronous `moveCamera`. The ANIMATED camera work (audit defect
-     * 5) lives in `MapScreen`, driven by user actions on the Compose thread —
-     * animation spec and duration are UI concerns, not style concerns.
      */
     fun fitCamera(map: MapLibreMap, pins: List<Pin>, route: List<LatLng> = emptyList()) {
         val points = buildList {
@@ -296,8 +278,6 @@ object MapPins {
             route.forEach { add(it) }
         }
         if (points.isEmpty()) return
-        // A single point has a degenerate bounds: `newLatLngBounds` cannot
-        // compute a zoom from zero area and throws. Zoom in on it instead.
         if (points.size == 1) {
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(points.first(), FOCUS_ZOOM))
             return
@@ -306,21 +286,8 @@ object MapPins {
         map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, BOUNDS_PADDING_PX))
     }
 
-    // -----------------------------------------------------------------------
-    // Internals
-    // -----------------------------------------------------------------------
-
-    /**
-     * Tap radius. 44dp is the minimum TARGET size; a finger aiming at a 33dp
-     * pin lands within roughly this of the marker centre, and pin spacing in
-     * Fort Kochi (pack v1.1.0) is far wider than 90m, so a generous radius
-     * costs no accuracy. [minByOrNull] already guarantees the nearest pin wins.
-     */
     private const val TAP_RADIUS_M = 90.0
-
     private const val BOUNDS_PADDING_PX = 120
-
-    /** Matches the map's offline pack range (12–16) — a single POI wants context. */
     private const val FOCUS_ZOOM = 16.0
 
     private fun pinState(pin: Pin, activeId: String?, nextId: String?): State = when (pin.id) {
@@ -329,18 +296,16 @@ object MapPins {
         else -> if (pin.visited) State.VISITED else State.DEFAULT
     }
 
-    /**
-     * Add one state's source + symbol layer.
-     *
-     * Visibility is filtered by layer existence rather than by pushing an empty
-     * collection: MapLibre renders nothing for an empty FeatureCollection, and
-     * skipping the layer entirely keeps `queryRenderedFeatures` and the tap
-     * listener honest — a layer that exists but is empty is a trap for readers.
-     */
-    private fun addPinLayer(style: Style, state: State, pins: List<Pin>?, sourceId: String) {
+    private fun updateOrAddPinLayer(style: Style, state: State, pins: List<Pin>?, sourceId: String) {
+        val features = pinFeatures(pins ?: emptyList())
+        val existingSource = style.getSource(sourceId) as? GeoJsonSource
+        if (existingSource != null) {
+            existingSource.setGeoJson(features)
+            return
+        }
         if (pins.isNullOrEmpty()) return
 
-        style.addSource(GeoJsonSource(sourceId, pinFeatures(pins)))
+        style.addSource(GeoJsonSource(sourceId, features))
 
         val active = state == State.ACTIVE
         val next = state == State.NEXT
@@ -357,24 +322,11 @@ object MapPins {
                 if (active) MapStyle.ICON_PIN_ACTIVE else MapStyle.ICON_PIN_DEFAULT,
             ),
             PropertyFactory.iconSize(iconSize),
-            // Anchor the marker at its point, not its centre — the padded quad
-            // means the glyph's tip is BELOW the quad centre, so the pin would
-            // otherwise float off its own location.
             PropertyFactory.iconAnchor(Property.ICON_ANCHOR_BOTTOM),
-            // Visited pins sit back without vanishing; the walk still needs to
-            // read them for orientation ("I've done that one").
             PropertyFactory.iconOpacity(if (visited) 0.55f else 1f),
-            // DEFAULT places all pins like a real map. The non-overlap rule is
-            // applied only to the two states that carry a LABEL, which is where
-            // collision actually hurts readability.
             PropertyFactory.iconAllowOverlap(visited),
             PropertyFactory.iconIgnorePlacement(!(active || next)),
         )
-
-        // No label is added here — see the PROP_ID/PROP_NAME comment above.
-        // Marker state is carried by glyph + size + colour, all of which render
-        // without a glyphs URL. The focused pin's name is drawn as a Compose
-        // overlay by MapScreen instead.
 
         style.addLayer(layer)
     }

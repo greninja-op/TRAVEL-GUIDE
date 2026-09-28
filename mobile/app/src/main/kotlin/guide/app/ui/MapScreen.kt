@@ -153,6 +153,8 @@ fun MapScreen(
     // must not yank the viewport away from a user who has panned somewhere.
     var framedOnce by remember { mutableStateOf(false) }
 
+    val companion = guide.app.navigation.MapsCompanionState.currentSession
+
     // --- Category filtering -------------------------------------------------
     var selectedCategory by remember { mutableStateOf("All") }
     val displayedPins = remember(latestPins, selectedCategory) {
@@ -201,16 +203,23 @@ fun MapScreen(
         // =====================================================================
         AndroidView(
             factory = {
+                (mapView.parent as? android.view.ViewGroup)?.removeView(mapView)
                 mapView.apply {
                     getMapAsync { map ->
                         mapActions.map = map
-                        val builder = if (styleUrl.trim().startsWith("{")) {
-                            Style.Builder().fromJson(styleUrl)
+                        val currentStyle = map.style
+                        if (currentStyle == null) {
+                            val builder = if (styleUrl.trim().startsWith("{")) {
+                                Style.Builder().fromJson(styleUrl)
+                            } else {
+                                Style.Builder().fromUri(styleUrl)
+                            }
+                            map.setStyle(builder) { style ->
+                                mapActions.style = style
+                                styleLoaded = true
+                            }
                         } else {
-                            Style.Builder().fromUri(styleUrl)
-                        }
-                        map.setStyle(builder) { style ->
-                            mapActions.style = style
+                            mapActions.style = currentStyle
                             styleLoaded = true
                         }
                     }
@@ -286,7 +295,6 @@ fun MapScreen(
             }
 
             // Google Maps Navigation Companion banner (visible when turn-by-turn navigation is detected)
-            val companion = guide.app.navigation.MapsCompanionState.currentSession
             if (companion != null) {
                 val corridorCount = guide.app.navigation.MapsCompanionState.corridorPoiIds.size
                 Surface(
@@ -390,14 +398,20 @@ fun MapScreen(
         }
 
         // =====================================================================
-        // 3. Right Cluster — Circular Compass & Recenter buttons
+        // 3. Right Cluster — Google Maps style Top-Right Compass & Recenter
         // =====================================================================
+        val controlsTopPad by androidx.compose.animation.core.animateDpAsState(
+            targetValue = statusInset + 120.dp + (if (companion != null) 72.dp else 0.dp),
+            animationSpec = tween(Motion.Fast, easing = Motion.easeOut),
+            label = "mapControlsTopPad",
+        )
+
         Column(
             modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = GuideTokens.Space.screenPad),
+                .align(Alignment.TopEnd)
+                .padding(top = controlsTopPad, end = GuideTokens.Space.screenPad),
             horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(GuideTokens.Space.md),
+            verticalArrangement = Arrangement.spacedBy(GuideTokens.Space.sm),
         ) {
             CompassControl(
                 headingDeg = headingDeg,
