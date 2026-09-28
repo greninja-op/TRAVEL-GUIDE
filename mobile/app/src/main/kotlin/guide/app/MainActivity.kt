@@ -399,6 +399,7 @@ fun GuideApp(
                             seeingAnswer = null,
                             onSeeingTap = { nav.navigate("nearby") },
                             onPinTap = { id -> nav.navigate("poi/$id") },
+                            onSettingsTap = { nav.navigate("settings") },
                             pins = app.pins(),
                             route = app.routePoints(),
                             userPosition = userPos,
@@ -454,25 +455,25 @@ fun GuideApp(
                     }
                     composable("settings") {
                         Box(modifier = Modifier.fillMaxSize().padding(top = statusPad)) {
-                            Column {
-                                SettingsScreen(
-                                    profile = profile,
-                                    onProfile = {
-                                        profile = it
-                                        GuideService.setProfile(context, it)
-                                    },
-                                    backgroundOptIn = backgroundOptIn,
-                                    onBackgroundOptIn = onBackgroundOptIn,
-                                    quietEnabled = quiet,
-                                    onQuiet = { quiet = it; GuideService.setQuiet(context, it) },
-                                    autoPlay = autoPlay,
-                                    onAutoPlay = { autoPlay = it; GuideService.setAutoPlay(context, it) },
-                                    onSimulateMapsRoute = {
-                                        app.simulateCompanionSession("chinese-fishing-nets")
-                                    },
-                                )
-                                VoiceSettings(onRate = { rate -> GuideService.setSpeechRate(context, rate) })
-                            }
+                            SettingsScreen(
+                                profile = profile,
+                                onProfile = {
+                                    profile = it
+                                    GuideService.setProfile(context, it)
+                                },
+                                backgroundOptIn = backgroundOptIn,
+                                onBackgroundOptIn = onBackgroundOptIn,
+                                quietEnabled = quiet,
+                                onQuiet = { quiet = it; GuideService.setQuiet(context, it) },
+                                autoPlay = autoPlay,
+                                onAutoPlay = { autoPlay = it; GuideService.setAutoPlay(context, it) },
+                                onSimulateMapsRoute = { poiId ->
+                                    app.simulateCompanionSession(poiId)
+                                },
+                                appState = app,
+                                onExportData = { exportTrip(context, app) },
+                                onClearData = { app.clearAllData() },
+                            )
                         }
                     }
                     composable("phrasebook") {

@@ -376,6 +376,60 @@ object GuideIcons {
         lineTo(11f, 13f)
         close()
     }
+
+    /** Settings / Sliders icon */
+    val Sliders: ImageVector = icon("SlidersIcon") {
+        moveTo(4f, 21f); verticalLineTo(14f)
+        moveTo(4f, 10f); verticalLineTo(3f)
+        moveTo(12f, 21f); verticalLineTo(12f)
+        moveTo(12f, 8f); verticalLineTo(3f)
+        moveTo(20f, 21f); verticalLineTo(16f)
+        moveTo(20f, 12f); verticalLineTo(3f)
+        moveTo(1f, 14f); horizontalLineTo(7f)
+        moveTo(9f, 8f); horizontalLineTo(15f)
+        moveTo(17f, 16f); horizontalLineTo(23f)
+    }
+
+    /** Privacy Shield icon */
+    val Shield: ImageVector = icon("ShieldIcon") {
+        moveTo(12f, 22f)
+        curveTo(12f, 22f, 20f, 18f, 20f, 12f)
+        verticalLineTo(5f)
+        lineTo(12f, 2f)
+        lineTo(4f, 5f)
+        verticalLineTo(12f)
+        curveTo(4f, 18f, 12f, 22f, 12f, 22f)
+        close()
+    }
+
+    /** App Lock icon */
+    val Lock: ImageVector = icon("LockIcon") {
+        moveTo(5f, 11f)
+        horizontalLineTo(19f)
+        arcToRelative(2f, 2f, 0f, false, true, 2f, 2f)
+        verticalLineToRelative(7f)
+        arcToRelative(2f, 2f, 0f, false, true, -2f, 2f)
+        horizontalLineTo(5f)
+        arcToRelative(2f, 2f, 0f, false, true, -2f, -2f)
+        verticalLineToRelative(-7f)
+        arcToRelative(2f, 2f, 0f, false, true, 2f, -2f)
+        close()
+        moveTo(7f, 11f)
+        verticalLineTo(7f)
+        arcToRelative(5f, 5f, 0f, false, true, 10f, 0f)
+        verticalLineToRelative(4f)
+    }
+
+    /** User / Account profile icon */
+    val User: ImageVector = icon("UserIcon") {
+        moveTo(12f, 11f)
+        arcToRelative(4f, 4f, 0f, true, false, 0f, -8f)
+        arcToRelative(4f, 4f, 0f, false, false, 0f, 8f)
+        close()
+        moveTo(4f, 21f)
+        curveToRelative(0f, -3.3f, 3.6f, -6f, 8f, -6f)
+        curveToRelative(4.4f, 0f, 8f, 2.7f, 8f, 6f)
+    }
 }
 
 /**

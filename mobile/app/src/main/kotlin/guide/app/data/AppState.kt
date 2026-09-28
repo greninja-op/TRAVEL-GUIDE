@@ -220,14 +220,17 @@ class AppState(context: Context) {
      * Activates a simulated route to a chosen destination so the user can test the
      * pre-loaded corridor stories without leaving their desk.
      */
-    fun simulateCompanionSession(destinationPoiId: String) {
-        val target = card(destinationPoiId) ?: cards.firstOrNull() ?: return
+    fun simulateCompanionSession(destinationPoiId: String, customName: String? = null) {
+        val target = card(destinationPoiId)
+        val name = customName ?: target?.name ?: "Destination from Google Maps"
+        val lat = target?.lat ?: lastLat ?: 9.9656
+        val lng = target?.lng ?: lastLng ?: 76.2423
         guide.app.navigation.MapsCompanionState.onNavStarted(
-            destinationName = target.name,
-            destinationLat = target.lat,
-            destinationLng = target.lng,
-            etaOrDistance = "15 min (3.8 km) · Google Maps",
-            nextManeuver = "In 350m turn right onto River Road",
+            destinationName = name,
+            destinationLat = lat,
+            destinationLng = lng,
+            etaOrDistance = "12 min (3.2 km) · Google Maps",
+            nextManeuver = "In 250m turn right onto Bazaar Road",
             source = guide.app.navigation.CompanionSource.SIMULATED,
         )
         updateCompanionCorridor()
@@ -235,6 +238,13 @@ class AppState(context: Context) {
 
     fun clearCompanionSession() {
         guide.app.navigation.MapsCompanionState.onNavEnded()
+    }
+
+    fun clearAllData() {
+        scope.launch {
+            db.clearAllTables()
+            loadVisits()
+        }
     }
 
     // ---- Visits & notes ----------------------------------------------------

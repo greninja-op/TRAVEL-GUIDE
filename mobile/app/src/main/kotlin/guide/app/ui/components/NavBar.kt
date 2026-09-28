@@ -59,6 +59,7 @@ enum class NavItem(val route: String, val label: String, val icon: ImageVector) 
     Routes("routes", "Routes", GuideIcons.Route),
     Packs("packs", "Packs", GuideIcons.Package),
     History("history", "History", GuideIcons.Clock),
+    Settings("settings", "Settings", GuideIcons.Sliders),
 }
 
 @Composable
@@ -141,7 +142,7 @@ private fun NavBarItem(
                 // Active pill behind the glyph.
                 Box(
                     modifier = Modifier
-                        .width(48.dp)
+                        .width(40.dp)
                         .height(28.dp)
                         .clip(RoundedCornerShape(GuideTokens.PinRadius))
                         .background(GuideTokens.Primary.copy(alpha = 0.14f * pillAlpha)),

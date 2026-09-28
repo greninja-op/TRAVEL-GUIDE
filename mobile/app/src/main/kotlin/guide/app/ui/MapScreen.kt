@@ -117,6 +117,7 @@ fun MapScreen(
     /** Next stop on the active route, if any. */
     nextPinId: String? = null,
     onPinTap: (String) -> Unit = {},
+    onSettingsTap: () -> Unit = {},
     /** Current device position, when known. Null hides the location puck. */
     userPosition: LatLng? = null,
     /** Compass azimuth in degrees; null hides the compass needle. */
@@ -287,10 +288,27 @@ fun MapScreen(
                     // Audio Guide Pulse indicator
                     Box(
                         modifier = Modifier
-                            .size(10.dp)
-                            .clip(RoundedCornerShape(GuideTokens.PinRadius))
+                            .size(8.dp)
+                            .clip(RoundedCornerShape(4.dp))
                             .background(GuideTokens.Highlight),
                     )
+                    Spacer(Modifier.width(10.dp))
+                    // Quick Settings & Security panel entry
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = GuideTokens.Surface2,
+                        modifier = Modifier.size(34.dp),
+                        onClick = onSettingsTap,
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = GuideIcons.Sliders,
+                                contentDescription = "Settings & Privacy",
+                                tint = GuideTokens.Text,
+                                modifier = Modifier.size(17.dp),
+                            )
+                        }
+                    }
                 }
             }
 
