@@ -2,6 +2,7 @@ package guide.app.ui
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -12,11 +13,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -361,44 +365,39 @@ private fun SeeingEntry(answer: String?, onClick: () -> Unit) {
     }
 }
 
-/** Selectable pill. Pill radius is reserved for tags — chips are tags. */
+/** Selectable filter pill with proportional horizontal padding and balanced height. */
 @Composable
 private fun FilterPill(label: String, selected: Boolean, onClick: () -> Unit) {
-    val bg by animateColorAsState(
-        targetValue = if (selected) GuideTokens.Primary else GuideTokens.Surface2,
-        animationSpec = tween(Motion.Fast, easing = Motion.easeOut),
-        label = "chipBg",
-    )
-    val fg by animateColorAsState(
-        targetValue = if (selected) GuideTokens.OnPrimary else GuideTokens.Text2,
-        animationSpec = tween(Motion.Fast, easing = Motion.easeOut),
-        label = "chipFg",
-    )
-    Pressable(
+    val bg = if (selected) GuideTokens.Primary else GuideTokens.Surface
+    val fg = if (selected) Color.White else GuideTokens.Text
+    val border = if (selected) null else BorderStroke(1.dp, GuideTokens.Border)
+
+    Surface(
+        shape = RoundedCornerShape(GuideTokens.ChipRadius),
+        color = bg,
+        contentColor = fg,
+        border = border,
+        shadowElevation = if (selected) 2.dp else 0.dp,
         onClick = onClick,
-        role = Role.RadioButton,
-        modifier = Modifier
-            .heightIn(min = GuideTokens.TouchTarget)
-            .background(color = bg, shape = RoundedCornerShape(GuideTokens.ChipRadius))
-            .padding(
-                horizontal = GuideTokens.Space.base,
-                vertical = GuideTokens.Space.sm + GuideTokens.Space.xs,
-            ),
+        modifier = Modifier.height(34.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            // Selection is a check AND a fill — never colour alone.
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
             if (selected) {
                 Icon(
                     imageVector = GuideIcons.Check,
                     contentDescription = null,
                     tint = fg,
-                    modifier = Modifier.size(14.dp),
+                    modifier = Modifier.size(13.dp),
                 )
-                Spacer(Modifier.size(GuideTokens.Space.xs))
+                Spacer(Modifier.width(5.dp))
             }
             Text(
                 text = label,
-                style = GuideTokens.Label,
+                style = GuideTokens.Caption,
                 color = fg,
                 maxLines = Lines.Single,
             )
