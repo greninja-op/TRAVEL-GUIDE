@@ -1262,9 +1262,11 @@ fun SettingsScreen(
                                     lat = 9.9674, lng = 76.2429, radiusM = 65.0,
                                     hours = "06:00–18:00", layer = "heritage", packVersion = "live",
                                 )
+                                val persona = guide.app.voice.SpontaneousGuideAiEngine.Persona.fromId(selectedPersonaId)
                                 val story = guide.app.voice.SpontaneousGuideAiEngine.generateStory(
                                     context = context,
                                     card = dummyCard,
+                                    language = language,
                                 )
                                 aiSampleStory = story
                                 isGeneratingStory = false
@@ -1292,14 +1294,58 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                StatusTag(text = "LIVE SPONTANEOUS OUTPUT", color = GuideTokens.Highlight)
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = "Spoken by Sarvam Neural Voice",
-                                    style = GuideTokens.Caption,
-                                    color = GuideTokens.Text2,
-                                )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    StatusTag(text = "LIVE SPONTANEOUS OUTPUT", color = GuideTokens.Highlight)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = "Sarvam Neural Voice",
+                                        style = GuideTokens.Caption,
+                                        color = GuideTokens.Text2,
+                                    )
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = GuideTokens.PrimaryWash,
+                                        modifier = Modifier.size(28.dp),
+                                        onClick = {
+                                            GuideService.speak(context, sample)
+                                        },
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = GuideIcons.Speak,
+                                                contentDescription = "Replay",
+                                                tint = GuideTokens.Primary,
+                                                modifier = Modifier.size(14.dp),
+                                            )
+                                        }
+                                    }
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = GuideTokens.Surface,
+                                        border = BorderStroke(1.dp, GuideTokens.Border),
+                                        modifier = Modifier.size(28.dp),
+                                        onClick = {
+                                            GuideService.setMuted(context, true)
+                                            GuideService.setMuted(context, false)
+                                        },
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = GuideIcons.X,
+                                                contentDescription = "Stop Voice",
+                                                tint = GuideTokens.Text2,
+                                                modifier = Modifier.size(14.dp),
+                                            )
+                                        }
+                                    }
+                                }
                             }
                             Spacer(Modifier.height(8.dp))
                             Text(

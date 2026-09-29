@@ -44,8 +44,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -95,10 +97,14 @@ fun PoiDetailScreen(
     onStartAudio: () -> Unit = {},
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     var saved by remember { mutableStateOf(false) }
     var noteText by remember(initialNote) { mutableStateOf(initialNote.orEmpty()) }
     var attachedPhotoUri by remember(initialPhotoUri) { mutableStateOf(initialPhotoUri) }
     var isSavedFeedback by remember { mutableStateOf(false) }
+    var qaQuestion by remember { mutableStateOf("") }
+    var isAskingQa by remember { mutableStateOf(false) }
+    var qaAnswer by remember { mutableStateOf<String?>(null) }
 
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -448,6 +454,217 @@ fun PoiDetailScreen(
                                         style = GuideTokens.Caption,
                                         color = GuideTokens.Text2,
                                     )
+                                }
+                            }
+                        }
+
+                        // ---- Interactive AI Tour Guide Q&A ------------------
+                        Spacer(Modifier.height(GuideTokens.Space.lg))
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = GuideTokens.Surface,
+                            border = BorderStroke(1.dp, GuideTokens.Primary.copy(alpha = 0.35f)),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Column(modifier = Modifier.padding(GuideTokens.Space.base)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = GuideTokens.PrimaryWash,
+                                        modifier = Modifier.size(36.dp),
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = GuideIcons.Sparkles,
+                                                contentDescription = null,
+                                                tint = GuideTokens.Primary,
+                                                modifier = Modifier.size(18.dp),
+                                            )
+                                        }
+                                    }
+                                    Spacer(Modifier.width(GuideTokens.Space.md))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = guide.app.data.AppStrings.askGuideHeader(language),
+                                            style = GuideTokens.Label,
+                                            color = GuideTokens.Text,
+                                            fontWeight = FontWeight.SemiBold,
+                                        )
+                                        Text(
+                                            text = guide.app.data.AppStrings.askGuideSubtitle(language),
+                                            style = GuideTokens.Caption,
+                                            color = GuideTokens.Text2,
+                                        )
+                                    }
+                                }
+
+                                Spacer(Modifier.height(GuideTokens.Space.md))
+
+                                // Quick question chips
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState()),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    val quickQuestions = listOf(
+                                        guide.app.data.AppStrings.askGuideQuickHistory(language),
+                                        guide.app.data.AppStrings.askGuideQuickSecrets(language),
+                                        guide.app.data.AppStrings.askGuideQuickArchitecture(language),
+                                    )
+                                    quickQuestions.forEach { prompt ->
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = GuideTokens.Surface2,
+                                            border = BorderStroke(1.dp, GuideTokens.Border),
+                                            onClick = {
+                                                qaQuestion = prompt
+                                                isAskingQa = true
+                                                coroutineScope.launch {
+                                                    val answer = guide.app.voice.SpontaneousGuideAiEngine.askQuestion(
+                                                        context = context,
+                                                        card = card,
+                                                        question = prompt,
+                                                        language = language,
+                                                        activeEvent = event?.title,
+                                                    )
+                                                    qaAnswer = answer
+                                                    isAskingQa = false
+                                                    guide.app.location.GuideService.speak(context, answer)
+                                                }
+                                            },
+                                        ) {
+                                            Text(
+                                                text = prompt,
+                                                style = GuideTokens.Caption,
+                                                color = GuideTokens.Text,
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Spacer(Modifier.height(GuideTokens.Space.md))
+
+                                // Question text input and send button
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    OutlinedTextField(
+                                        value = qaQuestion,
+                                        onValueChange = { qaQuestion = it },
+                                        placeholder = {
+                                            Text(
+                                                text = guide.app.data.AppStrings.askGuidePlaceholder(language),
+                                                style = GuideTokens.Caption,
+                                                color = GuideTokens.Text2,
+                                            )
+                                        },
+                                        textStyle = GuideTokens.Body.copy(color = GuideTokens.Text),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = GuideTokens.Primary,
+                                            unfocusedBorderColor = GuideTokens.Border,
+                                            focusedContainerColor = GuideTokens.Surface2,
+                                            unfocusedContainerColor = GuideTokens.Surface2,
+                                        ),
+                                        singleLine = true,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = if (qaQuestion.isNotBlank() && !isAskingQa) GuideTokens.Primary else GuideTokens.Border,
+                                        modifier = Modifier.size(48.dp),
+                                        onClick = {
+                                            if (qaQuestion.isNotBlank() && !isAskingQa) {
+                                                val q = qaQuestion.trim()
+                                                isAskingQa = true
+                                                coroutineScope.launch {
+                                                    val answer = guide.app.voice.SpontaneousGuideAiEngine.askQuestion(
+                                                        context = context,
+                                                        card = card,
+                                                        question = q,
+                                                        language = language,
+                                                        activeEvent = event?.title,
+                                                    )
+                                                    qaAnswer = answer
+                                                    isAskingQa = false
+                                                    guide.app.location.GuideService.speak(context, answer)
+                                                }
+                                            }
+                                        },
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = GuideIcons.Send,
+                                                contentDescription = "Send",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(18.dp),
+                                            )
+                                        }
+                                    }
+                                }
+
+                                if (isAskingQa) {
+                                    Spacer(Modifier.height(GuideTokens.Space.sm))
+                                    Text(
+                                        text = guide.app.data.AppStrings.askGuideAnswering(language),
+                                        style = GuideTokens.Caption,
+                                        color = GuideTokens.Primary,
+                                    )
+                                }
+
+                                // Spoken AI response bubble
+                                qaAnswer?.let { answer ->
+                                    Spacer(Modifier.height(GuideTokens.Space.md))
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = GuideTokens.Surface2,
+                                        border = BorderStroke(1.dp, GuideTokens.Border),
+                                        modifier = Modifier.fillMaxWidth(),
+                                    ) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                modifier = Modifier.fillMaxWidth(),
+                                            ) {
+                                                StatusTag(
+                                                    text = guide.app.data.AppStrings.guideAnswerSpoken(language),
+                                                    color = GuideTokens.Primary,
+                                                )
+                                                Surface(
+                                                    shape = CircleShape,
+                                                    color = GuideTokens.PrimaryWash,
+                                                    modifier = Modifier.size(28.dp),
+                                                    onClick = {
+                                                        guide.app.location.GuideService.speak(context, answer)
+                                                    },
+                                                ) {
+                                                    Box(contentAlignment = Alignment.Center) {
+                                                        Icon(
+                                                            imageVector = GuideIcons.Speak,
+                                                            contentDescription = "Replay Voice",
+                                                            tint = GuideTokens.Primary,
+                                                            modifier = Modifier.size(14.dp),
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                            Spacer(Modifier.height(8.dp))
+                                            Text(
+                                                text = "\"$answer\"",
+                                                style = GuideTokens.Body,
+                                                color = GuideTokens.Text,
+                                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

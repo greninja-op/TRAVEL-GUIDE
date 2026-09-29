@@ -92,6 +92,147 @@ object SpontaneousGuideAiEngine {
     }
 
     /**
+     * Answers a traveler's direct question about a POI using OpenAI GPT-4o-mini or local intelligence.
+     */
+    suspend fun askQuestion(
+        context: Context,
+        card: PackLoader.PoiCard,
+        question: String,
+        language: guide.app.data.AppLanguage? = null,
+        activeEvent: String? = null,
+    ): String = withContext(Dispatchers.IO) {
+        if (question.isBlank()) return@withContext ""
+        val prefs = context.getSharedPreferences("guide_prefs", Context.MODE_PRIVATE)
+        val apiKey = prefs.getString("openai_api_key", "")?.trim()?.ifBlank { null }
+            ?: runCatching { guide.app.BuildConfig.OPENAI_API_KEY }.getOrNull()?.trim()?.ifBlank { null }
+            ?: ""
+        val personaId = prefs.getString("ai_tour_persona", Persona.INSIDER.id)
+        val persona = Persona.fromId(personaId)
+        val lang = language ?: guide.app.data.AppLanguage.fromCode(prefs.getString("app_language", guide.app.data.AppLanguage.ENGLISH.code))
+
+        if (apiKey.isNotBlank()) {
+            val cloudAnswer = tryCloudQuestion(apiKey, card, persona, question, lang, activeEvent)
+            if (!cloudAnswer.isNullOrBlank()) {
+                return@withContext cleanVoiceText(cloudAnswer)
+            }
+        }
+
+        cleanVoiceText(generateLocalQuestionAnswer(card, question, lang))
+    }
+
+    /**
+     * Calls OpenAI GPT-4o-mini to answer a traveler's specific spoken/typed question.
+     */
+    private fun tryCloudQuestion(
+        apiKey: String,
+        card: PackLoader.PoiCard,
+        persona: Persona,
+        question: String,
+        lang: guide.app.data.AppLanguage,
+        activeEvent: String? = null,
+    ): String? {
+        return try {
+            val langInstruction = when (lang) {
+                guide.app.data.AppLanguage.MALAYALAM -> "CRITICAL: You must answer entirely in natural, fluent Malayalam (മലയാളത്തിൽ സ്വാഭാവികമായി മറുപടി നൽകുക). Do not output English."
+                guide.app.data.AppLanguage.HINDI -> "CRITICAL: You must answer entirely in natural, fluent Hindi (स्वाभाविक और सरल हिंदी में उत्तर दें). Do not output English."
+                guide.app.data.AppLanguage.TAMIL -> "CRITICAL: You must answer entirely in natural, fluent Tamil (இயற்கையான தமிழில் பதிலளியுங்கள்). Do not output English."
+                guide.app.data.AppLanguage.ENGLISH -> "Speak in clear, warm, conversational English."
+            }
+
+            val eventContext = if (!activeEvent.isNullOrBlank()) "Active Live Event happening here today: $activeEvent." else ""
+            val systemPrompt = """
+                You are a knowledgeable and warm local tour guide walking beside a traveler in Fort Kochi and Mattancherry, Kerala.
+                $langInstruction
+                The traveler is looking at: ${card.name}.
+                Summary: ${card.summary}
+                History: ${card.history ?: ""}
+                Notable Details: ${(card.funFacts + card.seeList).joinToString("; ")}
+                $eventContext
+                
+                Answer the traveler's question directly, accurately, and spontaneously in 2 to 3 natural spoken sentences (around 30 to 45 words).
+                Sound like a real person talking, not a search engine. Never recite boilerplate or markdown headers.
+            """.trimIndent()
+
+            val body = JSONObject().apply {
+                put("model", MODEL_NAME)
+                put("messages", JSONArray().apply {
+                    put(JSONObject().apply {
+                        put("role", "system")
+                        put("content", systemPrompt)
+                    })
+                    put(JSONObject().apply {
+                        put("role", "user")
+                        put("content", question)
+                    })
+                })
+                put("max_tokens", 150)
+                put("temperature", 0.7)
+            }
+
+            val conn = (URL(OPENAI_URL).openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                setRequestProperty("Authorization", "Bearer $apiKey")
+                setRequestProperty("Content-Type", "application/json")
+                connectTimeout = 7000
+                readTimeout = 9000
+                doOutput = true
+            }
+
+            conn.outputStream.use { os ->
+                os.write(body.toString().toByteArray(Charsets.UTF_8))
+            }
+
+            if (conn.responseCode in 200..299) {
+                val respText = conn.inputStream.bufferedReader().use { it.readText() }
+                val root = JSONObject(respText)
+                val choices = root.optJSONArray("choices")
+                if (choices != null && choices.length() > 0) {
+                    val message = choices.getJSONObject(0).optJSONObject("message")
+                    return message?.optString("content")?.trim()
+                }
+            }
+            null
+        } catch (e: Exception) {
+            Log.w(TAG, "Cloud Q&A error: ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * Local offline fallback for question answering based on pack data.
+     */
+    fun generateLocalQuestionAnswer(
+        card: PackLoader.PoiCard,
+        question: String,
+        lang: guide.app.data.AppLanguage,
+    ): String {
+        val localized = guide.app.data.AppStrings.getLocalizedPoi(card.id, lang)
+        val lowerQ = question.lowercase()
+        return when {
+            lowerQ.contains("secret") || lowerQ.contains("രഹസ്യ") || lowerQ.contains("रहस्य") || lowerQ.contains("ரகசிய") -> {
+                localized?.secret ?: card.funFacts.firstOrNull() ?: card.summary
+            }
+            lowerQ.contains("history") || lowerQ.contains("ചരിത്ര") || lowerQ.contains("इतिहास") || lowerQ.contains("வரலாறு") -> {
+                card.history ?: localized?.summary ?: card.summary
+            }
+            lowerQ.contains("see") || lowerQ.contains("look") || lowerQ.contains("രീതി") || lowerQ.contains("കാണ") -> {
+                if (card.seeList.isNotEmpty()) {
+                    "Look for ${card.seeList.joinToString(", ")}. ${localized?.summary ?: card.summary}"
+                } else {
+                    localized?.summary ?: card.summary
+                }
+            }
+            else -> {
+                if (localized != null) {
+                    "${localized.summary} ${localized.secret}"
+                } else {
+                    "${card.summary} ${card.funFacts.firstOrNull() ?: ""}"
+                }
+            }
+        }
+    }
+
+    /**
      * Calls OpenAI GPT-4o-mini API for real-time spontaneous oral storytelling.
      */
     private fun tryCloudGeneration(

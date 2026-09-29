@@ -1158,4 +1158,69 @@ object AppStrings {
         AppLanguage.TAMIL -> "அனைத்து பிரிவுகளையும் காட்டு"
         AppLanguage.ENGLISH -> "Show all layers"
     }
+
+    // ---- Spontaneous Tour Guide Q&A -----------------------------------------
+    fun askGuideHeader(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ടൂർ ഗൈഡിനോട് ചോദിക്കുക"
+        AppLanguage.HINDI -> "टूर गाइड से पूछें"
+        AppLanguage.TAMIL -> "டூர் வழிகாட்டியிடம் கேளுங்கள்"
+        AppLanguage.ENGLISH -> "Ask the Tour Guide"
+    }
+
+    fun askGuideSubtitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഈ സ്ഥലത്തെക്കുറിച്ച് തത്സമയം സംശയങ്ങൾ ചോദിക്കൂ — AI ഗൈഡ് ഉത്തരം നൽകും"
+        AppLanguage.HINDI -> "इस स्थान के बारे में कुछ भी पूछें — AI गाइड तुरंत उत्तर देगा"
+        AppLanguage.TAMIL -> "இந்த இடத்தைப் பற்றி ஏதேனும் கேளுங்கள் — AI வழிகாட்டி உடனடியாக பதிலளிக்கும்"
+        AppLanguage.ENGLISH -> "Ask anything about this place — spontaneous AI answers in real-time"
+    }
+
+    fun askGuidePlaceholder(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഒരു ചോദ്യം ചോദിക്കൂ..."
+        AppLanguage.HINDI -> "एक प्रश्न पूछें..."
+        AppLanguage.TAMIL -> "ஒரு கேள்வி கேளுங்கள்..."
+        AppLanguage.ENGLISH -> "Ask a question..."
+    }
+
+    fun askGuideBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ചോദിക്കുക"
+        AppLanguage.HINDI -> "पूछें"
+        AppLanguage.TAMIL -> "கேளுங்கள்"
+        AppLanguage.ENGLISH -> "Ask"
+    }
+
+    fun askGuideAnswering(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഗൈഡ് ചിന്തിക്കുന്നു..."
+        AppLanguage.HINDI -> "गाइड सोच रहा है..."
+        AppLanguage.TAMIL -> "வழிகாட்டி சிந்திக்கிறது..."
+        AppLanguage.ENGLISH -> "Guide is thinking..."
+    }
+
+    fun askGuideQuickHistory(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഇതിന്റെ ചരിത്രം എന്താണ്?"
+        AppLanguage.HINDI -> "इसका इतिहास क्या है?"
+        AppLanguage.TAMIL -> "இதன் வரலாறு என்ன?"
+        AppLanguage.ENGLISH -> "What is the history?"
+    }
+
+    fun askGuideQuickSecrets(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഇവിടുത്തെ രഹസ്യങ്ങൾ എന്തൊക്കെ?"
+        AppLanguage.HINDI -> "यहाँ के छिपे रहस्य क्या हैं?"
+        AppLanguage.TAMIL -> "இங்குள்ள ரகசியங்கள் என்ன?"
+        AppLanguage.ENGLISH -> "Any hidden secrets?"
+    }
+
+    fun askGuideQuickArchitecture(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "നിർമ്മാണ രീതി എങ്ങനെയാണ്?"
+        AppLanguage.HINDI -> "वास्तुकला कैसी है?"
+        AppLanguage.TAMIL -> "கட்டிடக்கலை எப்படிப்பட்டது?"
+        AppLanguage.ENGLISH -> "Architecture details?"
+    }
+
+    fun guideAnswerSpoken(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഗൈഡിന്റെ മറുപടി"
+        AppLanguage.HINDI -> "गाइड का उत्तर"
+        AppLanguage.TAMIL -> "வழிகாட்டியின் பதில்"
+        AppLanguage.ENGLISH -> "Guide's Answer"
+    }
 }
+

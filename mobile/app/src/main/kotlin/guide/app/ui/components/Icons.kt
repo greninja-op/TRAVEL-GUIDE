@@ -530,6 +530,26 @@ object GuideIcons {
         moveTo(18f, 6f); lineTo(6f, 18f)
         moveTo(6f, 6f); lineTo(18f, 18f)
     }
+
+    /** Send icon (Lucide 24x24) for submitting Q&A prompts. */
+    val Send: ImageVector = icon("Send") {
+        moveTo(22f, 2f); lineTo(11f, 13f)
+        moveTo(22f, 2f); lineTo(15f, 22f); lineTo(11f, 13f); lineTo(2f, 9f); close()
+    }
+
+    /** Sparkles icon (Lucide 24x24) for AI tour guide intelligence. */
+    val Sparkles: ImageVector = icon("Sparkles") {
+        moveTo(9.937f, 15.5f); arcTo(2f, 2f, 0f, false, false, 8.5f, 14.063f)
+        lineTo(2f, 12f); lineTo(8.5f, 9.937f); arcTo(2f, 2f, 0f, false, false, 9.937f, 8.5f)
+        lineTo(12f, 2f); lineTo(14.063f, 8.5f); arcTo(2f, 2f, 0f, false, false, 15.5f, 9.937f)
+        lineTo(22f, 12f); lineTo(15.5f, 14.063f); arcTo(2f, 2f, 0f, false, false, 14.063f, 15.5f)
+        lineTo(12f, 22f); close()
+    }
+
+    /** MessageCircle icon (Lucide 24x24) for oral conversation and questions. */
+    val MessageCircle: ImageVector = icon("MessageCircle") {
+        moveTo(7.9f, 20f); arcTo(9f, 9f, 0f, true, false, 4f, 16.1f); lineTo(2f, 22f); close()
+    }
 }
 
 /**
