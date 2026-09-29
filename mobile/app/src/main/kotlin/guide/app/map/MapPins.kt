@@ -193,19 +193,31 @@ object MapPins {
     ) {
         map.clear()
 
-        // 1. Draw Route: Sunset coral walking route polyline
+        // 1. Draw Route: Authentic Google Maps dual-stroke navigation polyline
         if (route.size >= 2) {
-            val polylineOpts = com.google.android.gms.maps.model.PolylineOptions()
-                .color(0xFFFF5A36.toInt()) // Sunset Coral brand accent
-                .width(16f)
+            // Dark navy outer border/casing
+            val outerPolyline = com.google.android.gms.maps.model.PolylineOptions()
+                .color(0xFF1557B0.toInt()) // Google Maps dark navy border
+                .width(20f)
+                .zIndex(1f)
                 .geodesic(true)
                 .jointType(com.google.android.gms.maps.model.JointType.ROUND)
                 .startCap(com.google.android.gms.maps.model.RoundCap())
                 .endCap(com.google.android.gms.maps.model.RoundCap())
-            route.forEach { pt ->
-                polylineOpts.add(pt)
-            }
-            map.addPolyline(polylineOpts)
+            route.forEach { outerPolyline.add(it) }
+            map.addPolyline(outerPolyline)
+
+            // Electric blue inner core
+            val innerPolyline = com.google.android.gms.maps.model.PolylineOptions()
+                .color(0xFF1A73E8.toInt()) // Google Maps electric navigation blue
+                .width(14f)
+                .zIndex(2f)
+                .geodesic(true)
+                .jointType(com.google.android.gms.maps.model.JointType.ROUND)
+                .startCap(com.google.android.gms.maps.model.RoundCap())
+                .endCap(com.google.android.gms.maps.model.RoundCap())
+            route.forEach { innerPolyline.add(it) }
+            map.addPolyline(innerPolyline)
         }
 
         // 2. Add Pins as Markers with Custom High-DPI Bitmaps
@@ -228,10 +240,11 @@ object MapPins {
             val builder = com.google.android.gms.maps.model.LatLngBounds.Builder()
             pins.forEach { builder.include(com.google.android.gms.maps.model.LatLng(it.lat, it.lng)) }
             route.forEach { builder.include(it) }
+            val bounds = builder.build()
             try {
-                map.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(builder.build(), 120))
+                map.animateCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 120))
             } catch (_: Exception) {
-                map.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(com.google.android.gms.maps.model.LatLng(9.9656, 76.2423), 15.5f))
+                map.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(bounds.center, 14.0f))
             }
         }
     }

@@ -170,6 +170,10 @@ class AppState(private val context: Context) {
     /** Whether the user manually started a walking tour route without Google Maps. */
     var isManualRouteActive by mutableStateOf(false)
 
+    /** Dynamically fetched road-snapped polyline coordinates hugging real streets. */
+    var activeRoutePoints by mutableStateOf<List<com.google.android.gms.maps.model.LatLng>>(emptyList())
+        private set
+
     /**
      * Route polyline: shown strictly while active navigation is underway
      * (either from Google Maps companion session or a manual walking plan).
@@ -178,7 +182,11 @@ class AppState(private val context: Context) {
      */
     fun routePoints(): List<com.google.android.gms.maps.model.LatLng> {
         val hasActiveNav = guide.app.navigation.MapsCompanionState.currentSession != null
-        return if (hasActiveNav || isManualRouteActive) cachedRoutePoints else emptyList()
+        return when {
+            hasActiveNav -> activeRoutePoints
+            isManualRouteActive -> cachedRoutePoints
+            else -> emptyList()
+        }
     }
 
     // ---- Location ----------------------------------------------------------
@@ -219,9 +227,13 @@ class AppState(private val context: Context) {
      * Google Maps navigation session is active.
      */
     fun updateCompanionCorridor() {
-        val session = guide.app.navigation.MapsCompanionState.currentSession ?: return
-        val originLat = lastLat ?: 9.9656
-        val originLng = lastLng ?: 76.2423
+        val session = guide.app.navigation.MapsCompanionState.currentSession
+        if (session == null) {
+            activeRoutePoints = emptyList()
+            return
+        }
+        val originLat = lastLat ?: 9.9675
+        val originLng = lastLng ?: 76.2442
 
         // Resolve destination coordinates: either explicit lat/lng or best-match POI card
         val destCoords = if (session.destinationLat != null && session.destinationLng != null) {
@@ -235,16 +247,27 @@ class AppState(private val context: Context) {
         }
 
         if (destCoords != null) {
-            guide.app.navigation.MapsCompanionState.updateCorridorPois(
-                originLat = originLat,
-                originLng = originLng,
-                destLat = destCoords.first,
-                destLng = destCoords.second,
-                allPois = cards.map {
-                    guide.app.navigation.CorridorCandidate(it.id, it.name, it.lat, it.lng)
-                },
-                maxCrossTrackM = 500.0,
-            )
+            val origin = com.google.android.gms.maps.model.LatLng(originLat, originLng)
+            val dest = com.google.android.gms.maps.model.LatLng(destCoords.first, destCoords.second)
+
+            scope.launch {
+                val routeResult = guide.app.map.RoadRouter.fetchRoute(origin, dest, mode = "driving")
+                kotlinx.coroutines.withContext(Dispatchers.Main) {
+                    activeRoutePoints = routeResult.points
+
+                    // Filter corridor POIs: only places that lie within 350m of the actual road line segments
+                    val matchedIds = cards.filter { card ->
+                        guide.app.map.RoadRouter.isPoiAlongRoad(
+                            poiLat = card.lat,
+                            poiLng = card.lng,
+                            roadPolyline = routeResult.points,
+                            thresholdMeters = 350.0,
+                        )
+                    }.map { it.id }.toSet()
+
+                    guide.app.navigation.MapsCompanionState.setCorridorPois(matchedIds)
+                }
+            }
         }
     }
 
@@ -275,6 +298,7 @@ class AppState(private val context: Context) {
 
     fun clearCompanionSession() {
         guide.app.navigation.MapsCompanionState.onNavEnded()
+        activeRoutePoints = emptyList()
     }
 
     fun clearAllData() {

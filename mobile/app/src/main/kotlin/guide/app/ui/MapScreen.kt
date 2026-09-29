@@ -173,22 +173,28 @@ fun MapScreen(
 
     // --- Category & Progressive On-Path Discovery ---------------------------
     var selectedCategory by remember { mutableStateOf("All") }
-    val displayedPins = remember(latestPins, selectedCategory, latestRoute, userPosition, activePinId, nextPinId) {
+    val displayedPins = remember(pins, selectedCategory, route, userPosition, activePinId, nextPinId) {
         val categoryFiltered = when (selectedCategory) {
-            "Heritage" -> latestPins.filter { !it.id.contains("cafe") && !it.id.contains("hotel") }
-            "Food" -> latestPins.filter { it.id.contains("cafe") || it.id.contains("food") }
-            "Stay" -> latestPins.filter { it.id.contains("hotel") || it.id.contains("stay") }
-            else -> latestPins
+            "Heritage" -> pins.filter { !it.id.contains("cafe") && !it.id.contains("hotel") }
+            "Food" -> pins.filter { it.id.contains("cafe") || it.id.contains("food") }
+            "Stay" -> pins.filter { it.id.contains("hotel") || it.id.contains("stay") }
+            else -> pins
         }
 
         // Progressive on-path exploration:
         // 1. If following a walking route or navigation corridor: show only path POIs & active stops
         // 2. If free-walking with GPS: show only stops along the path / nearby within 500m
         // 3. If browsing all: show top highlights instead of an overwhelming cluster of 24 pins
-        if (latestRoute.size >= 2) {
+        if (route.size >= 2) {
             val corridorIds = guide.app.navigation.MapsCompanionState.corridorPoiIds
+            val destName = companion?.destinationName.orEmpty()
+            val matchedDest = categoryFiltered.find {
+                it.name.contains(destName, ignoreCase = true) || (destName.isNotBlank() && destName.contains(it.name, ignoreCase = true))
+            }
             if (corridorIds.isNotEmpty()) {
-                categoryFiltered.filter { it.id in corridorIds || it.id == activePinId || it.id == nextPinId }
+                categoryFiltered.filter {
+                    it.id in corridorIds || it.id == activePinId || it.id == nextPinId || it.id == matchedDest?.id
+                }
             } else {
                 categoryFiltered.take(7)
             }
@@ -212,17 +218,21 @@ fun MapScreen(
         }
     }
 
-    LaunchedEffect(styleLoaded, displayedPins, latestRoute, activePinId, nextPinId) {
+    var lastRouteSize by remember { mutableStateOf(0) }
+    LaunchedEffect(styleLoaded, displayedPins, route, activePinId, nextPinId) {
         val map = mapActions.map ?: return@LaunchedEffect
+        val routeJustLoaded = route.size >= 2 && lastRouteSize < 2
+        val shouldFit = !framedOnce || routeJustLoaded
         MapPins.renderGoogleMap(
             map = map,
             pins = displayedPins,
-            route = latestRoute,
+            route = route,
             activeId = latestActive,
             nextId = latestNext,
-            fitToPins = !framedOnce,
+            fitToPins = shouldFit,
         )
-        if (displayedPins.isNotEmpty() || latestRoute.size >= 2) framedOnce = true
+        lastRouteSize = route.size
+        if (displayedPins.isNotEmpty() || route.size >= 2) framedOnce = true
     }
 
     // --- Camera animation ----------------------------------------------------
@@ -582,7 +592,14 @@ fun MapScreen(
                 SeeingAnswerCard(text = seeingAnswer)
             }
 
-            val previewPin = activePin ?: pins.firstOrNull()
+            val previewPin = activePin ?: run {
+                if (companion != null) {
+                    val corridorIds = guide.app.navigation.MapsCompanionState.corridorPoiIds
+                    pins.find { it.id in corridorIds } ?: pins.firstOrNull()
+                } else {
+                    pins.firstOrNull()
+                }
+            }
             if (previewPin != null) {
                 // Luxury Snapping Preview Card (AirBnB / Sakhalin luxury aesthetic)
                 Surface(
@@ -615,8 +632,13 @@ fun MapScreen(
                                         },
                                     )
                                     Spacer(Modifier.width(GuideTokens.Space.sm))
+                                    val tourSubtitle = if (companion != null) {
+                                        "Route to ${companion.destinationName}"
+                                    } else {
+                                        "Fort Kochi Walking Tour"
+                                    }
                                     Text(
-                                        text = "Fort Kochi Walking Tour",
+                                        text = tourSubtitle,
                                         style = GuideTokens.Caption,
                                         color = GuideTokens.Text2,
                                         maxLines = 1,

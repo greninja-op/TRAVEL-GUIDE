@@ -91,6 +91,10 @@ object MapsCompanionState {
         onNavStateChanged?.invoke()
     }
 
+    fun setCorridorPois(ids: Set<String>) {
+        corridorPoiIds = ids
+    }
+
     /**
      * Compute and record the POIs that lie within a corridor along the path from
      * [originLat],[originLng] to the destination.

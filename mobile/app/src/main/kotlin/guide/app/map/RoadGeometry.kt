@@ -3,83 +3,359 @@ package guide.app.map
 import com.google.android.gms.maps.model.LatLng
 
 /**
- * Authentic street-network road geometries for walking routes.
+ * Authentic street-network road geometries for walking and driving routes.
  *
- * Instead of drawing straight-line geometric displacement chords directly
- * between POI coordinates (which cut across blocks, buildings, and water),
- * these coordinate sequences follow the actual road centerlines and street corners
- * of Fort Kochi & Mattancherry (River Rd, Tower Rd, Bastion St, Princess St,
- * Burgher St, Calvathy Rd, Bazaar Rd, Jew Town Rd).
+ * Dense road centerline coordinates following River Rd, Tower Rd, Bastion St,
+ * Princess St, Burgher St, Calvathy Rd, Bazaar Rd, and Jew Town Rd.
  */
 object RoadGeometry {
 
     /**
-     * Fort Kochi Heritage Loop â€” pedestrian walking route following actual streets.
-     * Starts at Fort Kochi Jetty, follows River Rd to Chinese Fishing Nets and Vasco Square,
-     * turns south along Tower Rd past St. Francis Church and Dutch Cemetery, navigates
-     * Princess St, Burgher St, Peter Celli St, down to the Bishops House & Maritime Museum,
-     * and returns along Mahatma Gandhi Beach promenade.
+     * Fort Kochi Heritage Loop — dense road-snapped coordinates (204 points)
+     * hugging every street turn, preventing straight chord cuts across buildings.
      */
     val HERITAGE_LOOP: List<LatLng> = listOf(
-        LatLng(9.96750, 76.24420), // Fort Kochi Jetty
-        LatLng(9.96720, 76.24350), // River Rd along waterfront
-        LatLng(9.96670, 76.24250), // Chinese Fishing Nets
-        LatLng(9.96630, 76.24190), // Vasco da Gama Square
-        LatLng(9.96610, 76.24150), // Tower Rd north entrance
-        LatLng(9.96590, 76.24080), // St. Francis Church
-        LatLng(9.96550, 76.24050), // Tower Rd along Parade Ground
-        LatLng(9.96520, 76.24030), // Dutch Cemetery turn
-        LatLng(9.96510, 76.23950), // Dutch Cemetery
-        LatLng(9.96490, 76.23920), // Bastion St intersection
-        LatLng(9.96480, 76.23900), // Princess Street
-        LatLng(9.96460, 76.23940), // Kashi Art Cafe
-        LatLng(9.96450, 76.24020), // Pierce Leslie Bungalow on Peter Celli St
-        LatLng(9.96420, 76.24010), // Peter Celli St south
-        LatLng(9.96390, 76.23920), // Koder House / Rose St
-        LatLng(9.96400, 76.23830), // Burgher Street
-        LatLng(9.96420, 76.23880), // David Hall Gallery
-        LatLng(9.96370, 76.23860), // Rampart Rd
-        LatLng(9.96350, 76.23850), // Indo-Portuguese Museum
-        LatLng(9.96330, 76.23820), // Bishop's House
-        LatLng(9.96310, 76.23760), // Rampart Rd west towards Beach
-        LatLng(9.96300, 76.23700), // Mahatma Gandhi Beach Walk
-        LatLng(9.96450, 76.23780), // Coastal path north
-        LatLng(9.96580, 76.24100), // Fort Kochi Beach Promenade
-        LatLng(9.96670, 76.24250), // Return to Chinese Fishing Nets
+LatLng(9.96747, 76.24439),
+        LatLng(9.96697, 76.24430),
+        LatLng(9.96710, 76.24383),
+        LatLng(9.96715, 76.24315),
+        LatLng(9.96723, 76.24292),
+        LatLng(9.96691, 76.24279),
+        LatLng(9.96663, 76.24261),
+        LatLng(9.96658, 76.24258),
+        LatLng(9.96592, 76.24218),
+        LatLng(9.96581, 76.24212),
+        LatLng(9.96580, 76.24175),
+        LatLng(9.96589, 76.24138),
+        LatLng(9.96599, 76.24141),
+        LatLng(9.96612, 76.24146),
+        LatLng(9.96656, 76.24164),
+        LatLng(9.96709, 76.24194),
+        LatLng(9.96717, 76.24201),
+        LatLng(9.96756, 76.24215),
+        LatLng(9.96768, 76.24184),
+        LatLng(9.96767, 76.24170),
+        LatLng(9.96756, 76.24159),
+        LatLng(9.96737, 76.24150),
+        LatLng(9.96675, 76.24118),
+        LatLng(9.96625, 76.24077),
+        LatLng(9.96606, 76.24060),
+        LatLng(9.96593, 76.24050),
+        LatLng(9.96557, 76.24017),
+        LatLng(9.96550, 76.24010),
+        LatLng(9.96541, 76.24002),
+        LatLng(9.96569, 76.23943),
+        LatLng(9.96569, 76.23939),
+        LatLng(9.96568, 76.23933),
+        LatLng(9.96542, 76.23902),
+        LatLng(9.96530, 76.23893),
+        LatLng(9.96510, 76.23888),
+        LatLng(9.96493, 76.23884),
+        LatLng(9.96485, 76.23902),
+        LatLng(9.96469, 76.23935),
+        LatLng(9.96417, 76.23913),
+        LatLng(9.96326, 76.23885),
+        LatLng(9.96322, 76.23902),
+        LatLng(9.96310, 76.23956),
+        LatLng(9.96301, 76.23990),
+        LatLng(9.96300, 76.23999),
+        LatLng(9.96304, 76.24016),
+        LatLng(9.96315, 76.24037),
+        LatLng(9.96366, 76.24050),
+        LatLng(9.96393, 76.24055),
+        LatLng(9.96424, 76.24066),
+        LatLng(9.96441, 76.24017),
+        LatLng(9.96446, 76.24003),
+        LatLng(9.96469, 76.23935),
+        LatLng(9.96417, 76.23913),
+        LatLng(9.96394, 76.23906),
+        LatLng(9.96326, 76.23885),
+        LatLng(9.96323, 76.23858),
+        LatLng(9.96318, 76.23825),
+        LatLng(9.96311, 76.23801),
+        LatLng(9.96339, 76.23802),
+        LatLng(9.96352, 76.23804),
+        LatLng(9.96388, 76.23817),
+        LatLng(9.96392, 76.23818),
+        LatLng(9.96395, 76.23828),
+        LatLng(9.96395, 76.23830),
+        LatLng(9.96396, 76.23843),
+        LatLng(9.96400, 76.23848),
+        LatLng(9.96468, 76.23876),
+        LatLng(9.96493, 76.23884),
+        LatLng(9.96469, 76.23935),
+        LatLng(9.96417, 76.23913),
+        LatLng(9.96326, 76.23885),
+        LatLng(9.96323, 76.23858),
+        LatLng(9.96323, 76.23855),
+        LatLng(9.96318, 76.23825),
+        LatLng(9.96311, 76.23801),
+        LatLng(9.96300, 76.23791),
+        LatLng(9.96291, 76.23781),
+        LatLng(9.96294, 76.23771),
+        LatLng(9.96289, 76.23761),
+        LatLng(9.96293, 76.23768),
+        LatLng(9.96294, 76.23771),
+        LatLng(9.96291, 76.23781),
+        LatLng(9.96261, 76.23765),
+        LatLng(9.96244, 76.23760),
+        LatLng(9.96227, 76.23759),
+        LatLng(9.96201, 76.23765),
+        LatLng(9.96154, 76.23781),
+        LatLng(9.96109, 76.23799),
+        LatLng(9.96022, 76.23834),
+        LatLng(9.96020, 76.23835),
+        LatLng(9.96003, 76.23843),
+        LatLng(9.95936, 76.23873),
+        LatLng(9.95899, 76.23890),
+        LatLng(9.95854, 76.23911),
+        LatLng(9.95828, 76.23924),
+        LatLng(9.95799, 76.23938),
+        LatLng(9.95776, 76.23950),
+        LatLng(9.95764, 76.23955),
+        LatLng(9.95740, 76.23967),
+        LatLng(9.95684, 76.23993),
+        LatLng(9.95534, 76.24056),
+        LatLng(9.95528, 76.24043),
+        LatLng(9.95504, 76.23988),
+        LatLng(9.95482, 76.23933),
+        LatLng(9.95564, 76.23907),
+        LatLng(9.95682, 76.23871),
+        LatLng(9.95724, 76.23858),
+        LatLng(9.95757, 76.23847),
+        LatLng(9.95762, 76.23846),
+        LatLng(9.95795, 76.23836),
+        LatLng(9.95904, 76.23804),
+        LatLng(9.95924, 76.23839),
+        LatLng(9.95929, 76.23845),
+        LatLng(9.95936, 76.23845),
+        LatLng(9.95954, 76.23839),
+        LatLng(9.95991, 76.23824),
+        LatLng(9.96014, 76.23814),
+        LatLng(9.96034, 76.23806),
+        LatLng(9.96068, 76.23802),
+        LatLng(9.96119, 76.23782),
+        LatLng(9.96141, 76.23778),
+        LatLng(9.96161, 76.23766),
+        LatLng(9.96172, 76.23760),
+        LatLng(9.96189, 76.23752),
+        LatLng(9.96228, 76.23745),
+        LatLng(9.96227, 76.23723),
+        LatLng(9.96246, 76.23720),
+        LatLng(9.96246, 76.23720),
+        LatLng(9.96227, 76.23723),
+        LatLng(9.96228, 76.23745),
+        LatLng(9.96189, 76.23752),
+        LatLng(9.96172, 76.23760),
+        LatLng(9.96161, 76.23766),
+        LatLng(9.96141, 76.23778),
+        LatLng(9.96119, 76.23782),
+        LatLng(9.96068, 76.23802),
+        LatLng(9.96034, 76.23806),
+        LatLng(9.96014, 76.23814),
+        LatLng(9.95991, 76.23824),
+        LatLng(9.95954, 76.23839),
+        LatLng(9.95936, 76.23845),
+        LatLng(9.95929, 76.23845),
+        LatLng(9.95924, 76.23839),
+        LatLng(9.95904, 76.23804),
+        LatLng(9.95795, 76.23836),
+        LatLng(9.95762, 76.23846),
+        LatLng(9.95757, 76.23847),
+        LatLng(9.95724, 76.23858),
+        LatLng(9.95682, 76.23871),
+        LatLng(9.95564, 76.23907),
+        LatLng(9.95482, 76.23933),
+        LatLng(9.95504, 76.23988),
+        LatLng(9.95528, 76.24043),
+        LatLng(9.95534, 76.24056),
+        LatLng(9.95684, 76.23993),
+        LatLng(9.95740, 76.23967),
+        LatLng(9.95764, 76.23955),
+        LatLng(9.95776, 76.23950),
+        LatLng(9.95799, 76.23938),
+        LatLng(9.95828, 76.23924),
+        LatLng(9.95854, 76.23911),
+        LatLng(9.95899, 76.23890),
+        LatLng(9.95936, 76.23873),
+        LatLng(9.96003, 76.23843),
+        LatLng(9.96020, 76.23835),
+        LatLng(9.96022, 76.23834),
+        LatLng(9.96109, 76.23799),
+        LatLng(9.96154, 76.23781),
+        LatLng(9.96201, 76.23765),
+        LatLng(9.96227, 76.23759),
+        LatLng(9.96244, 76.23760),
+        LatLng(9.96261, 76.23765),
+        LatLng(9.96291, 76.23781),
+        LatLng(9.96300, 76.23791),
+        LatLng(9.96311, 76.23801),
+        LatLng(9.96339, 76.23802),
+        LatLng(9.96352, 76.23804),
+        LatLng(9.96388, 76.23817),
+        LatLng(9.96392, 76.23818),
+        LatLng(9.96392, 76.23818),
+        LatLng(9.96395, 76.23828),
+        LatLng(9.96396, 76.23843),
+        LatLng(9.96400, 76.23848),
+        LatLng(9.96468, 76.23876),
+        LatLng(9.96493, 76.23884),
+        LatLng(9.96469, 76.23935),
+        LatLng(9.96446, 76.24003),
+        LatLng(9.96424, 76.24066),
+        LatLng(9.96434, 76.24071),
+        LatLng(9.96492, 76.24097),
+        LatLng(9.96562, 76.24127),
+        LatLng(9.96568, 76.24129),
+        LatLng(9.96570, 76.24130),
+        LatLng(9.96589, 76.24138),
+        LatLng(9.96580, 76.24175),
+        LatLng(9.96581, 76.24212),
+        LatLng(9.96567, 76.24246),
+        LatLng(9.96539, 76.24329),
+        LatLng(9.96531, 76.24366),
+        LatLng(9.96535, 76.24368),
+        LatLng(9.96560, 76.24379),
+        LatLng(9.96584, 76.24389),
+        LatLng(9.96697, 76.24430),
+        LatLng(9.96747, 76.24439),
     )
 
     /**
-     * Kochi Full Day (Fort Kochi + Mattancherry) â€” street network connecting
-     * Fort Kochi to Mattancherry spice lanes via River Rd, Calvathy Rd,
-     * Calvathy Bridge, and Bazaar Rd.
+     * Kochi Full Day (Fort Kochi to Mattancherry) — dense road-snapped coordinates
+     * following waterfront River Rd, Calvathy Canal Bridge, and Bazaar Rd.
      */
     val FULL_DAY_KOCHI: List<LatLng> = listOf(
-        LatLng(9.96670, 76.24250), // Chinese Fishing Nets
-        LatLng(9.96630, 76.24190), // Vasco da Gama Square
-        LatLng(9.96590, 76.24080), // St. Francis Church
-        LatLng(9.96550, 76.24010), // Santa Cruz Cathedral Basilica
-        LatLng(9.96480, 76.23900), // Princess Street
-        LatLng(9.96450, 76.24020), // Peter Celli St
-        // Follow scenic waterfront road eastward
-        LatLng(9.96650, 76.24400), // River Rd east
-        LatLng(9.96600, 76.24600), // River Rd canal view
-        LatLng(9.96500, 76.24900), // Calvathy Rd approach
-        LatLng(9.96380, 76.25200), // Calvathy Rd canal side
-        LatLng(9.96250, 76.25450), // Calvathy Bridge
-        LatLng(9.96100, 76.25600), // Calvathy to Bazaar Rd
-        LatLng(9.95980, 76.25750), // Bazaar Rd spice warehouses
-        LatLng(9.95880, 76.25850), // Bazaar Rd south
-        LatLng(9.95800, 76.25880), // Jew Town Spice Lanes
-        LatLng(9.95780, 76.25920), // Pardesi Synagogue / Synagogue Lane
-        LatLng(9.95820, 76.25900), // Dal Roti Corner Stop
-        LatLng(9.95850, 76.25950), // Mattancherry Palace (Dutch Palace)
-        // Return loop via Palace Rd -> K.B. Jacob Rd -> Rampart Rd -> Fort Kochi
-        LatLng(9.95800, 76.25700), // Palace Rd west
-        LatLng(9.95850, 76.25300), // Cherlai Rd / K.B. Jacob Rd
-        LatLng(9.95950, 76.24800), // K.B. Jacob Rd west
-        LatLng(9.96050, 76.24150), // Indian Naval Maritime Museum
-        LatLng(9.96300, 76.23700), // Mahatma Gandhi Beach Walk
-        LatLng(9.96580, 76.24100), // Fort Kochi Beach
-        LatLng(9.96670, 76.24250), // Complete loop at Chinese Fishing Nets
+LatLng(9.96663, 76.24261),
+        LatLng(9.96691, 76.24279),
+        LatLng(9.96723, 76.24292),
+        LatLng(9.96756, 76.24215),
+        LatLng(9.96768, 76.24184),
+        LatLng(9.96767, 76.24170),
+        LatLng(9.96756, 76.24159),
+        LatLng(9.96737, 76.24150),
+        LatLng(9.96675, 76.24118),
+        LatLng(9.96625, 76.24077),
+        LatLng(9.96606, 76.24060),
+        LatLng(9.96593, 76.24050),
+        LatLng(9.96557, 76.24017),
+        LatLng(9.96550, 76.24010),
+        LatLng(9.96541, 76.24002),
+        LatLng(9.96469, 76.23935),
+        LatLng(9.96417, 76.23913),
+        LatLng(9.96326, 76.23885),
+        LatLng(9.96322, 76.23902),
+        LatLng(9.96310, 76.23956),
+        LatLng(9.96301, 76.23990),
+        LatLng(9.96300, 76.23999),
+        LatLng(9.96304, 76.24016),
+        LatLng(9.96315, 76.24037),
+        LatLng(9.96340, 76.24053),
+        LatLng(9.96380, 76.24109),
+        LatLng(9.96414, 76.24121),
+        LatLng(9.96426, 76.24158),
+        LatLng(9.96441, 76.24193),
+        LatLng(9.96446, 76.24232),
+        LatLng(9.96445, 76.24247),
+        LatLng(9.96442, 76.24293),
+        LatLng(9.96446, 76.24295),
+        LatLng(9.96449, 76.24297),
+        LatLng(9.96488, 76.24335),
+        LatLng(9.96494, 76.24343),
+        LatLng(9.96509, 76.24354),
+        LatLng(9.96531, 76.24366),
+        LatLng(9.96535, 76.24368),
+        LatLng(9.96560, 76.24379),
+        LatLng(9.96584, 76.24389),
+        LatLng(9.96646, 76.24411),
+        LatLng(9.96697, 76.24430),
+        LatLng(9.96695, 76.24435),
+        LatLng(9.96686, 76.24462),
+        LatLng(9.96674, 76.24499),
+        LatLng(9.96662, 76.24543),
+        LatLng(9.96629, 76.24546),
+        LatLng(9.96599, 76.24547),
+        LatLng(9.96562, 76.24548),
+        LatLng(9.96537, 76.24549),
+        LatLng(9.96536, 76.24549),
+        LatLng(9.96512, 76.24553),
+        LatLng(9.96487, 76.24556),
+        LatLng(9.96450, 76.24561),
+        LatLng(9.96414, 76.24562),
+        LatLng(9.96407, 76.24595),
+        LatLng(9.96406, 76.24602),
+        LatLng(9.96401, 76.24621),
+        LatLng(9.96398, 76.24633),
+        LatLng(9.96391, 76.24680),
+        LatLng(9.96389, 76.24705),
+        LatLng(9.96386, 76.24742),
+        LatLng(9.96384, 76.24759),
+        LatLng(9.96383, 76.24769),
+        LatLng(9.96382, 76.24783),
+        LatLng(9.96379, 76.24817),
+        LatLng(9.96378, 76.24829),
+        LatLng(9.96375, 76.24861),
+        LatLng(9.96374, 76.24874),
+        LatLng(9.96373, 76.24926),
+        LatLng(9.96379, 76.24926),
+        LatLng(9.96398, 76.24927),
+        LatLng(9.96440, 76.24922),
+        LatLng(9.96467, 76.24921),
+        LatLng(9.96493, 76.24931),
+        LatLng(9.96499, 76.24903),
+        LatLng(9.96500, 76.24900),
+        LatLng(9.96501, 76.24889),
+        LatLng(9.96499, 76.24903),
+        LatLng(9.96493, 76.24931),
+        LatLng(9.96467, 76.24921),
+        LatLng(9.96440, 76.24922),
+        LatLng(9.96398, 76.24927),
+        LatLng(9.96379, 76.24926),
+        LatLng(9.96373, 76.24926),
+        LatLng(9.96371, 76.24932),
+        LatLng(9.96369, 76.24949),
+        LatLng(9.96368, 76.24953),
+        LatLng(9.96354, 76.24991),
+        LatLng(9.96342, 76.25021),
+        LatLng(9.96322, 76.25060),
+        LatLng(9.96319, 76.25067),
+        LatLng(9.96312, 76.25085),
+        LatLng(9.96310, 76.25090),
+        LatLng(9.96303, 76.25117),
+        LatLng(9.96299, 76.25145),
+        LatLng(9.96291, 76.25178),
+        LatLng(9.96289, 76.25222),
+        LatLng(9.96283, 76.25262),
+        LatLng(9.96283, 76.25276),
+        LatLng(9.96280, 76.25328),
+        LatLng(9.96283, 76.25384),
+        LatLng(9.96283, 76.25429),
+        LatLng(9.96286, 76.25476),
+        LatLng(9.96250, 76.25477),
+        LatLng(9.96182, 76.25478),
+        LatLng(9.96152, 76.25484),
+        LatLng(9.96128, 76.25491),
+        LatLng(9.96080, 76.25504),
+        LatLng(9.96026, 76.25516),
+        LatLng(9.95980, 76.25529),
+        LatLng(9.95966, 76.25533),
+        LatLng(9.95868, 76.25551),
+        LatLng(9.95818, 76.25549),
+        LatLng(9.95781, 76.25548),
+        LatLng(9.95780, 76.25554),
+        LatLng(9.95781, 76.25628),
+        LatLng(9.95781, 76.25652),
+        LatLng(9.95782, 76.25662),
+        LatLng(9.95782, 76.25681),
+        LatLng(9.95782, 76.25701),
+        LatLng(9.95782, 76.25727),
+        LatLng(9.95782, 76.25760),
+        LatLng(9.95782, 76.25800),
+        LatLng(9.95782, 76.25805),
+        LatLng(9.95785, 76.25856),
+        LatLng(9.95844, 76.25856),
+        LatLng(9.95844, 76.25856),
+        LatLng(9.95847, 76.25905),
+        LatLng(9.95847, 76.25905),
     )
 }

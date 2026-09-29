@@ -170,46 +170,56 @@ class MainActivity : FragmentActivity() {
         if (routeExtra != null) {
             pendingRoute = routeExtra
         }
-        val action = intent.action
-        if (action == android.content.Intent.ACTION_SEND && intent.type?.startsWith("text/") == true) {
-            val rawText = intent.getStringExtra(android.content.Intent.EXTRA_TEXT).orEmpty()
-            // Security Bounds & Sanitization (OWASP M4, CWE-20): Clamp length and strip control chars
-            val text = rawText.take(250)
-            val firstLine = text.lines().firstOrNull { it.isNotBlank() && !it.startsWith("http") }
-                ?: text.substringBefore("http").trim()
-            val dest = firstLine.replace(Regex("""[^\w\s.,'#\-]"""), " ").trim().take(80)
-                .ifBlank { "Destination from Google Maps" }
-            guide.app.navigation.MapsCompanionState.onNavStarted(
-                destinationName = dest,
-                etaOrDistance = "Synced from Google Maps",
-                source = guide.app.navigation.CompanionSource.SHARED_INTENT,
-            )
-            app?.updateCompanionCorridor()
-        } else if (action == android.content.Intent.ACTION_VIEW && intent.data?.scheme == "geo") {
-            val uri = intent.data ?: return
-            val schemeSpecific = uri.schemeSpecificPart.orEmpty().take(120)
-            val query = uri.getQueryParameter("q")?.take(120)
-            val rawLabel = query?.substringAfter('(')?.substringBefore(')')
-                ?: query?.replace('+', ' ')
-                ?: "Destination from Google Maps"
-            val label = rawLabel.replace(Regex("""[^\w\s.,'#\-]"""), " ").trim().take(80)
-                .ifBlank { "Destination from Google Maps" }
-            val coords = schemeSpecific.substringBefore('?').split(',')
-            val rawLat = coords.getOrNull(0)?.toDoubleOrNull()
-            val rawLng = coords.getOrNull(1)?.toDoubleOrNull()
+        try {
+            val action = intent.action
+            if (action == android.content.Intent.ACTION_SEND && intent.type?.startsWith("text/") == true) {
+                val rawText = intent.getStringExtra(android.content.Intent.EXTRA_TEXT).orEmpty()
+                // Security Bounds & Sanitization (OWASP M4, CWE-20): Clamp length and strip control chars
+                val text = rawText.take(250)
+                val firstLine = text.lines().firstOrNull { it.isNotBlank() && !it.startsWith("http") }
+                    ?: text.substringBefore("http").trim()
+                val dest = firstLine.replace(Regex("""[^\w\s.,'#\-]"""), " ").trim().take(80)
+                    .ifBlank { "Destination from Google Maps" }
+                guide.app.navigation.MapsCompanionState.onNavStarted(
+                    destinationName = dest,
+                    etaOrDistance = "Synced from Google Maps",
+                    source = guide.app.navigation.CompanionSource.SHARED_INTENT,
+                )
+                app?.updateCompanionCorridor()
+            } else if (action == android.content.Intent.ACTION_VIEW && intent.data?.scheme == "geo") {
+                val uri = intent.data ?: return
+                val schemeSpecific = uri.schemeSpecificPart.orEmpty().take(120)
+                val queryParam = if (uri.isHierarchical) {
+                    runCatching { uri.getQueryParameter("q") }.getOrNull()
+                } else if (schemeSpecific.contains("?q=")) {
+                    schemeSpecific.substringAfter("?q=").substringBefore('&')
+                } else {
+                    null
+                }
+                val rawLabel = queryParam?.substringAfter('(')?.substringBefore(')')
+                    ?: queryParam?.replace('+', ' ')
+                    ?: "Destination from Google Maps"
+                val label = rawLabel.replace(Regex("""[^\w\s.,'#\-]"""), " ").trim().take(80)
+                    .ifBlank { "Destination from Google Maps" }
+                val coords = schemeSpecific.substringBefore('?').split(',')
+                val rawLat = coords.getOrNull(0)?.toDoubleOrNull()
+                val rawLng = coords.getOrNull(1)?.toDoubleOrNull()
 
-            // Strict geographic coordinate bounds verification
-            val validLat = rawLat?.takeIf { !it.isNaN() && !it.isInfinite() && it in -90.0..90.0 }
-            val validLng = rawLng?.takeIf { !it.isNaN() && !it.isInfinite() && it in -180.0..180.0 }
+                // Strict geographic coordinate bounds verification
+                val validLat = rawLat?.takeIf { !it.isNaN() && !it.isInfinite() && it in -90.0..90.0 }
+                val validLng = rawLng?.takeIf { !it.isNaN() && !it.isInfinite() && it in -180.0..180.0 }
 
-            guide.app.navigation.MapsCompanionState.onNavStarted(
-                destinationName = label,
-                destinationLat = validLat,
-                destinationLng = validLng,
-                etaOrDistance = "Synced from Google Maps",
-                source = guide.app.navigation.CompanionSource.SHARED_INTENT,
-            )
-            app?.updateCompanionCorridor()
+                guide.app.navigation.MapsCompanionState.onNavStarted(
+                    destinationName = label,
+                    destinationLat = validLat,
+                    destinationLng = validLng,
+                    etaOrDistance = "Synced from Google Maps",
+                    source = guide.app.navigation.CompanionSource.SHARED_INTENT,
+                )
+                app?.updateCompanionCorridor()
+            }
+        } catch (_: Exception) {
+            // Keep app resilient against non-standard external intents
         }
     }
 
