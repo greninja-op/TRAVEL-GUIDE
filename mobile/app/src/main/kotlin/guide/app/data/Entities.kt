@@ -22,6 +22,7 @@ data class VisitEntity(
 data class NoteEntity(
     @PrimaryKey val poiId: String,
     val text: String,
+    val photoUri: String? = null,
     val updatedAt: Long,
 )
 
@@ -29,11 +30,13 @@ data class NoteEntity(
 interface GuideDao {
     @Insert suspend fun insertVisit(v: VisitEntity)
     @Query("SELECT * FROM visits ORDER BY arrivedAt DESC") suspend fun visits(): List<VisitEntity>
-    @Insert suspend fun upsertNote(n: NoteEntity)
+    @androidx.room.Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE) suspend fun upsertNote(n: NoteEntity)
     @Query("SELECT * FROM notes WHERE poiId = :poiId") suspend fun note(poiId: String): NoteEntity?
+    @Query("DELETE FROM notes WHERE poiId = :poiId") suspend fun deleteNote(poiId: String)
+    @Query("SELECT * FROM notes ORDER BY updatedAt DESC") suspend fun allNotes(): List<NoteEntity>
 }
 
-@Database(entities = [VisitEntity::class, NoteEntity::class], version = 1)
+@Database(entities = [VisitEntity::class, NoteEntity::class], version = 2)
 abstract class GuideDb : RoomDatabase() {
     abstract fun dao(): GuideDao
 
@@ -47,7 +50,7 @@ abstract class GuideDb : RoomDatabase() {
                     context.applicationContext,
                     GuideDb::class.java,
                     "guide.db",
-                ).build().also { INSTANCE = it }
+                ).fallbackToDestructiveMigration().build().also { INSTANCE = it }
             }
     }
 }

@@ -55,7 +55,9 @@ class AppState(private val context: Context) {
     var visits by mutableStateOf<List<VisitRow>>(emptyList())
         private set
 
-    /** Notes keyed by POI id — merged into [visits] as they load. */
+    /** Notes keyed by POI id — personal reflections and photos. */
+    var poiNotes by mutableStateOf<Map<String, PoiNote>>(emptyMap())
+        private set
     private var notes: Map<String, String> = emptyMap()
 
     /**
@@ -314,10 +316,17 @@ class AppState(private val context: Context) {
     fun loadVisits() {
         scope.launch {
             val raw = db.dao().visits()
-            val n = raw.mapNotNull { v ->
-                db.dao().note(v.poiId)?.let { it.poiId to CryptoVault.decrypt(it.text) }
-            }.toMap()
-            notes = n
+            val allNotesList = db.dao().allNotes()
+            val notesMap = allNotesList.associate { entity ->
+                entity.poiId to PoiNote(
+                    poiId = entity.poiId,
+                    text = CryptoVault.decrypt(entity.text),
+                    photoUri = entity.photoUri,
+                    updatedAt = entity.updatedAt,
+                )
+            }
+            poiNotes = notesMap
+            notes = notesMap.mapValues { it.value.text }
             visitedIds = raw.map { it.poiId }.toSet()
             recomputePins()
             visits = raw.map { v ->
@@ -325,18 +334,33 @@ class AppState(private val context: Context) {
                     poiId = v.poiId,
                     name = name(v.poiId),
                     whenText = formatWhen(v.arrivedAt),
-                    note = n[v.poiId],
+                    note = notesMap[v.poiId]?.text,
+                    photoUri = notesMap[v.poiId]?.photoUri,
                 )
             }
         }
     }
 
-    fun saveNote(poiId: String, text: String) {
+    fun getNote(poiId: String): PoiNote? = poiNotes[poiId]
+
+    fun saveNote(poiId: String, text: String, photoUri: String? = null) {
         scope.launch {
             val encryptedText = CryptoVault.encrypt(text)
             db.dao().upsertNote(
-                NoteEntity(poiId = poiId, text = encryptedText, updatedAt = System.currentTimeMillis()),
+                NoteEntity(
+                    poiId = poiId,
+                    text = encryptedText,
+                    photoUri = photoUri ?: poiNotes[poiId]?.photoUri,
+                    updatedAt = System.currentTimeMillis(),
+                ),
             )
+            loadVisits()
+        }
+    }
+
+    fun deleteNote(poiId: String) {
+        scope.launch {
+            db.dao().deleteNote(poiId)
             loadVisits()
         }
     }
@@ -347,3 +371,11 @@ class AppState(private val context: Context) {
         return fmt.format(Date(epochSeconds * 1000))
     }
 }
+
+/** Traveler note attached to a specific POI with optional photo and timestamp. */
+data class PoiNote(
+    val poiId: String,
+    val text: String,
+    val photoUri: String? = null,
+    val updatedAt: Long = System.currentTimeMillis(),
+)

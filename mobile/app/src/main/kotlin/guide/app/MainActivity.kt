@@ -754,11 +754,20 @@ fun GuideApp(
                                 )
                             }
                         } else {
+                            val currentNote = app.getNote(id)
                             PoiDetailScreen(
                                 card = card,
                                 hoursText = card.hours,
                                 openNow = isOpenNow(card.hours),
                                 language = app.appLanguage,
+                                initialNote = currentNote?.text,
+                                initialPhotoUri = currentNote?.photoUri,
+                                onSaveNote = { text, photoUri ->
+                                    app.saveNote(id, text, photoUri)
+                                },
+                                onDeleteNote = {
+                                    app.deleteNote(id)
+                                },
                                 onAddNote = { nav.navigate("history") },
                                 onBack = { nav.popBackStack() },
                                 onStartAudio = {

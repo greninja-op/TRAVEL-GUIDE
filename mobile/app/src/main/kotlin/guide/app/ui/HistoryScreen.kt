@@ -40,7 +40,7 @@ import guide.app.ui.theme.GuideTokens
 import guide.app.ui.theme.Lines
 
 /** One visited stop. [whenText] is a human string the caller formats ("Today, 4:12 pm"). */
-data class VisitRow(val poiId: String, val name: String, val whenText: String, val note: String?)
+data class VisitRow(val poiId: String, val name: String, val whenText: String, val note: String?, val photoUri: String? = null)
 
 /**
  * Trip history: the visited timeline with notes, per-POI note editing, and the

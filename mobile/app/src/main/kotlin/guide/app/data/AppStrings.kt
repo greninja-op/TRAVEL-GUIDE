@@ -797,4 +797,46 @@ object AppStrings {
             history = "நான்கு நூற்றாண்டுகளாக உலகளாவிய வாசனை திரவிய வர்த்தகத்தின் மையமாக விளங்கும் இந்த தெருவில் பழங்கால பொருட்கள் ஏராளமாக கிடைக்கின்றன.",
         ),
     )
+
+    fun myNotesHeader(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "എന്റെ കുറിപ്പുകളും ചിത്രങ്ങളും"
+        AppLanguage.HINDI -> "मेरी नोट्स और तस्वीरें"
+        AppLanguage.TAMIL -> "என் குறிப்புகள் மற்றும் புகைப்படங்கள்"
+        AppLanguage.ENGLISH -> "My Notes & Photos"
+    }
+
+    fun notesPlaceholder(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഈ സ്ഥലത്തെക്കുറിച്ചുള്ള കുറിപ്പുകൾ, ഓർമ്മകൾ ഇവിടെ എഴുതാം..."
+        AppLanguage.HINDI -> "इस स्थान के बारे में अपनी यादें और विचार यहाँ लिखें..."
+        AppLanguage.TAMIL -> "இந்த இடத்தைப் பற்றிய உங்கள் குறிப்புகளை இங்கே எழுதவும்..."
+        AppLanguage.ENGLISH -> "Add your personal reflections, memories, or notes about this place..."
+    }
+
+    fun attachPhotoBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ചിത്രം ചേർക്കുക"
+        AppLanguage.HINDI -> "तस्वीर जोड़ें"
+        AppLanguage.TAMIL -> "புகைப்படம் சேர்க்க"
+        AppLanguage.ENGLISH -> "Attach Photo"
+    }
+
+    fun saveNoteBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കുറിപ്പ് സൂക്ഷിക്കുക"
+        AppLanguage.HINDI -> "नोट सहेजें"
+        AppLanguage.TAMIL -> "குறிப்பை சேமிக்கவும்"
+        AppLanguage.ENGLISH -> "Save Note"
+    }
+
+    fun noteSavedBadge(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സുരക്ഷിതമായി സൂക്ഷിച്ചു"
+        AppLanguage.HINDI -> "सुरक्षित रूप से सहेजा गया"
+        AppLanguage.TAMIL -> "பாதுகாப்பாக சேமிக்கப்பட்டது"
+        AppLanguage.ENGLISH -> "Saved Locally"
+    }
+
+    fun removePhotoBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ചിത്രം നീക്കുക"
+        AppLanguage.HINDI -> "तस्वीर हटाएं"
+        AppLanguage.TAMIL -> "புகைப்படத்தை நீக்கு"
+        AppLanguage.ENGLISH -> "Remove Photo"
+    }
 }

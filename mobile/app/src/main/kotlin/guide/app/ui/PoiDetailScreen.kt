@@ -1,5 +1,14 @@
 package guide.app.ui
 
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +36,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,8 +50,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -72,11 +85,51 @@ fun PoiDetailScreen(
     hoursText: String?,
     openNow: Boolean,
     language: guide.app.data.AppLanguage = guide.app.data.AppLanguage.ENGLISH,
+    initialNote: String? = null,
+    initialPhotoUri: String? = null,
+    onSaveNote: (text: String, photoUri: String?) -> Unit = { _, _ -> },
+    onDeleteNote: () -> Unit = {},
     onAddNote: () -> Unit = {},
     onBack: () -> Unit = {},
     onStartAudio: () -> Unit = {},
 ) {
+    val context = LocalContext.current
     var saved by remember { mutableStateOf(false) }
+    var noteText by remember(initialNote) { mutableStateOf(initialNote.orEmpty()) }
+    var attachedPhotoUri by remember(initialPhotoUri) { mutableStateOf(initialPhotoUri) }
+    var isSavedFeedback by remember { mutableStateOf(false) }
+
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri: Uri? ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                )
+            }
+            attachedPhotoUri = uri.toString()
+            onSaveNote(noteText, uri.toString())
+            isSavedFeedback = true
+        }
+    }
+
+    val photoBitmap: Bitmap? = remember(attachedPhotoUri) {
+        attachedPhotoUri?.let { uriStr ->
+            runCatching {
+                val uri = Uri.parse(uriStr)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri))
+                } else {
+                    context.contentResolver.openInputStream(uri)?.use { stream ->
+                        BitmapFactory.decodeStream(stream)
+                    }
+                }
+            }.getOrNull()
+        }
+    }
+
     val statusInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val navInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
@@ -336,6 +389,122 @@ fun PoiDetailScreen(
                                         text = guide.app.data.AppStrings.spontaneousGuideSubtitle(language),
                                         style = GuideTokens.Caption,
                                         color = GuideTokens.Text2,
+                                    )
+                                }
+                            }
+                        }
+
+                        // ---- Personal Notes & Photos Section -----------------
+                        Spacer(Modifier.height(GuideTokens.Space.lg))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            SectionHeader(guide.app.data.AppStrings.myNotesHeader(language))
+                            if (isSavedFeedback) {
+                                StatusTag(
+                                    text = guide.app.data.AppStrings.noteSavedBadge(language),
+                                    color = GuideTokens.Success,
+                                    icon = GuideIcons.Check,
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(GuideTokens.Space.xs))
+                        GuideCard {
+                            Column {
+                                OutlinedTextField(
+                                    value = noteText,
+                                    onValueChange = {
+                                        noteText = it
+                                        isSavedFeedback = false
+                                    },
+                                    placeholder = {
+                                        Text(
+                                            text = guide.app.data.AppStrings.notesPlaceholder(language),
+                                            style = GuideTokens.Chrome,
+                                            color = GuideTokens.Text2,
+                                        )
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    minLines = 3,
+                                    maxLines = 6,
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedContainerColor = GuideTokens.Surface2,
+                                        unfocusedContainerColor = GuideTokens.Surface2,
+                                        focusedBorderColor = GuideTokens.Primary,
+                                        unfocusedBorderColor = GuideTokens.Border,
+                                        focusedTextColor = GuideTokens.Text,
+                                        unfocusedTextColor = GuideTokens.Text,
+                                    ),
+                                    textStyle = GuideTokens.Body,
+                                )
+
+                                if (photoBitmap != null) {
+                                    Spacer(Modifier.height(GuideTokens.Space.sm))
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(180.dp)
+                                            .clip(RoundedCornerShape(14.dp)),
+                                    ) {
+                                        Image(
+                                            bitmap = photoBitmap.asImageBitmap(),
+                                            contentDescription = "Personal note photo",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = Color(0xCC000000),
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .padding(8.dp)
+                                                .size(32.dp),
+                                            onClick = {
+                                                attachedPhotoUri = null
+                                                onSaveNote(noteText, null)
+                                            },
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(
+                                                    imageVector = GuideIcons.X,
+                                                    contentDescription = guide.app.data.AppStrings.removePhotoBtn(language),
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(16.dp),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Spacer(Modifier.height(GuideTokens.Space.md))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    GuideButton(
+                                        text = guide.app.data.AppStrings.attachPhotoBtn(language),
+                                        icon = GuideIcons.Camera,
+                                        variant = GuideButtonVariant.Tonal,
+                                        modifier = Modifier.weight(1f),
+                                        onClick = {
+                                            photoPicker.launch(
+                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                                            )
+                                        },
+                                    )
+                                    GuideButton(
+                                        text = guide.app.data.AppStrings.saveNoteBtn(language),
+                                        icon = GuideIcons.Check,
+                                        variant = GuideButtonVariant.Primary,
+                                        modifier = Modifier.weight(1f),
+                                        onClick = {
+                                            onSaveNote(noteText, attachedPhotoUri)
+                                            isSavedFeedback = true
+                                        },
                                     )
                                 }
                             }

@@ -512,6 +512,24 @@ object GuideIcons {
         arcTo(7f, 7f, 0f, false, false, 7f, 2.5f)
         moveTo(2f, 2f); lineTo(22f, 22f)
     }
+
+    /** Camera icon (Lucide 24x24) for attaching photos to personal notes. */
+    val Camera: ImageVector = icon("Camera") {
+        moveTo(14.5f, 4f); lineTo(16.5f, 7f); horizontalLineTo(20f)
+        arcToRelative(2f, 2f, 0f, false, true, 2f, 2f); verticalLineToRelative(11f)
+        arcToRelative(2f, 2f, 0f, false, true, -2f, 2f); horizontalLineTo(4f)
+        arcToRelative(2f, 2f, 0f, false, true, -2f, -2f); verticalLineTo(9f)
+        arcToRelative(2f, 2f, 0f, false, true, 2f, -2f); horizontalLineTo(7.5f)
+        lineTo(9.5f, 4f); horizontalLineTo(14.5f); close()
+        moveTo(12f, 18f); arcToRelative(5f, 5f, 0f, true, false, 0f, -10f)
+        arcToRelative(5f, 5f, 0f, false, false, 0f, 10f); close()
+    }
+
+    /** Close / dismiss / remove icon (Lucide 24x24). */
+    val X: ImageVector = icon("X") {
+        moveTo(18f, 6f); lineTo(6f, 18f)
+        moveTo(6f, 6f); lineTo(18f, 18f)
+    }
 }
 
 /**
