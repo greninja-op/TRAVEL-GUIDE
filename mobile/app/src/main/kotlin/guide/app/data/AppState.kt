@@ -98,6 +98,7 @@ class AppState(private val context: Context) {
 
         // Update GuideService & Sarvam Indic language in real-time
         GuideService.setLanguage(context, lang.code)
+        refreshNearby()
     }
 
     /** Pack inventory for the offline-packs screen. */
@@ -210,11 +211,11 @@ class AppState(private val context: Context) {
             val detail = if (lat != null && lng != null) {
                 val d = Geo.distanceM(lat, lng, c.lat, c.lng)
                 when {
-                    d < 1000 -> "${d.toInt()} m away"
-                    else -> String.format(Locale.US, "%.1f km away", d / 1000)
+                    d < 1000 -> AppStrings.distanceMeters(appLanguage, d.toInt())
+                    else -> AppStrings.distanceKm(appLanguage, String.format(Locale.US, "%.1f", d / 1000))
                 }
             } else {
-                "Distance unknown — no GPS fix yet"
+                AppStrings.distanceGpsWaiting(appLanguage)
             }
             NearbyRow(id = c.id, name = c.name, detail = detail, layer = c.layer)
         }

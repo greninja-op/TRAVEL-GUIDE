@@ -80,10 +80,18 @@ fun NearbyScreen(
     seeingAnswer: String?,
     onSeeingTap: () -> Unit,
     onRowTap: (String) -> Unit,
+    language: guide.app.data.AppLanguage = guide.app.data.AppLanguage.ENGLISH,
 ) {
     var layer by rememberSaveable { mutableStateOf<String?>(null) }
     val shown = remember(rows, layer) { if (layer == null) rows else rows.filter { it.layer == layer } }
-    val filters = remember { FILTERS }
+    val filters = remember(language, rows.size) {
+        listOf(
+            LayerFilter(null, guide.app.data.AppStrings.chipAllStops(language, rows.size)),
+            LayerFilter("heritage", guide.app.data.AppStrings.chipHeritage(language)),
+            LayerFilter("food", guide.app.data.AppStrings.chipFood(language)),
+            LayerFilter("stay", guide.app.data.AppStrings.chipStays(language)),
+        )
+    }
     val listState = rememberLazyListState()
 
     LazyColumn(
@@ -102,9 +110,9 @@ fun NearbyScreen(
         // ---- Header: what this screen is, then the one action -------------
         item(key = "header") {
             Column {
-                Text("Nearby", style = GuideTokens.Heading, maxLines = Lines.Single)
+                Text(guide.app.data.AppStrings.nearbyTitle(language), style = GuideTokens.Heading, maxLines = Lines.Single)
                 Text(
-                    text = "Places near your path, sorted by distance.",
+                    text = guide.app.data.AppStrings.nearbySubtitle(language),
                     style = GuideTokens.Chrome,
                     color = GuideTokens.Text2,
                     maxLines = Lines.Single,
@@ -115,13 +123,13 @@ fun NearbyScreen(
         }
 
         item(key = "seeing") {
-            SeeingEntry(answer = seeingAnswer, onClick = onSeeingTap)
+            SeeingEntry(answer = seeingAnswer, onClick = onSeeingTap, language = language)
         }
 
         // ---- Layer filter: pills, scrolling not wrapping -------------------
         item(key = "filters") {
             Column {
-                SectionHeader("Filter by layer")
+                SectionHeader(guide.app.data.AppStrings.filterByLayer(language))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -171,7 +179,7 @@ fun NearbyScreen(
         if (shown.isNotEmpty()) {
             item(key = "count") {
                 Text(
-                    text = countLabel(shown.size),
+                    text = guide.app.data.AppStrings.stopsInRange(language, shown.size),
                     style = GuideTokens.Caption,
                     maxLines = Lines.Single,
                     overflow = TextOverflow.Ellipsis,
@@ -182,7 +190,7 @@ fun NearbyScreen(
 
         // ---- The list -------------------------------------------------------
         items(shown, key = { it.id }) { row ->
-            NearbyPoiCard(row = row, onClick = { onRowTap(row.id) })
+            NearbyPoiCard(row = row, language = language, onClick = { onRowTap(row.id) })
         }
 
         if (shown.isEmpty()) {
@@ -220,19 +228,8 @@ fun NearbyScreen(
 
 private data class LayerFilter(val value: String?, val label: String)
 
-private val FILTERS = listOf(
-    LayerFilter(null, "All"),
-    LayerFilter("heritage", "Heritage"),
-    LayerFilter("food", "Food"),
-    LayerFilter("stay", "Stay"),
-)
-
-/** Counted noun — never "1 stops" (microcopy: pluralize, do not do "item(s)"). */
-private fun countLabel(n: Int): String =
-    if (n == 1) "1 stop in range" else "$n stops in range"
-
 @Composable
-private fun NearbyPoiCard(row: NearbyRow, onClick: () -> Unit) {
+private fun NearbyPoiCard(row: NearbyRow, language: guide.app.data.AppLanguage, onClick: () -> Unit) {
     GuideCard(onClick = onClick) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -254,7 +251,7 @@ private fun NearbyPoiCard(row: NearbyRow, onClick: () -> Unit) {
             Spacer(Modifier.size(GuideTokens.Space.md))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = layerWord(row.layer).uppercase(),
+                    text = layerWord(row.layer, language).uppercase(),
                     style = GuideTokens.Caption,
                     color = when (row.layer) {
                         "food" -> GuideTokens.Highlight
@@ -263,8 +260,9 @@ private fun NearbyPoiCard(row: NearbyRow, onClick: () -> Unit) {
                     },
                 )
                 Spacer(Modifier.size(2.dp))
+                val localizedPoi = guide.app.data.AppStrings.getLocalizedPoi(row.id, language)
                 Text(
-                    text = row.name,
+                    text = localizedPoi?.name ?: row.name,
                     style = GuideTokens.Title,
                     color = GuideTokens.Text,
                     maxLines = 1,
@@ -282,7 +280,7 @@ private fun NearbyPoiCard(row: NearbyRow, onClick: () -> Unit) {
             val badgeText = when {
                 row.detail.contains("km") -> row.detail.substringBefore(" ·")
                 row.detail.contains("m ") || row.detail.endsWith("m") -> row.detail.substringBefore(" ·")
-                else -> "Explore"
+                else -> guide.app.data.AppStrings.explore(language)
             }
             Surface(
                 shape = RoundedCornerShape(GuideTokens.ChipRadius),
@@ -307,10 +305,10 @@ private fun layerIcon(layer: String): ImageVector = when (layer) {
     else -> GuideIcons.Heritage
 }
 
-private fun layerWord(layer: String): String = when (layer) {
-    "food" -> "Food"
-    "stay" -> "Stay"
-    else -> "Heritage"
+private fun layerWord(layer: String, language: guide.app.data.AppLanguage): String = when (layer) {
+    "food" -> guide.app.data.AppStrings.chipFood(language)
+    "stay" -> guide.app.data.AppStrings.chipStays(language)
+    else -> guide.app.data.AppStrings.chipHeritage(language)
 }
 
 /**
@@ -319,7 +317,7 @@ private fun layerWord(layer: String): String = when (layer) {
  * single thing the user reaches for without walking anywhere.
  */
 @Composable
-private fun SeeingEntry(answer: String?, onClick: () -> Unit) {
+private fun SeeingEntry(answer: String?, language: guide.app.data.AppLanguage, onClick: () -> Unit) {
     GuideCard(raised = true) {
         Pressable(onClick = onClick) {
             Row(
@@ -334,10 +332,9 @@ private fun SeeingEntry(answer: String?, onClick: () -> Unit) {
                 )
                 Spacer(Modifier.size(GuideTokens.Space.md))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("What am I seeing?", style = GuideTokens.Title, maxLines = Lines.Single)
+                    Text(guide.app.data.AppStrings.whatAmISeeing(language), style = GuideTokens.Title, maxLines = Lines.Single)
                     Text(
-                        text = "Point the phone at what's in front of you. The guide names it " +
-                            "from where you're standing.",
+                        text = guide.app.data.AppStrings.seeingPrompt(language),
                         style = GuideTokens.Chrome,
                         maxLines = Lines.Supporting,
                         overflow = TextOverflow.Ellipsis,
@@ -354,7 +351,7 @@ private fun SeeingEntry(answer: String?, onClick: () -> Unit) {
         }
         // "+600 m along the loop" never arrives empty — say why it's blank.
         Text(
-            text = answer ?: "Waiting on a GPS fix — this answers once location is locked.",
+            text = answer ?: guide.app.data.AppStrings.gpsWaiting(language),
             style = if (answer == null) GuideTokens.Chrome else GuideTokens.Story,
             maxLines = Lines.Unbounded,
             modifier = Modifier.padding(top = GuideTokens.Space.md),

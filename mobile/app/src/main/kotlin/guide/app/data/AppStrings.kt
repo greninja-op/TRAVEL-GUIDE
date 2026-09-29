@@ -50,10 +50,80 @@ object AppStrings {
 
     // ---- Primary Actions ----------------------------------------------------
     fun whatAmISeeing(lang: AppLanguage): String = when (lang) {
-        AppLanguage.MALAYALAM -> "ഞാൻ എന്താണ് കാണുന്നത്?"
-        AppLanguage.HINDI -> "मैं क्या देख रहा हूँ?"
-        AppLanguage.TAMIL -> "நான் என்ன பார்க்கிறேன்?"
+        AppLanguage.MALAYALAM -> "എന്താണ് മുന്നിൽ?"
+        AppLanguage.HINDI -> "क्या दिख रहा है?"
+        AppLanguage.TAMIL -> "என்ன தெரிகிறது?"
         AppLanguage.ENGLISH -> "What am I seeing?"
+    }
+
+    fun nearbyTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "അടുത്തുള്ളവ"
+        AppLanguage.HINDI -> "आस-पास के स्थान"
+        AppLanguage.TAMIL -> "அருகிலுள்ள இடங்கள்"
+        AppLanguage.ENGLISH -> "Nearby"
+    }
+
+    fun nearbySubtitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "നിങ്ങളുടെ വഴിക്കരികിലുള്ള സ്ഥലങ്ങൾ, ദൂര ക്രമത്തിൽ."
+        AppLanguage.HINDI -> "आपके रास्ते के पास के स्थान, दूरी के अनुसार।"
+        AppLanguage.TAMIL -> "உங்கள் பாதைக்கு அருகிலுள்ள இடங்கள், தொலைவு வரிசையில்."
+        AppLanguage.ENGLISH -> "Places near your path, sorted by distance."
+    }
+
+    fun filterByLayer(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "വിഭാഗം തിരഞ്ഞെടുക്കുക"
+        AppLanguage.HINDI -> "श्रेणी चुनें"
+        AppLanguage.TAMIL -> "வகை வடிகட்டு"
+        AppLanguage.ENGLISH -> "Filter by layer"
+    }
+
+    fun explore(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കാണുക"
+        AppLanguage.HINDI -> "देखें"
+        AppLanguage.TAMIL -> "பார்"
+        AppLanguage.ENGLISH -> "Explore"
+    }
+
+    fun stopsInRange(lang: AppLanguage, count: Int): String = when (lang) {
+        AppLanguage.MALAYALAM -> "$count സ്ഥലങ്ങൾ പരിധിയിലുണ്ട്"
+        AppLanguage.HINDI -> "$count स्थान सीमा में हैं"
+        AppLanguage.TAMIL -> "$count இடங்கள் வரம்பில் உள்ளன"
+        AppLanguage.ENGLISH -> "$count stops in range"
+    }
+
+    fun seeingPrompt(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഫോൺ മുന്നിലെ കാഴ്ചയിലേക്ക് തിരിക്കുക. നിങ്ങൾ നിൽക്കുന്നിടത്തുനിന്ന് ഗൈഡ് വിവരങ്ങൾ പറയും."
+        AppLanguage.HINDI -> "फ़ोन को अपने सामने की ओर करें। गाइड स्थान का विवरण देगा।"
+        AppLanguage.TAMIL -> "தொலைபேசியை முன்நோக்கி திருப்பவும். நீங்கள் இருக்கும் இடத்திலிருந்து வழிகாட்டி விவரிக்கும்."
+        AppLanguage.ENGLISH -> "Point the phone at what's in front of you. The guide names it from where you're standing."
+    }
+
+    fun gpsWaiting(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ജിപിഎസ് സിഗ്നലിനായി കാത്തിരിക്കുന്നു..."
+        AppLanguage.HINDI -> "जीपीएस सिग्नल की प्रतीक्षा कर रहा है..."
+        AppLanguage.TAMIL -> "ஜிபிஎஸ் சிக்னலுக்காக காத்திருக்கிறது..."
+        AppLanguage.ENGLISH -> "Waiting on a GPS fix — this answers once location is locked."
+    }
+
+    fun distanceMeters(lang: AppLanguage, meters: Int): String = when (lang) {
+        AppLanguage.MALAYALAM -> "$meters മീറ്റർ ദൂരം"
+        AppLanguage.HINDI -> "$meters मीटर दूर"
+        AppLanguage.TAMIL -> "$meters மீட்டர் தொலைவு"
+        AppLanguage.ENGLISH -> "$meters m away"
+    }
+
+    fun distanceKm(lang: AppLanguage, kmFormatted: String): String = when (lang) {
+        AppLanguage.MALAYALAM -> "$kmFormatted കി.മീ ദൂരം"
+        AppLanguage.HINDI -> "$kmFormatted किमी दूर"
+        AppLanguage.TAMIL -> "$kmFormatted கி.மீ தொலைவு"
+        AppLanguage.ENGLISH -> "$kmFormatted km away"
+    }
+
+    fun distanceGpsWaiting(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ജിപിഎസ് തിരയുന്നു..."
+        AppLanguage.HINDI -> "जीपीएस की प्रतीक्षा..."
+        AppLanguage.TAMIL -> "ஜிபிஎஸ் காத்திருக்கிறது..."
+        AppLanguage.ENGLISH -> "Waiting for GPS..."
     }
 
     fun story(lang: AppLanguage): String = when (lang) {
@@ -247,6 +317,12 @@ object AppStrings {
     }
 
     private val POIS_ML = mapOf(
+        "vasco-square" to LocalizedPoi(
+            name = "വാസ്കോ ഡ ഗാമ സ്ക്വയർ",
+            summary = "പോർച്ചുഗീസ് നാവികന്റെ പേരിൽ അറിയപ്പെടുന്ന കടൽത്തീര ചത്വരം; സജീവമായ വഴിയോര ഭക്ഷണശാലകൾ.",
+            secret = "1700-കളിൽ ഇവിടെയുണ്ടായിരുന്ന ഡച്ച് വിളക്കുമാടത്തിൽ എണ്ണവിളക്കുകൾ കത്തിച്ചാണ് കപ്പലുകൾക്ക് വഴികാട്ടിയിരുന്നത്.",
+            history = "1502-ൽ ആദ്യത്തെ വ്യാപാര കോട്ട സ്ഥാപിച്ച പോർച്ചുഗീസ് നാവികൻ വാസ്കോ ഡ ഗാമയുടെ സ്മരണാർത്ഥം നാമകരണം ചെയ്ത ചത്വരം. തണൽ വിരിക്കുന്ന മഴമരങ്ങൾക്ക് കീഴെ വൈകുന്നേരങ്ങളിൽ മീൻ വിഭവങ്ങൾ തയ്യാറാക്കുന്ന വഴിയോരക്കടകൾ ഇവിടെ സജീവമാണ്.",
+        ),
         "chinese-fishing-nets" to LocalizedPoi(
             name = "ചീനവലകൾ",
             summary = "14-ാം നൂറ്റാണ്ടിൽ കുബ്ലൈ ഖാന്റെ കാലത്ത് എത്തിയ ഭീമൻ തടിയും മുളയും കൊണ്ടുണ്ടാക്കിയ ചീനവലകൾ.",
@@ -292,6 +368,12 @@ object AppStrings {
     )
 
     private val POIS_HI = mapOf(
+        "vasco-square" to LocalizedPoi(
+            name = "वास्को द गामा स्क्वायर",
+            summary = "पुर्तगाली खोजकर्ता के नाम पर बना तटीय चौक; शाम के समय ताज़ा समुद्री भोजन के स्टॉल।",
+            secret = "1700 के दशक में यहाँ एक डच नौसैनिक संकेत स्तंभ था, जो तेल के दीयों से मसाला जहाजों को रास्ता दिखाता था।",
+            history = "1502 में यूरोप का पहला भारतीय व्यापारिक किला स्थापित करने वाले पुर्तगाली नाविक वास्को द गामा के नाम पर बना यह चौक फोर्ट कोच्चि का मुख्य प्रवेश बिंदु है।",
+        ),
         "chinese-fishing-nets" to LocalizedPoi(
             name = "चीनी मछली पकड़ने के जाल",
             summary = "14वीं सदी के विशाल कैंटिलीवर जाल, जो भारी पत्थरों के संतुलन पर चलते हैं।",
@@ -337,6 +419,12 @@ object AppStrings {
     )
 
     private val POIS_TA = mapOf(
+        "vasco-square" to LocalizedPoi(
+            name = "வாஸ்கோட காமா சதுக்கம்",
+            summary = "போர்த்துகீசிய மாலுமியின் பெயரில் அமைந்த கடற்கரை சதுக்கம்; கடல் உணவு அங்காடிகள்.",
+            secret = "1700 களில் இங்கு அமைந்திருந்த டச்சு விளக்குக்கம்பம் எண்ணெய் விளக்குகளால் கப்பல்களுக்கு வழிகாட்டியது.",
+            history = "1502 இல் முதல் வர்த்தகக் கோட்டையை அமைத்த வாஸ்கோட காமாவின் நினைவாக பெயரிடப்பட்ட இந்த கடலோர சதுக்கம் வரலாற்று நடைபயணத்தின் தொடக்க புள்ளியாகும்.",
+        ),
         "chinese-fishing-nets" to LocalizedPoi(
             name = "சீன மீன்பிடி வலைகள்",
             summary = "14 ஆம் நூற்றாண்டின் பழமையான சமநிலை பாறை மீன்பிடி வலைகள்.",

@@ -676,6 +676,7 @@ fun GuideApp(
                                 seeingAnswer = seeingAnswer,
                                 onSeeingTap = onSeeingTap,
                                 onRowTap = { id -> nav.navigate("poi/$id") },
+                                language = app.appLanguage,
                             )
                         }
                     }
