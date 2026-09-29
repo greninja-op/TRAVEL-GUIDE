@@ -120,6 +120,10 @@ class AppState(context: Context) {
         recomputePins()
         refreshNearby()
         loadVisits()
+
+        guide.app.navigation.MapsCompanionState.onNavStateChanged = {
+            updateCompanionCorridor()
+        }
     }
 
     private fun recomputePins() {

@@ -48,6 +48,8 @@ object MapsCompanionState {
     var corridorPoiIds by mutableStateOf<Set<String>>(emptySet())
         private set
 
+    var onNavStateChanged: (() -> Unit)? = null
+
     /**
      * Called when a navigation session is detected or updated from Google Maps.
      */
@@ -68,6 +70,7 @@ object MapsCompanionState {
             source = source,
             isActive = true,
         )
+        onNavStateChanged?.invoke()
     }
 
     fun onNavUpdated(
@@ -79,11 +82,13 @@ object MapsCompanionState {
             etaOrDistance = etaOrDistance ?: s.etaOrDistance,
             nextManeuver = nextManeuver ?: s.nextManeuver,
         )
+        onNavStateChanged?.invoke()
     }
 
     fun onNavEnded() {
         currentSession = null
         corridorPoiIds = emptySet()
+        onNavStateChanged?.invoke()
     }
 
     /**

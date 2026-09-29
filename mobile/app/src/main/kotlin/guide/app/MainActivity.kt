@@ -201,6 +201,7 @@ class MainActivity : FragmentActivity() {
         super.onResume()
         enforceHighRefreshRate()
         mapView?.onResume()
+        appState?.updateCompanionCorridor()
     }
 
     override fun onPause() {
