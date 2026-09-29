@@ -71,6 +71,7 @@ fun PoiDetailScreen(
     card: PackLoader.PoiCard,
     hoursText: String?,
     openNow: Boolean,
+    language: guide.app.data.AppLanguage = guide.app.data.AppLanguage.ENGLISH,
     onAddNote: () -> Unit = {},
     onBack: () -> Unit = {},
     onStartAudio: () -> Unit = {},
@@ -78,6 +79,14 @@ fun PoiDetailScreen(
     var saved by remember { mutableStateOf(false) }
     val statusInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val navInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
+    val localized = remember(card.id, language) {
+        guide.app.data.AppStrings.getLocalizedPoi(card.id, language)
+    }
+    val displayName = localized?.name ?: card.name
+    val displaySummary = localized?.summary ?: card.summary
+    val displaySecret = localized?.secret ?: card.funFacts.firstOrNull()
+    val displayHistory = localized?.history ?: card.history
 
     Box(modifier = Modifier.fillMaxSize().background(GuideTokens.Surface)) {
         LazyColumn(
@@ -93,7 +102,7 @@ fun PoiDetailScreen(
                 ) {
                     Image(
                         painter = painterResource(id = PoiImageResolver.getDrawableForPoi(card.id)),
-                        contentDescription = card.name,
+                        contentDescription = displayName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -145,7 +154,7 @@ fun PoiDetailScreen(
                     ) {
                         // Place Title
                         Text(
-                            text = card.name,
+                            text = displayName,
                             style = GuideTokens.Heading.copy(fontWeight = FontWeight.Bold),
                             color = GuideTokens.Text,
                             maxLines = Lines.Title,
@@ -160,17 +169,17 @@ fun PoiDetailScreen(
                             horizontalArrangement = Arrangement.spacedBy(GuideTokens.Space.sm),
                         ) {
                             DetailPill(
-                                label = layerWord(card.layer),
+                                label = layerWord(card.layer, language),
                                 icon = layerIcon(card.layer),
                             )
-                            HoursTag(hoursText = hoursText, openNow = openNow)
+                            HoursTag(hoursText = hoursText, openNow = openNow, language = language)
                         }
 
                         Spacer(Modifier.height(GuideTokens.Space.base))
 
                         // Essence Summary
                         Text(
-                            text = card.summary,
+                            text = displaySummary,
                             style = GuideTokens.Body.copy(
                                 fontSize = 16.sp,
                                 lineHeight = 24.sp,
@@ -180,8 +189,7 @@ fun PoiDetailScreen(
                         )
 
                         // Highlighted Secret / Surprise Callout Card
-                        val surpriseFact = card.funFacts.firstOrNull()
-                        if (surpriseFact != null) {
+                        if (displaySecret != null) {
                             Spacer(Modifier.height(GuideTokens.Space.base))
                             Surface(
                                 shape = RoundedCornerShape(16.dp),
@@ -210,7 +218,7 @@ fun PoiDetailScreen(
                                     Spacer(Modifier.width(GuideTokens.Space.md))
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = "HIDDEN SECRET & CURIOSITY",
+                                            text = guide.app.data.AppStrings.hiddenSecret(language),
                                             style = GuideTokens.Caption.copy(
                                                 fontWeight = FontWeight.Bold,
                                                 letterSpacing = 0.5.sp,
@@ -219,7 +227,7 @@ fun PoiDetailScreen(
                                         )
                                         Spacer(Modifier.height(2.dp))
                                         Text(
-                                            text = surpriseFact,
+                                            text = displaySecret,
                                             style = GuideTokens.Body.copy(
                                                 fontWeight = FontWeight.Medium,
                                                 lineHeight = 22.sp,
@@ -233,10 +241,10 @@ fun PoiDetailScreen(
 
                         // The Living Story Section
                         Spacer(Modifier.height(GuideTokens.Space.lg))
-                        SectionHeader("The living story")
+                        SectionHeader(guide.app.data.AppStrings.livingStory(language))
                         Spacer(Modifier.height(GuideTokens.Space.xs))
                         Text(
-                            text = card.history,
+                            text = displayHistory,
                             style = GuideTokens.Story,
                             color = GuideTokens.Text,
                             lineHeight = 26.sp,
@@ -245,7 +253,7 @@ fun PoiDetailScreen(
                         // What to Spot in Person (The Field Checklist)
                         if (card.seeList.isNotEmpty()) {
                             Spacer(Modifier.height(GuideTokens.Space.lg))
-                            SectionHeader("What to spot in person")
+                            SectionHeader(guide.app.data.AppStrings.whatToSpot(language))
                             Spacer(Modifier.height(GuideTokens.Space.xs))
                             GuideCard {
                                 card.seeList.forEachIndexed { index, item ->
@@ -271,7 +279,7 @@ fun PoiDetailScreen(
                         // Additional Lore & Curiosities
                         if (card.funFacts.size > 1) {
                             Spacer(Modifier.height(GuideTokens.Space.lg))
-                            SectionHeader("Heritage lore & curiosities")
+                            SectionHeader(guide.app.data.AppStrings.heritageLore(language))
                             Spacer(Modifier.height(GuideTokens.Space.xs))
                             GuideCard {
                                 card.funFacts.drop(1).forEachIndexed { index, fact ->
@@ -320,12 +328,12 @@ fun PoiDetailScreen(
                                 Spacer(Modifier.width(GuideTokens.Space.md))
                                 Column {
                                     Text(
-                                        text = "Spontaneous Spoken Guide",
+                                        text = guide.app.data.AppStrings.spontaneousGuideTitle(language),
                                         style = GuideTokens.Label,
                                         color = GuideTokens.Text,
                                     )
                                     Text(
-                                        text = "Double-tap your wireless earbud anytime while standing here for unscripted oral storytelling.",
+                                        text = guide.app.data.AppStrings.spontaneousGuideSubtitle(language),
                                         style = GuideTokens.Caption,
                                         color = GuideTokens.Text2,
                                     )
@@ -406,7 +414,7 @@ fun PoiDetailScreen(
             ) {
                 // Wide Sunset Coral CTA Button
                 GuideButton(
-                    text = "Start Audio Story",
+                    text = guide.app.data.AppStrings.startAudioStory(language),
                     onClick = onStartAudio,
                     variant = GuideButtonVariant.Primary,
                     icon = GuideIcons.Speak,
@@ -469,20 +477,20 @@ private fun NumberBadge(number: Int) {
 
 /** Open / closed tag. */
 @Composable
-private fun HoursTag(hoursText: String?, openNow: Boolean) {
+private fun HoursTag(hoursText: String?, openNow: Boolean, language: guide.app.data.AppLanguage) {
     if (hoursText != null) {
-        val word = if (openNow) "Open now · $hoursText" else "Closed"
+        val word = if (openNow) guide.app.data.AppStrings.openNow(language, hoursText) else guide.app.data.AppStrings.closedNow(language)
         val color = if (openNow) GuideTokens.Success else GuideTokens.Danger
         StatusTag(text = word, color = color, icon = GuideIcons.Clock)
     } else {
-        StatusTag(text = "Open 24/7 · Always accessible", color = GuideTokens.Success, icon = GuideIcons.Clock)
+        StatusTag(text = guide.app.data.AppStrings.openAlways(language), color = GuideTokens.Success, icon = GuideIcons.Clock)
     }
 }
 
-private fun layerWord(layer: String): String = when (layer) {
-    "food" -> "Food"
-    "stay" -> "Stay"
-    else -> "Heritage"
+private fun layerWord(layer: String, language: guide.app.data.AppLanguage): String = when (layer) {
+    "food" -> guide.app.data.AppStrings.chipFood(language)
+    "stay" -> guide.app.data.AppStrings.chipStays(language)
+    else -> guide.app.data.AppStrings.chipHeritage(language)
 }
 
 private fun layerIcon(layer: String): ImageVector = when (layer) {

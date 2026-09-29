@@ -71,6 +71,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
 import guide.app.companion.TravelGuideAccessibilityService
+import guide.app.data.AppLanguage
+import guide.app.data.AppStrings
 import guide.app.data.AppState
 import guide.app.location.GuideService
 import guide.app.navigation.MapsCompanionState
@@ -839,7 +841,135 @@ fun SettingsScreen(
         }
 
         // =====================================================================
-        // 5. Audio & Voice Settings
+        // 5. Language & Spoken Voice (Sarvam Indic Neural Voice + App UI)
+        // =====================================================================
+        val currentLanguage = appState?.appLanguage
+            ?: AppLanguage.fromCode(prefs.getString("app_language", AppLanguage.ENGLISH.code))
+
+        item { SectionHeader(AppStrings.languageSectionTitle(currentLanguage)) }
+        item {
+            GuideCard {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = AppStrings.languageSectionTitle(currentLanguage),
+                            style = GuideTokens.Title,
+                            color = GuideTokens.Text,
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = AppStrings.languageSectionDesc(currentLanguage),
+                            style = GuideTokens.Caption,
+                            color = GuideTokens.Text2,
+                        )
+                    }
+                    StatusTag(
+                        text = "SARVAM ${currentLanguage.code.uppercase()}",
+                        color = GuideTokens.Primary,
+                    )
+                }
+
+                Spacer(Modifier.height(GuideTokens.Space.base))
+
+                // 4 Interactive Language Tiles (English, Malayalam, Hindi, Tamil)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    AppLanguage.entries.forEach { lang ->
+                        val isSelected = currentLanguage == lang
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (isSelected) GuideTokens.PrimaryWash else GuideTokens.Surface2,
+                            border = BorderStroke(
+                                1.5.dp,
+                                if (isSelected) GuideTokens.Primary else GuideTokens.Border,
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    appState?.setLanguage(lang)
+                                },
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.weight(1f),
+                                ) {
+                                    // Custom Radio Indicator (zero emojis)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .clip(CircleShape)
+                                            .border(
+                                                2.dp,
+                                                if (isSelected) GuideTokens.Primary else GuideTokens.Text2.copy(alpha = 0.5f),
+                                                CircleShape,
+                                            ),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        if (isSelected) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(10.dp)
+                                                    .clip(CircleShape)
+                                                    .background(GuideTokens.Primary),
+                                            )
+                                        }
+                                    }
+                                    Spacer(Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            text = lang.nativeName,
+                                            style = GuideTokens.Label,
+                                            color = if (isSelected) GuideTokens.Primary else GuideTokens.Text,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        )
+                                        Text(
+                                            text = "${lang.title} • Sarvam bulbul:v3 (${lang.sarvamCode})",
+                                            style = GuideTokens.Caption,
+                                            color = GuideTokens.Text2,
+                                        )
+                                    }
+                                }
+                                if (isSelected) {
+                                    StatusTag(text = "ACTIVE", color = GuideTokens.Success)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(GuideTokens.Space.base))
+                GuideDivider()
+                Spacer(Modifier.height(GuideTokens.Space.base))
+
+                // Voice Preview Button with sample audio text
+                GuideButton(
+                    text = "${AppStrings.testVoiceBtn(currentLanguage)} (${currentLanguage.nativeName})",
+                    onClick = {
+                        val sample = AppStrings.sampleVoiceText(currentLanguage)
+                        GuideService.speak(context, sample)
+                    },
+                    variant = GuideButtonVariant.Primary,
+                    icon = GuideIcons.Speak,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+
+        // =====================================================================
+        // 6. Audio & Voice Settings
         // =====================================================================
         item { SectionHeader("Audio & Voice Guidance") }
         item {
@@ -913,22 +1043,54 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     GuideButton(
-                        text = "Test English",
+                        text = "Sample English",
                         onClick = {
+                            GuideService.setLanguage(context, AppLanguage.ENGLISH.code)
                             GuideService.speak(
                                 context,
-                                "Welcome to Fort Kochi. This is a voice test of your Sarvam AI travel companion.",
+                                AppStrings.sampleVoiceText(AppLanguage.ENGLISH),
                             )
                         },
                         variant = GuideButtonVariant.Tonal,
                         modifier = Modifier.weight(1f),
                     )
                     GuideButton(
-                        text = "Test മലയാളം",
+                        text = "Sample മലയാളം",
                         onClick = {
+                            GuideService.setLanguage(context, AppLanguage.MALAYALAM.code)
                             GuideService.speak(
                                 context,
-                                "നമസ്കാരം, ഫോർട്ട് കൊച്ചിയിലേക്ക് സ്വാഗതം. നിങ്ങളുടെ ഓഡിയോ ഗൈഡ് തയ്യാറാണ്.",
+                                AppStrings.sampleVoiceText(AppLanguage.MALAYALAM),
+                            )
+                        },
+                        variant = GuideButtonVariant.Tonal,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    GuideButton(
+                        text = "Sample हिन्दी",
+                        onClick = {
+                            GuideService.setLanguage(context, AppLanguage.HINDI.code)
+                            GuideService.speak(
+                                context,
+                                AppStrings.sampleVoiceText(AppLanguage.HINDI),
+                            )
+                        },
+                        variant = GuideButtonVariant.Tonal,
+                        modifier = Modifier.weight(1f),
+                    )
+                    GuideButton(
+                        text = "Sample தமிழ்",
+                        onClick = {
+                            GuideService.setLanguage(context, AppLanguage.TAMIL.code)
+                            GuideService.speak(
+                                context,
+                                AppStrings.sampleVoiceText(AppLanguage.TAMIL),
                             )
                         },
                         variant = GuideButtonVariant.Tonal,

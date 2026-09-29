@@ -102,10 +102,17 @@ import java.time.format.DateTimeFormatter
 class MainActivity : FragmentActivity() {
     private var mapView: MapView? = null
     private var appState: AppState? = null
+    private var pendingRoute by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enforceHighRefreshRate()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        }
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
@@ -128,8 +135,13 @@ class MainActivity : FragmentActivity() {
         setContent {
             GuideApp(
                 initialRoute = route,
+                pendingRoute = pendingRoute,
+                onRouteConsumed = { pendingRoute = null },
                 mapView = map,
-                onAppStateReady = { appState = it },
+                onAppStateReady = { 
+                    appState = it
+                    handleNavigationIntent(intent)
+                },
             )
         }
         handleNavigationIntent(intent)
@@ -149,6 +161,15 @@ class MainActivity : FragmentActivity() {
     private fun handleNavigationIntent(intent: android.content.Intent?) {
         if (intent == null) return
         val app = appState
+        val langExtra = intent.getStringExtra("language")
+        if (langExtra != null) {
+            val lang = guide.app.data.AppLanguage.fromCode(langExtra)
+            app?.setLanguage(lang)
+        }
+        val routeExtra = intent.getStringExtra("route")
+        if (routeExtra != null) {
+            pendingRoute = routeExtra
+        }
         val action = intent.action
         if (action == android.content.Intent.ACTION_SEND && intent.type?.startsWith("text/") == true) {
             val rawText = intent.getStringExtra(android.content.Intent.EXTRA_TEXT).orEmpty()
@@ -260,6 +281,8 @@ class MainActivity : FragmentActivity() {
 @Composable
 fun GuideApp(
     initialRoute: String? = null,
+    pendingRoute: String? = null,
+    onRouteConsumed: () -> Unit = {},
     mapView: MapView,
     onAppStateReady: (AppState) -> Unit = {},
 ) {
@@ -364,6 +387,17 @@ fun GuideApp(
                 nav.navigate(initialRoute) {
                     launchSingleTop = true
                 }
+            }
+        }
+
+        LaunchedEffect(pendingRoute) {
+            val dest = pendingRoute
+            if (!dest.isNullOrEmpty()) {
+                kotlinx.coroutines.delay(80)
+                nav.navigate(dest) {
+                    launchSingleTop = true
+                }
+                onRouteConsumed()
             }
         }
         // The one seam between the engine's data and the screens. Built once,
@@ -509,6 +543,7 @@ fun GuideApp(
                 if (!currentRoute.startsWith("poi/")) {
                     GuideNavBar(
                         current = activeTab,
+                        language = app.appLanguage,
                         onSelect = { tab ->
                             if (tab == "map") {
                                 if (!nav.popBackStack("map", inclusive = false)) {
@@ -542,7 +577,7 @@ fun GuideApp(
             ) {
                 NavHost(
                     navController = nav,
-                    startDestination = "map",
+                    startDestination = initialRoute ?: "map",
                     enterTransition = {
                         val isDetailPush = targetState.destination.route?.startsWith("poi/") == true ||
                             targetState.destination.route?.startsWith("phrasebook") == true
@@ -620,6 +655,7 @@ fun GuideApp(
                             route = app.routePoints(),
                             userPosition = userPos,
                             activePinId = activePoiId,
+                            language = app.appLanguage,
                         )
                     }
                     composable("nearby") {
@@ -710,11 +746,18 @@ fun GuideApp(
                                 card = card,
                                 hoursText = card.hours,
                                 openNow = isOpenNow(card.hours),
+                                language = app.appLanguage,
                                 onAddNote = { nav.navigate("history") },
                                 onBack = { nav.popBackStack() },
                                 onStartAudio = {
                                     activePoiId = id
-                                    GuideService.speak(context, "${card.name}. ${card.summary}")
+                                    val localized = guide.app.data.AppStrings.getLocalizedPoi(card.id, app.appLanguage)
+                                    val spoken = if (localized != null) {
+                                        "${localized.name}. ${localized.summary} ${localized.secret}"
+                                    } else {
+                                        "${card.name}. ${card.summary}"
+                                    }
+                                    GuideService.speak(context, spoken)
                                 },
                             )
                         }

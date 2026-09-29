@@ -65,25 +65,27 @@ object SpontaneousGuideAiEngine {
         card: PackLoader.PoiCard,
         userLat: Double? = null,
         userLng: Double? = null,
+        language: guide.app.data.AppLanguage? = null,
     ): String = withContext(Dispatchers.IO) {
         val prefs = context.getSharedPreferences("guide_prefs", Context.MODE_PRIVATE)
         val apiKey = prefs.getString("openai_api_key", "")?.trim().orEmpty()
         val personaId = prefs.getString("ai_tour_persona", Persona.INSIDER.id)
         val persona = Persona.fromId(personaId)
+        val lang = language ?: guide.app.data.AppLanguage.fromCode(prefs.getString("app_language", guide.app.data.AppLanguage.ENGLISH.code))
 
         val timeContext = getTimeOfDayContext()
         val proximityContext = getProximityContext(card, userLat, userLng)
 
         // If an OpenAI API key is supplied, attempt live GPT-4o-mini generation
         if (apiKey.isNotBlank()) {
-            val cloudStory = tryCloudGeneration(apiKey, card, persona, timeContext, proximityContext)
+            val cloudStory = tryCloudGeneration(apiKey, card, persona, timeContext, proximityContext, lang)
             if (!cloudStory.isNullOrBlank()) {
                 return@withContext cleanVoiceText(cloudStory)
             }
         }
 
         // Seamless, high-variety on-device generative fallback
-        cleanVoiceText(generateLocalSpontaneousStory(card, persona, timeContext, proximityContext))
+        cleanVoiceText(generateLocalSpontaneousStory(card, persona, timeContext, proximityContext, lang))
     }
 
     /**
@@ -95,11 +97,20 @@ object SpontaneousGuideAiEngine {
         persona: Persona,
         timeContext: String,
         proximityContext: String,
+        lang: guide.app.data.AppLanguage,
     ): String? {
         return try {
+            val langInstruction = when (lang) {
+                guide.app.data.AppLanguage.MALAYALAM -> "CRITICAL: You must speak entirely in natural, fluent Malayalam (മലയാളത്തിൽ സ്വാഭാവികമായി സംസാരിക്കുക). Do not output English."
+                guide.app.data.AppLanguage.HINDI -> "CRITICAL: You must speak entirely in natural, fluent Hindi (स्वाभाविक और सरल हिंदी में बोलें). Do not output English."
+                guide.app.data.AppLanguage.TAMIL -> "CRITICAL: You must speak entirely in natural, fluent Tamil (இயற்கையான தமிழில் பேசுங்கள்). Do not output English."
+                guide.app.data.AppLanguage.ENGLISH -> "Speak in clear, warm, engaging English."
+            }
+
             val systemPrompt = when (persona) {
                 Persona.INSIDER -> """
                     You are an authentic, warm, and observant local guide walking beside a traveler in Fort Kochi and Mattancherry, Kerala.
+                    $langInstruction
                     Speak spontaneously in 2 to 3 natural spoken sentences (around 35 to 45 words).
                     Never recite brochure facts or textbook paragraphs.
                     Mention tactile sensory details: the sea breeze, timber scent, peeling lime wash, fishing ropes, or how the light looks at this time.
@@ -107,12 +118,14 @@ object SpontaneousGuideAiEngine {
                 """.trimIndent()
                 Persona.STORYTELLER -> """
                     You are a captivating maritime storyteller in Fort Kochi and Mattancherry, Kerala.
+                    $langInstruction
                     Speak spontaneously in 2 to 3 evocative spoken sentences (around 35 to 45 words).
                     Bring out the drama of the spice trade, sea voyages, ancient empires, and legends tied to this exact place.
                     Make the listener feel the historic atmosphere of this hour.
                 """.trimIndent()
                 Persona.HISTORIAN -> """
                     You are a distinguished heritage scholar walking through Fort Kochi and Mattancherry.
+                    $langInstruction
                     Speak spontaneously in 2 to 3 insightful spoken sentences (around 35 to 45 words).
                     Highlight architectural transitions, colonial engineering, cultural fusion, and historical significance.
                 """.trimIndent()
@@ -188,7 +201,12 @@ object SpontaneousGuideAiEngine {
         persona: Persona,
         timeContext: String,
         proximityContext: String,
+        lang: guide.app.data.AppLanguage = guide.app.data.AppLanguage.ENGLISH,
     ): String {
+        val localized = guide.app.data.AppStrings.getLocalizedPoi(card.id, lang)
+        if (localized != null) {
+            return "${localized.name}. ${localized.summary} ${localized.secret}"
+        }
         val rand = Random(System.currentTimeMillis())
 
         val atmosphericIntros = when (persona) {

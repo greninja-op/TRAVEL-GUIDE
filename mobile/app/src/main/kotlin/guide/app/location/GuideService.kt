@@ -48,11 +48,17 @@ class GuideService : Service() {
         const val ACTION_SPEAK = "guide.app.SPEAK"
         const val ACTION_NOTIF_ON = "guide.app.NOTIF_ON"
         const val ACTION_NOTIF_OFF = "guide.app.NOTIF_OFF"
+        const val ACTION_LANGUAGE = "guide.app.LANGUAGE"
         const val EXTRA_PROFILE = "guide.app.PROFILE"
         const val EXTRA_RATE = "guide.app.RATE_VALUE"
         const val EXTRA_PHRASE = "guide.app.PHRASE_VALUE"
+        const val EXTRA_LANGUAGE = "guide.app.LANGUAGE_CODE"
         var running = false
             private set
+
+        fun setLanguage(context: Context, langCode: String) {
+            send(context, ACTION_LANGUAGE) { putExtra(EXTRA_LANGUAGE, langCode) }
+        }
 
         /** Start tracking. Caller must already hold location permission. */
         fun start(context: Context, profile: BatteryProfile = BatteryProfile.BALANCED) {
@@ -220,6 +226,11 @@ class GuideService : Service() {
                 }
                 return START_STICKY
             }
+            ACTION_LANGUAGE -> {
+                val code = intent.getStringExtra(EXTRA_LANGUAGE)
+                narrator?.setLanguage(guide.app.data.AppLanguage.fromCode(code))
+                return START_STICKY
+            }
             ACTION_STOP -> {
                 running = false
                 tracker?.stop()
@@ -283,6 +294,7 @@ class GuideService : Service() {
                             card = c,
                             userLat = lastFix?.lat,
                             userLng = lastFix?.lng,
+                            language = narrator?.language,
                         )
                         lastSpokenStory = c.id to story
                         wearableCompanion?.setPlaybackState(true)
@@ -307,6 +319,7 @@ class GuideService : Service() {
                             card = card,
                             userLat = fix?.lat,
                             userLng = fix?.lng,
+                            language = narrator?.language,
                         )
                         lastSpokenStory = card.id to story
                         wearableCompanion?.setPlaybackState(true)
@@ -352,6 +365,7 @@ class GuideService : Service() {
                             card = card,
                             userLat = fix.lat,
                             userLng = fix.lng,
+                            language = narrator?.language,
                         )
                         lastSpokenStory = card.id to story
                         wearableCompanion?.setPlaybackState(true)
@@ -380,6 +394,7 @@ class GuideService : Service() {
                                     card = cCard,
                                     userLat = fix.lat,
                                     userLng = fix.lng,
+                                    language = narrator?.language,
                                 )
                                 lastSpokenStory = cCard.id to story
                                 wearableCompanion?.setPlaybackState(true)

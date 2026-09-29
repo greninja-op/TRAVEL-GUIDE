@@ -26,16 +26,28 @@ class Narrator(context: Context) {
     /** Whether to use Sarvam AI studio voice (true) or device system voice (false). */
     var useStudioVoice = true
 
+    var language: guide.app.data.AppLanguage = guide.app.data.AppLanguage.ENGLISH
+        private set
+
     var speechRate = 1.0f
         set(value) {
             field = value
             tts?.setSpeechRate(value)
         }
 
+    fun setLanguage(lang: guide.app.data.AppLanguage) {
+        language = lang
+        tts?.language = lang.locale
+    }
+
     init {
+        val prefs = context.getSharedPreferences("guide_prefs", Context.MODE_PRIVATE)
+        val savedLang = prefs.getString("app_language", guide.app.data.AppLanguage.ENGLISH.code)
+        language = guide.app.data.AppLanguage.fromCode(savedLang)
+
         tts = TextToSpeech(context.applicationContext) { status ->
             ready = status == TextToSpeech.SUCCESS
-            tts?.language = Locale.getDefault()
+            tts?.language = language.locale
             tts?.setSpeechRate(speechRate)
             tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onDone(utteranceId: String) = onSpoken(utteranceId)
@@ -89,11 +101,14 @@ class Narrator(context: Context) {
         if (useStudioVoice) {
             sarvam.speak(
                 text = text,
+                languageCode = language.sarvamCode,
+                speaker = language.defaultSpeaker,
                 onStart = { /* Audio playback underway */ },
                 onDone = { onSpoken(next) },
                 onError = {
                     // Gracefully fallback to on-device TTS if network or quota issue occurs
                     if (ready) {
+                        tts?.language = language.locale
                         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, next)
                     } else {
                         onSpoken(next)

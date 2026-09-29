@@ -62,6 +62,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import guide.app.data.AppLanguage
+import guide.app.data.AppStrings
 import guide.app.map.MapPins
 import guide.app.map.MapStyle
 import guide.app.ui.components.CategoryChip
@@ -132,6 +134,8 @@ fun MapScreen(
     userPosition: LatLng? = null,
     /** Compass azimuth in degrees; null hides the compass needle. */
     headingDeg: Float? = null,
+    /** Active UI and Spoken Voice Language. */
+    language: AppLanguage = AppLanguage.ENGLISH,
     /**
      * The bottom sheet region. The app's NowPlayingSheet is owned by another
      * agent and must not be re-implemented here — this screen only reserves and
@@ -445,18 +449,14 @@ fun MapScreen(
                                 )
                             }
                             Text(
-                                text = "Navigating to ${companion.destinationName}",
+                                text = AppStrings.navigatingTo(language, companion.destinationName),
                                 style = GuideTokens.Label,
                                 color = GuideTokens.Text,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                text = if (corridorCount > 0) {
-                                    "$corridorCount spots along path pre-loaded • ${companion.etaOrDistance ?: "Active"}"
-                                } else {
-                                    "Path armed • ${companion.etaOrDistance ?: "Active"}"
-                                },
+                                text = AppStrings.spotsAlongPath(language, corridorCount, companion.etaOrDistance),
                                 style = GuideTokens.Caption,
                                 color = GuideTokens.Text2,
                                 maxLines = 1,
@@ -465,7 +465,7 @@ fun MapScreen(
                         Spacer(Modifier.width(6.dp))
                         // Exit navigation companion button
                         GuideButton(
-                            text = "Exit Nav",
+                            text = AppStrings.exitNav(language),
                             onClick = { guide.app.navigation.MapsCompanionState.onNavEnded() },
                             variant = GuideButtonVariant.Tonal,
                         )
@@ -481,22 +481,22 @@ fun MapScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 CategoryChip(
-                    text = "All Stops (${pins.size})",
+                    text = AppStrings.chipAllStops(language, pins.size),
                     selected = selectedCategory == "All",
                     onClick = { selectedCategory = "All" },
                 )
                 CategoryChip(
-                    text = "Heritage",
+                    text = AppStrings.chipHeritage(language),
                     selected = selectedCategory == "Heritage",
                     onClick = { selectedCategory = "Heritage" },
                 )
                 CategoryChip(
-                    text = "Food & Cafes",
+                    text = AppStrings.chipFood(language),
                     selected = selectedCategory == "Food",
                     onClick = { selectedCategory = "Food" },
                 )
                 CategoryChip(
-                    text = "Stays",
+                    text = AppStrings.chipStays(language),
                     selected = selectedCategory == "Stay",
                     onClick = { selectedCategory = "Stay" },
                 )
@@ -599,12 +599,14 @@ fun MapScreen(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
+                                val localizedPoi = AppStrings.getLocalizedPoi(previewPin.id, language)
+                                val displayName = localizedPoi?.name ?: previewPin.name
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     StatusTag(
                                         text = if (activePin != null) {
                                             if (activePin.visited) "Visited" else "Playing Now"
                                         } else {
-                                            "Next Stop"
+                                            AppStrings.nextStop(language)
                                         },
                                         color = if (activePin != null) {
                                             if (activePin.visited) GuideTokens.Success else GuideTokens.Highlight
@@ -623,7 +625,7 @@ fun MapScreen(
                                 }
                                 Spacer(Modifier.height(GuideTokens.Space.xs))
                                 Text(
-                                    text = previewPin.name,
+                                    text = displayName,
                                     style = GuideTokens.Title,
                                     color = GuideTokens.Text,
                                     maxLines = 1,
@@ -644,14 +646,14 @@ fun MapScreen(
                         Spacer(Modifier.height(GuideTokens.Space.md))
                         Row(horizontalArrangement = Arrangement.spacedBy(GuideTokens.Space.sm)) {
                             GuideButton(
-                                text = "What am I seeing?",
+                                text = AppStrings.whatAmISeeing(language),
                                 onClick = onSeeingTap,
                                 variant = GuideButtonVariant.Primary,
                                 icon = GuideIcons.Navigation,
                                 modifier = Modifier.weight(1.2f),
                             )
                             GuideButton(
-                                text = "Story",
+                                text = AppStrings.story(language),
                                 onClick = { onPinTap(previewPin.id) },
                                 variant = GuideButtonVariant.Dark,
                                 modifier = Modifier.weight(0.8f),

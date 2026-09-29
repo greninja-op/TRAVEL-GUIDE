@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import guide.app.ui.theme.GuideTokens
 import guide.app.ui.theme.Motion
 
@@ -53,18 +54,27 @@ import guide.app.ui.theme.Motion
  */
 
 /** The five primary destinations. Order is deliberate: the walk first. */
-enum class NavItem(val route: String, val label: String, val icon: ImageVector) {
-    Map("map", "Map", GuideIcons.Map),
-    Nearby("nearby", "Nearby", GuideIcons.Compass),
-    Packs("packs", "Packs", GuideIcons.Package),
-    History("history", "History", GuideIcons.Clock),
-    Settings("settings", "Settings", GuideIcons.Sliders),
+enum class NavItem(val route: String, val icon: ImageVector) {
+    Map("map", GuideIcons.Map),
+    Nearby("nearby", GuideIcons.Compass),
+    Packs("packs", GuideIcons.Package),
+    History("history", GuideIcons.Clock),
+    Settings("settings", GuideIcons.Sliders);
+
+    fun label(lang: guide.app.data.AppLanguage): String = when (this) {
+        Map -> guide.app.data.AppStrings.tabMap(lang)
+        Nearby -> guide.app.data.AppStrings.tabNearby(lang)
+        Packs -> guide.app.data.AppStrings.tabPacks(lang)
+        History -> guide.app.data.AppStrings.tabHistory(lang)
+        Settings -> guide.app.data.AppStrings.tabSettings(lang)
+    }
 }
 
 @Composable
 fun GuideNavBar(
     current: String,
     onSelect: (String) -> Unit,
+    language: guide.app.data.AppLanguage = guide.app.data.AppLanguage.ENGLISH,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -93,6 +103,7 @@ fun GuideNavBar(
                 NavItem.entries.forEach { item ->
                     NavBarItem(
                         item = item,
+                        label = item.label(language),
                         selected = current == item.route,
                         onClick = { onSelect(item.route) },
                         modifier = Modifier.weight(1f),
@@ -106,6 +117,7 @@ fun GuideNavBar(
 @Composable
 private fun NavBarItem(
     item: NavItem,
+    label: String,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -158,8 +170,11 @@ private fun NavBarItem(
             }
             Spacer(Modifier.height(GuideTokens.Space.xs))
             Text(
-                text = item.label,
-                style = GuideTokens.Caption,
+                text = label,
+                style = GuideTokens.Caption.copy(
+                    fontSize = 10.sp,
+                    letterSpacing = (-0.2).sp,
+                ),
                 color = tint,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

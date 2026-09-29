@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.room.Room
+import guide.app.location.GuideService
 import guide.app.map.MapPins
 import guide.app.ui.NearbyRow
 import guide.app.ui.PackRow
@@ -37,7 +38,7 @@ import java.util.Locale
  *  - It owns the Room database, because visits and notes are the only durable
  *    user data the app has (SPEC §1.5: they stay on the device).
  */
-class AppState(context: Context) {
+class AppState(private val context: Context) {
 
     private val db: GuideDb = GuideDb.getInstance(context)
 
@@ -78,6 +79,26 @@ class AppState(context: Context) {
     /** Cached pins for the map to prevent spurious recomposition loops. */
     var cachedPins by mutableStateOf<List<MapPins.Pin>>(emptyList())
         private set
+
+    /** Active UI and Spoken Voice Language. */
+    var appLanguage by mutableStateOf(
+        AppLanguage.fromCode(
+            context.getSharedPreferences("guide_prefs", Context.MODE_PRIVATE)
+                .getString("app_language", AppLanguage.ENGLISH.code)
+        )
+    )
+        private set
+
+    fun setLanguage(lang: AppLanguage) {
+        appLanguage = lang
+        context.getSharedPreferences("guide_prefs", Context.MODE_PRIVATE)
+            .edit()
+            .putString("app_language", lang.code)
+            .apply()
+
+        // Update GuideService & Sarvam Indic language in real-time
+        GuideService.setLanguage(context, lang.code)
+    }
 
     /** Pack inventory for the offline-packs screen. */
     val packs: List<PackRow>
