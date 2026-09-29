@@ -645,6 +645,15 @@ object AppStrings {
         }
     }
 
+    fun poiTitle(id: String, lang: AppLanguage): String {
+        val localized = getLocalizedPoi(id, lang)
+        if (localized != null) return localized.name
+        return id.split('-')
+            .filterNot { it.isEmpty() }
+            .joinToString(" ") { word -> word.replaceFirstChar { it.uppercase() } }
+            .ifBlank { id }
+    }
+
     private val POIS_ML = mapOf(
         "vasco-square" to LocalizedPoi(
             name = "വാസ്കോ ഡ ഗാമ സ്ക്വയർ",
@@ -838,5 +847,315 @@ object AppStrings {
         AppLanguage.HINDI -> "तस्वीर हटाएं"
         AppLanguage.TAMIL -> "புகைப்படத்தை நீக்கு"
         AppLanguage.ENGLISH -> "Remove Photo"
+    }
+
+    // ---- History Screen ----------------------------------------------------
+    fun historyTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "യാത്രാ ചരിത്രം"
+        AppLanguage.HINDI -> "यात्रा इतिहास"
+        AppLanguage.TAMIL -> "பயண வரலாறு"
+        AppLanguage.ENGLISH -> "Trip history"
+    }
+
+    fun historySubtitleEmpty(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "നിങ്ങൾ സന്ദർശിച്ച സ്ഥലങ്ങളും കേട്ട ഓഡിയോ വിവരണങ്ങളും."
+        AppLanguage.HINDI -> "आपके द्वारा देखे गए स्थान और सुनी गई ऑडियो कहानियाँ।"
+        AppLanguage.TAMIL -> "நீங்கள் பார்வையிட்ட இடங்களும் கேட்ட ஆடியோ கதைகளும்."
+        AppLanguage.ENGLISH -> "Places visited and audio stories heard along your journey."
+    }
+
+    fun historyStopsVisited(lang: AppLanguage, count: Int): String = when (lang) {
+        AppLanguage.MALAYALAM -> if (count == 1) "1 സ്ഥലം സന്ദർശിച്ചു" else "$count സ്ഥലങ്ങൾ സന്ദർശിച്ചു"
+        AppLanguage.HINDI -> if (count == 1) "1 स्थान देखा गया" else "$count स्थान देखे गए"
+        AppLanguage.TAMIL -> if (count == 1) "1 இடம் பார்க்கப்பட்டது" else "$count இடங்கள் பார்க்கப்பட்டன"
+        AppLanguage.ENGLISH -> if (count == 1) "1 stop visited" else "$count stops visited"
+    }
+
+    fun newestFirst(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "പുതിയത് ആദ്യം"
+        AppLanguage.HINDI -> "नवीनतम पहले"
+        AppLanguage.TAMIL -> "புதியவை முதலில்"
+        AppLanguage.ENGLISH -> "newest first"
+    }
+
+    fun historyNoVisitsTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സന്ദർശനങ്ങൾ ഒന്നുമില്ല"
+        AppLanguage.HINDI -> "अभी तक कोई यात्रा नहीं"
+        AppLanguage.TAMIL -> "இன்னும் வருகைகள் இல்லை"
+        AppLanguage.ENGLISH -> "No visits yet"
+    }
+
+    fun historyNoVisitsBody(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "വഴിയിലൂടെ നടക്കുമ്പോൾ നിങ്ങൾ പിന്നിടുന്ന ഓരോ സ്ഥലവും എത്തിയ സമയവും കുറിപ്പുകളുമായി ഇവിടെ രേഖപ്പെടുത്തും."
+        AppLanguage.HINDI -> "रास्ते पर चलें और स्थान यहाँ जुड़ते जाएंगे — पहुँचा हुआ समय और आपके अपने नोट्स के साथ।"
+        AppLanguage.TAMIL -> "வழியில் நடக்கும்போது நீங்கள் கடக்கும் ஒவ்வொரு இடமும், அடைந்த நேரமும் உங்கள் குறிப்புகளும் இங்கே சேரும்."
+        AppLanguage.ENGLISH -> "Walk the loop and the stories will land here — each stop you pass, with the time you reached it and a place for your own notes."
+    }
+
+    fun noteSavedTag(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കുറിപ്പ് ചേർത്തു"
+        AppLanguage.HINDI -> "नोट सहेजा गया"
+        AppLanguage.TAMIL -> "குறிப்பு சேமிக்கப்பட்டது"
+        AppLanguage.ENGLISH -> "Note saved"
+    }
+
+    fun historyNoteLabel(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "നിങ്ങൾ ഇവിടെ ശ്രദ്ധിച്ച കാര്യങ്ങൾ"
+        AppLanguage.HINDI -> "आपने यहाँ क्या देखा"
+        AppLanguage.TAMIL -> "நீங்கள் இங்கே கவனித்தவை"
+        AppLanguage.ENGLISH -> "What you noticed here"
+    }
+
+    fun historyNotePlaceholder(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ചീനവലകൾ താഴുമ്പോഴുള്ള ശബ്ദം — ഒരു മുഴുവൻ വല ഉയർത്തൽ കാണാൻ കാത്തിരിക്കാം."
+        AppLanguage.HINDI -> "चीनी जाल झुकते समय चरमराते हैं — एक पूरे खिंचाव का इंतज़ार करना सार्थक है।"
+        AppLanguage.TAMIL -> "சீன வலைகள் சாயும்போது எழும் ஒலி — ஒரு முழுமையான தூக்கலைக் காண காத்திருக்கலாம்."
+        AppLanguage.ENGLISH -> "The fishing nets creak as they tip — worth waiting for one full lift."
+    }
+
+    fun historyNoteSupporting(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഈ ഫോണിൽ സൂക്ഷിക്കുകയും യാത്രാ എക്സ്പോർട്ടിൽ ഉൾപ്പെടുത്തുകയും ചെയ്യും."
+        AppLanguage.HINDI -> "इस फ़ोन पर सुरक्षित और आपके यात्रा निर्यात में शामिल।"
+        AppLanguage.TAMIL -> "இந்த போனில் சேமிக்கப்பட்டு உங்கள் பயண ஏற்றுமதியில் சேர்க்கப்படும்."
+        AppLanguage.ENGLISH -> "Kept on this phone and included in your trip export."
+    }
+
+    fun saveNoteAction(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കുറിപ്പ് സൂക്ഷിക്കുക"
+        AppLanguage.HINDI -> "नोट सहेजें"
+        AppLanguage.TAMIL -> "குறிப்பை சேமிக்கவும்"
+        AppLanguage.ENGLISH -> "Save note"
+    }
+
+    fun cancelAction(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "റദ്ദാക്കുക"
+        AppLanguage.HINDI -> "रद्द करें"
+        AppLanguage.TAMIL -> "ரத்து செய்"
+        AppLanguage.ENGLISH -> "Cancel"
+    }
+
+    fun addNoteAction(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കുറിപ്പ് ചേർക്കുക"
+        AppLanguage.HINDI -> "नोट जोड़ें"
+        AppLanguage.TAMIL -> "குறிப்பு சேர்க்க"
+        AppLanguage.ENGLISH -> "Add note"
+    }
+
+    fun editNoteAction(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കുറിപ്പ് തിരുത്തുക"
+        AppLanguage.HINDI -> "नोट बदलें"
+        AppLanguage.TAMIL -> "குறிப்பைத் திருத்து"
+        AppLanguage.ENGLISH -> "Edit note"
+    }
+
+    fun exportTripBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "യാത്ര വിവരങ്ങൾ എക്സ്പോർട്ട് ചെയ്യുക"
+        AppLanguage.HINDI -> "यह यात्रा निर्यात करें"
+        AppLanguage.TAMIL -> "இந்தப் பயணத்தை ஏற்றுமதி செய்"
+        AppLanguage.ENGLISH -> "Export this trip"
+    }
+
+    fun exportTripCaption(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സന്ദർശിച്ച സ്ഥലങ്ങളും സമയവും കുറിപ്പുകളും അടങ്ങിയ മാർക്ക്ഡൗൺ ഫയലായി സൂക്ഷിക്കാം; ആർക്കും അയക്കാനും പ്രിന്റ് ചെയ്യാനും സാധിക്കും."
+        AppLanguage.HINDI -> "एक मार्कडाउन फ़ाइल सहेजता है — स्थान, समय और नोट्स — जिसे आप रख सकते हैं, प्रिंट कर सकते हैं या किसी को भेज सकते हैं।"
+        AppLanguage.TAMIL -> "இடங்கள், நேரம் மற்றும் உங்கள் குறிப்புகளைக் கொண்ட மார்க்டவுன் கோப்பாக சேமிக்கும் — வைத்துக்கொள்ளலாம், பகிரலாம்."
+        AppLanguage.ENGLISH -> "Saves a Markdown file — the stops, the times and your notes — that you can keep, print or send to anyone."
+    }
+
+    // ---- Packs Screen ------------------------------------------------------
+    fun packsTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഓഫ്‌ലൈൻ പാക്കുകൾ"
+        AppLanguage.HINDI -> "ऑफ़लाइन पैक्स"
+        AppLanguage.TAMIL -> "ஆஃப்லைன் பேக்குகள்"
+        AppLanguage.ENGLISH -> "Offline packs"
+    }
+
+    fun packsSubtitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "മൊബൈൽ ഡാറ്റ ഇല്ലാതെ യാത്ര ചെയ്യാൻ ഡൗൺലോഡ് ചെയ്ത നഗര വഴികാട്ടികൾ."
+        AppLanguage.HINDI -> "मोबाइल डेटा के बिना घूमने के लिए डाउनलोड किए गए शहर गाइड।"
+        AppLanguage.TAMIL -> "மொபைல் டேட்டா இன்றி சுற்ற பதிவிறக்கிய நகர வழிகாட்டிகள்."
+        AppLanguage.ENGLISH -> "Downloaded city guides for exploring without mobile data."
+    }
+
+    fun worksNoSignalTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സിഗ്നൽ ഇല്ലാതെയും പ്രവർത്തിക്കും"
+        AppLanguage.HINDI -> "बिना सिग्नल के भी काम करता है"
+        AppLanguage.TAMIL -> "சிக்னல் இல்லாமலும் இயங்கும்"
+        AppLanguage.ENGLISH -> "Works with no signal"
+    }
+
+    fun worksNoSignalBody(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "വിവരണങ്ങൾ, ഓഡിയോ, ഭൂപടം എന്നിവ മൊബൈൽ ഡാറ്റയോ വൈഫൈയോ ഇല്ലാതെ ഫോണിൽ നേരിട്ട് പ്രവർത്തിക്കും."
+        AppLanguage.HINDI -> "कहानियाँ, ऑडियो और मानचित्र सेल्युलर डेटा या वाई-फ़ाई के बिना पूरी तरह से डिवाइस पर चलते हैं।"
+        AppLanguage.TAMIL -> "கதைகள், ஆடியோ மற்றும் வரைபடங்கள் செல்லுலார் அல்லது வைஃபை இன்றி முழுமையாக போனில் இயங்கும்."
+        AppLanguage.ENGLISH -> "Stories, audio, and maps run entirely on-device without cellular data or Wi-Fi."
+    }
+
+    fun kochiTilesTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കൊച്ചി ഭൂപട ടൈലുകൾ"
+        AppLanguage.HINDI -> "कोच्चि मानचित्र टाइल्स"
+        AppLanguage.TAMIL -> "கொச்சி வரைபட டைல்ஸ்"
+        AppLanguage.ENGLISH -> "Kochi map tiles"
+    }
+
+    fun kochiTilesIdleDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സൂം ലെവലുകൾ 12 മുതൽ 16 വരെയുള്ള ഏകദേശം 180 MB — തെരുവുകളുടെ ഓരോ മുക്കും വ്യക്തമായി കാണാൻ ആവശ്യമായ ഭൂപടം."
+        AppLanguage.HINDI -> "ज़ूम स्तर 12 से 16 के लिए लगभग 180 एमबी — हर सड़क और कोने को स्पष्ट देखने के लिए।"
+        AppLanguage.TAMIL -> "ஜூம் நிலைகள் 12 முதல் 16 வரை சுமார் 180 எம்பி — தெரு மூலைகளைத் தெளிவாகப் பார்க்கத் தேவையான வரைபடம்."
+        AppLanguage.ENGLISH -> "About 180 MB for zoom levels 12 to 16 — the detail you need to read a street corner, not the whole country."
+    }
+
+    fun downloadKochiTilesBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കൊച്ചി ടൈലുകൾ ഡൗൺലോഡ് ചെയ്യുക"
+        AppLanguage.HINDI -> "कोच्चि टाइल्स डाउनलोड करें"
+        AppLanguage.TAMIL -> "கொச்சி டைல்களைப் பதிவிறக்கு"
+        AppLanguage.ENGLISH -> "Download Kochi tiles"
+    }
+
+    fun tilesDownloadStarting(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഡൗൺലോഡ് ആരംഭിക്കുന്നു — ആദ്യ ടൈലുകൾ ഉടൻ ലഭിക്കും."
+        AppLanguage.HINDI -> "डाउनलोड शुरू हो रहा है — पहले टाइल्स अभी आ रहे हैं।"
+        AppLanguage.TAMIL -> "பதிவிறக்கம் தொடங்குகிறது — முதல் டைல்கள் விரைவில் வரும்."
+        AppLanguage.ENGLISH -> "Starting the download — the first tiles land in a moment."
+    }
+
+    fun tilesDownloadProgress(lang: AppLanguage, done: Long, total: Long): String = when (lang) {
+        AppLanguage.MALAYALAM -> "$done / $total ടൈലുകൾ സൂക്ഷിച്ചു. ഇത് പൂർത്തിയാകും വരെ ആപ്പ് തുറന്നു വെയ്ക്കുക."
+        AppLanguage.HINDI -> "$total में से $done टाइल्स सहेजे गए। इसके पूरा होने तक ऐप खुला रखें।"
+        AppLanguage.TAMIL -> "$total இல் $done டைல்கள் சேமிக்கப்பட்டன. முடியும் வரை செயலியைத் திறந்து வைக்கவும்."
+        AppLanguage.ENGLISH -> "$done of $total tiles stored. Keep the app open until this finishes."
+    }
+
+    fun onThisDeviceHeader(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഈ ഫോണിൽ ഉള്ളവ"
+        AppLanguage.HINDI -> "इस डिवाइस पर"
+        AppLanguage.TAMIL -> "இந்த சாதனத்தில் உள்ளவை"
+        AppLanguage.ENGLISH -> "On this device"
+    }
+
+    fun noPacksTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "പാക്കുകൾ ലഭ്യമല്ല"
+        AppLanguage.HINDI -> "अभी कोई पैक उपलब्ध नहीं"
+        AppLanguage.TAMIL -> "இன்னும் பேக்குகள் கிடைக்கவில்லை"
+        AppLanguage.ENGLISH -> "No packs readable yet"
+    }
+
+    fun noPacksBody(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഫോർട്ട് കൊച്ചി പാക്ക് ആപ്പിൽ തന്നെയുണ്ട്. ഇത് ശൂന്യമായി തുടരുകയാണെങ്കിൽ ആപ്പ് വീണ്ടും തുറക്കുക."
+        AppLanguage.HINDI -> "फ़ोर्ट कोच्चि ऐप के अंदर ही आता है। यदि यह खाली रहता है, तो गाइड को बंद करके फिर से खोलें।"
+        AppLanguage.TAMIL -> "ஃபோர்ட் கொச்சி செயலியின் உள்ளேயே வருகிறது. இது காலியாக இருந்தால் செயலியை மூடி மீண்டும் திறக்கவும்."
+        AppLanguage.ENGLISH -> "Fort Kochi ships inside the app, so this normally lists itself. If it stays empty, close and reopen the guide — the bundled pack is re-read on launch."
+    }
+
+    fun packBuiltIn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഇൻ-ബിൽറ്റ് · നീക്കം ചെയ്യപ്പെടില്ല"
+        AppLanguage.HINDI -> "बिल्ट-इन · कभी नहीं हटेगा"
+        AppLanguage.TAMIL -> "உள்ளமைந்தது · நீக்கப்படாது"
+        AppLanguage.ENGLISH -> "Built in · never removed"
+    }
+
+    fun packDownloaded(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഡൗൺലോഡ് ചെയ്തത് · നീക്കം ചെയ്യാം"
+        AppLanguage.HINDI -> "डाउनलोड किया गया · हटाया जा सकता है"
+        AppLanguage.TAMIL -> "பதிவிறக்கப்பட்டது · நீக்கலாம்"
+        AppLanguage.ENGLISH -> "Downloaded · can be removed"
+    }
+
+    fun removePackBtn(lang: AppLanguage, cityName: String): String = when (lang) {
+        AppLanguage.MALAYALAM -> "$cityName നീക്കം ചെയ്യുക"
+        AppLanguage.HINDI -> "$cityName हटाएं"
+        AppLanguage.TAMIL -> "$cityName-ஐ நீக்கு"
+        AppLanguage.ENGLISH -> "Remove $cityName"
+    }
+
+    fun removePackCaption(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഈ ഫോണിൽ നിന്ന് പാക്ക് നീക്കം ചെയ്യുന്നു. വൈഫൈ കണക്ഷൻ ലഭിക്കുമ്പോൾ വീണ്ടും ഡൗൺലോഡ് ചെയ്യാം."
+        AppLanguage.HINDI -> "इस फ़ोन से पैक हटाता है। वाई-फ़ाई पर वापस आने पर आप इसे फिर से डाउनलोड कर सकते हैं।"
+        AppLanguage.TAMIL -> "போனிலிருந்து பேக்கை நீக்கும். வைஃபை கிடைக்கும்போது மீண்டும் பதிவிறக்கலாம்."
+        AppLanguage.ENGLISH -> "Removes the pack from this phone. You can download it again whenever you're back on Wi-Fi."
+    }
+
+    fun storageBudgetFooter(lang: AppLanguage, mb: Long): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ടൈലുകൾ $mb MB വരെ സൂക്ഷിക്കും. സ്ഥലം തികയാതെ വരുമ്പോൾ പഴയ നഗരങ്ങൾ ആദ്യം ഒഴിവാക്കും — ഫോർട്ട് കൊച്ചി പാക്ക് ഒരിക്കലും നീക്കം ചെയ്യില്ല."
+        AppLanguage.HINDI -> "टाइल्स को $mb एमबी तक रखा जाता है। भरने पर, सबसे पुराने शहर को पहले हटाया जाता है — फ़ोर्ट कोच्चि कभी नहीं हटता।"
+        AppLanguage.TAMIL -> "டைல்கள் $mb எம்பி வரை வைக்கப்படும். இடம் நிரம்பினால் பழைய நகரங்கள் முதலில் நீக்கப்படும் — ஃபோர்ட் கொச்சி ஒருபோதும் நீக்கப்படாது."
+        AppLanguage.ENGLISH -> "Tiles are kept up to $mb MB. When that fills, the least recently used city is dropped first — the Fort Kochi pack is never evicted."
+    }
+
+    fun packVersionLabel(lang: AppLanguage, sizeText: String, version: String): String = when (lang) {
+        AppLanguage.MALAYALAM -> "$sizeText · പാക്ക് v$version"
+        AppLanguage.HINDI -> "$sizeText · पैक v$version"
+        AppLanguage.TAMIL -> "$sizeText · பேக் v$version"
+        AppLanguage.ENGLISH -> "$sizeText · pack v$version"
+    }
+
+    fun cityName(cityId: String, lang: AppLanguage): String = when (cityId) {
+        "kochi-fort-kochi", "fort-kochi" -> when (lang) {
+            AppLanguage.MALAYALAM -> "ഫോർട്ട് കൊച്ചി"
+            AppLanguage.HINDI -> "फ़ोर्ट कोच्चि"
+            AppLanguage.TAMIL -> "ஃபோர்ட் கொச்சி"
+            AppLanguage.ENGLISH -> "Fort Kochi"
+        }
+        else -> cityId.split('-')
+            .filterNot { it == "kochi" }
+            .joinToString(" ") { word -> word.replaceFirstChar { it.uppercase() } }
+            .ifBlank { cityId }
+    }
+
+    // ---- Live Events & Nearby strings ---------------------------------------
+    fun happeningToday(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഇന്നത്തെ വിശേഷങ്ങൾ"
+        AppLanguage.HINDI -> "आज के कार्यक्रम"
+        AppLanguage.TAMIL -> "இன்றைய நிகழ்வுகள்"
+        AppLanguage.ENGLISH -> "Happening today"
+    }
+
+    fun eventBadge(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഇന്നത്തെ പരിപാടി"
+        AppLanguage.HINDI -> "आज का कार्यक्रम"
+        AppLanguage.TAMIL -> "இன்றைய நிகழ்ச்சி"
+        AppLanguage.ENGLISH -> "Event today"
+    }
+
+    fun eventAtPoi(lang: AppLanguage, poiName: String): String = when (lang) {
+        AppLanguage.MALAYALAM -> "യാത്രാവഴിയിലെ $poiName-ൽ"
+        AppLanguage.HINDI -> "रास्ते के $poiName पर"
+        AppLanguage.TAMIL -> "பாதையில் $poiName-இல்"
+        AppLanguage.ENGLISH -> "At $poiName on the loop"
+    }
+
+    fun nearbyNoStopsTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "അടുത്തൊന്നും സ്ഥലങ്ങളില്ല"
+        AppLanguage.HINDI -> "पास में कोई स्थान नहीं"
+        AppLanguage.TAMIL -> "அருகில் இடங்கள் இல்லை"
+        AppLanguage.ENGLISH -> "No stops within reach"
+    }
+
+    fun nearbyNoStopsBody(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഫോർട്ട് കൊച്ചിയിലെ 24 പ്രധാന സ്ഥലങ്ങൾ 1.6 കി.മീ നടത്ത പരിധിയിലാണ്. നടന്നു തുടങ്ങുമ്പോൾ അവ ഇവിടെ കാണാം."
+        AppLanguage.HINDI -> "फ़ोर्ट कोच्चि के 24 स्थान 1.6 किमी के पैदल दायरे में हैं। चलना शुरू करें और वे यहाँ दिखेंगे।"
+        AppLanguage.TAMIL -> "ஃபோர்ட் கொச்சியின் 24 இடங்கள் 1.6 கி.மீ நடை தூரத்தில் உள்ளன. நடைப்பயணம் தொடங்கும்போது அவை தோன்றும்."
+        AppLanguage.ENGLISH -> "The 24 Fort Kochi stops sit inside a 1.6 km walk. Start the loop and they'll surface here as you reach them."
+    }
+
+    fun nearbyEmptyLayerTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഈ വിഭാഗത്തിൽ ഇപ്പോൾ ഒന്നുമില്ല"
+        AppLanguage.HINDI -> "इस श्रेणी में अभी कुछ नहीं है"
+        AppLanguage.TAMIL -> "இந்த பிரிவில் இப்போது எதுவும் இல்லை"
+        AppLanguage.ENGLISH -> "Nothing on this layer right now"
+    }
+
+    fun nearbyEmptyLayerBody(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഈ ഗൈഡിൽ 20 പൈതൃക കേന്ദ്രങ്ങളും, 2 ഭക്ഷണശാലകളും, 2 താമസസ്ഥലങ്ങളുമുണ്ട്."
+        AppLanguage.HINDI -> "इस गाइड में 20 विरासत, 2 भोजन और 2 ठहरने के स्थान हैं।"
+        AppLanguage.TAMIL -> "இந்த வழிகாட்டியில் 20 பாரம்பரியம், 2 உணவகங்கள் மற்றும் 2 தங்கும் இடங்கள் உள்ளன."
+        AppLanguage.ENGLISH -> "The pack carries 20 heritage, 2 food and 2 stay stops. Show everything again to see the rest of the loop."
+    }
+
+    fun showAllLayers(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "എല്ലാ വിഭാഗങ്ങളും കാണിക്കുക"
+        AppLanguage.HINDI -> "सभी श्रेणियाँ दिखाएं"
+        AppLanguage.TAMIL -> "அனைத்து பிரிவுகளையும் காட்டு"
+        AppLanguage.ENGLISH -> "Show all layers"
     }
 }

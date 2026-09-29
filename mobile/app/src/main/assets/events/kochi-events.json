@@ -1,0 +1,61 @@
+{
+  "pack_version": "1.1.0",
+  "events": [
+    {
+      "id": "cochin-carnival",
+      "poi_id": "mahatma-gandhi-beach-walk",
+      "title": "Cochin Carnival Week & Seaside Pageantry",
+      "date": "2026-12-25",
+      "note": "Grand cultural carnival celebrating Fort Kochi's maritime heritage, music, vibrant street processions, and seaside gatherings."
+    },
+    {
+      "id": "biennale-season",
+      "poi_id": "david-hall-gallery",
+      "title": "Kochi-Muziris Biennale Contemporary Art Exhibition",
+      "date": "2026-12-12",
+      "note": "Asia's largest contemporary art biennial showcasing site-specific installations, curated talks, and international artist pavilions across heritage warehouses."
+    },
+    {
+      "id": "kathakali-recital",
+      "poi_id": "kerala-kathakali-centre",
+      "title": "Evening Kathakali Makeup Ritual & Classical Drama",
+      "date": "*",
+      "note": "Daily 5:00 PM natural mineral makeup demonstration followed by classical Mudra expressions and traditional Chenda drumming recital."
+    },
+    {
+      "id": "sunset-cantilever",
+      "poi_id": "chinese-fishing-nets",
+      "title": "Cantilever Net Sunset Drops & Fishermen Gathering",
+      "date": "*",
+      "note": "Traditional 14th-century Chinese cantilever net teams demonstrate coordinated wooden beam counterweight drops during sunset tide."
+    },
+    {
+      "id": "spice-market-trading",
+      "poi_id": "paradesi-synagogue",
+      "title": "Jew Town Spice Trading & Historic Antique Bazaar",
+      "date": "*",
+      "note": "Historic warehouse spice merchants sorting world-renowned Malabar black pepper, wild cardamom pods, and cinnamon quills."
+    },
+    {
+      "id": "basilica-vespers",
+      "poi_id": "santa-cruz-cathedral-basilica",
+      "title": "Cathedral Basilica Evening Illumination & Choral Bells",
+      "date": "*",
+      "note": "Atmospheric evening illumination of the grand Portuguese-Gothic facade and historic ceiling frescoes."
+    },
+    {
+      "id": "dhobi-washing-heritage",
+      "poi_id": "dhobi-khana",
+      "title": "Dhobi Khana Traditional Heritage Washing Demonstration",
+      "date": "*",
+      "note": "Century-old Vannar community demonstrating traditional stone-slab washing and heavy brass charcoal ironing techniques."
+    },
+    {
+      "id": "st-francis-heritage",
+      "poi_id": "st-francis-church",
+      "title": "Historic Heritage Chimes & Vasco da Gama Memorial",
+      "date": "*",
+      "note": "Choral heritage chimes in India's oldest European church, preserving original timber gables and Vasco da Gama's 1524 burial marker."
+    }
+  ]
+}

@@ -86,6 +86,7 @@ object MapPins {
         val lat: Double,
         val lng: Double,
         val visited: Boolean = false,
+        val hasEvent: Boolean = false,
     )
 
     /** Emitted when a pin is tapped. */
@@ -175,6 +176,18 @@ object MapPins {
             chipCornerPx = CHIP_CORNER_DP * MapStyle.ICON_DENSITY,
         ).also { cachedActiveBitmap = it }
 
+    private var cachedEventBitmap: Bitmap? = null
+
+    internal fun getOrCreateEventBitmap(): Bitmap =
+        cachedEventBitmap ?: Raster.drawPin(
+            sizePx = MapStyle.ICON_SIZE_PX,
+            edge = MapStyle.PIN_EDGE_PX,
+            pad = MapStyle.PIN_PAD_PX,
+            palette = MapStyle.eventPinPalette(),
+            filled = true,
+            chipCornerPx = CHIP_CORNER_DP * MapStyle.ICON_DENSITY,
+        ).also { cachedEventBitmap = it }
+
     internal fun getOrCreateNavArrowBitmap(): Bitmap =
         cachedNavArrowBitmap ?: Raster.drawNavArrow(
             sizePx = (38 * MapStyle.ICON_DENSITY).toInt(),
@@ -224,7 +237,11 @@ object MapPins {
         pins.forEach { pin ->
             val isActive = pin.id == activeId
             val isNext = pin.id == nextId
-            val bmp = if (isActive || isNext) getOrCreateActiveBitmap() else getOrCreateDefaultBitmap()
+            val bmp = when {
+                isActive || isNext -> getOrCreateActiveBitmap()
+                pin.hasEvent -> getOrCreateEventBitmap()
+                else -> getOrCreateDefaultBitmap()
+            }
             val marker = map.addMarker(
                 com.google.android.gms.maps.model.MarkerOptions()
                     .position(com.google.android.gms.maps.model.LatLng(pin.lat, pin.lng))

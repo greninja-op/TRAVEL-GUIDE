@@ -151,13 +151,15 @@ fun NearbyScreen(
         // ---- Today's events ------------------------------------------------
         if (events.isNotEmpty()) {
             item(key = "events-header") {
-                SectionHeader("Happening today")
+                SectionHeader(guide.app.data.AppStrings.happeningToday(language))
             }
             items(events, key = { "event-${it.id}" }) { event ->
-                GuideCard {
+                GuideCard(
+                    modifier = Modifier.clickable { onRowTap(event.poiId) },
+                ) {
                     GuideRow(
                         title = event.title,
-                        supporting = "Follows the ${event.poiId.replace('-', ' ')} stop on the loop",
+                        supporting = guide.app.data.AppStrings.eventAtPoi(language, guide.app.data.AppStrings.poiTitle(event.poiId, language)),
                         leading = {
                             Box(
                                 modifier = Modifier.size(GuideTokens.TouchTarget),
@@ -198,20 +200,18 @@ fun NearbyScreen(
             item(key = "empty") {
                 if (rows.isEmpty()) {
                     EmptyState(
-                        title = "No stops within reach",
-                        body = "The 24 Fort Kochi stops sit inside a 1.6 km walk. " +
-                            "Start the loop and they'll surface here as you reach them.",
+                        title = guide.app.data.AppStrings.nearbyNoStopsTitle(language),
+                        body = guide.app.data.AppStrings.nearbyNoStopsBody(language),
                         icon = GuideIcons.Compass,
                     )
                 } else {
                     EmptyState(
-                        title = "Nothing on this layer right now",
-                        body = "The pack carries 20 heritage, 2 food and 2 stay stops. " +
-                            "Show everything again to see the rest of the loop.",
+                        title = guide.app.data.AppStrings.nearbyEmptyLayerTitle(language),
+                        body = guide.app.data.AppStrings.nearbyEmptyLayerBody(language),
                         icon = GuideIcons.Compass,
                         action = {
                             GuideButton(
-                                text = "Show all layers",
+                                text = guide.app.data.AppStrings.showAllLayers(language),
                                 onClick = { layer = null },
                                 variant = GuideButtonVariant.Tonal,
                             )

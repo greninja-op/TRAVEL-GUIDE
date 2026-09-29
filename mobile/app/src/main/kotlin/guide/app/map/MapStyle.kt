@@ -284,6 +284,14 @@ object MapStyle {
         chipBorder = Color(0xFFFF5A36),
     )
 
+    fun eventPinPalette(): PinPalette = PinPalette(
+        fill = Color(0xFFF59E0B),
+        ring = Color(0xFFFFFFFF),
+        inner = Color(0xFFFFFFFF),
+        chip = Color(0xFFFFFFFF),
+        chipBorder = Color(0xFFF59E0B),
+    )
+
     // =======================================================================
     // Lucide icon vectors
     //

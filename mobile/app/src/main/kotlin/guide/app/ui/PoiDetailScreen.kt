@@ -85,6 +85,7 @@ fun PoiDetailScreen(
     hoursText: String?,
     openNow: Boolean,
     language: guide.app.data.AppLanguage = guide.app.data.AppLanguage.ENGLISH,
+    event: guide.app.extras.LocalEvent? = null,
     initialNote: String? = null,
     initialPhotoUri: String? = null,
     onSaveNote: (text: String, photoUri: String?) -> Unit = { _, _ -> },
@@ -240,6 +241,63 @@ fun PoiDetailScreen(
                             ),
                             color = GuideTokens.Text,
                         )
+
+                        // Live Happening Today Event Banner
+                        if (event != null) {
+                            Spacer(Modifier.height(GuideTokens.Space.base))
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = if (androidx.compose.foundation.isSystemInDarkTheme()) Color(0xFF2E2005) else Color(0xFFFEF3C7),
+                                border = BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.5f)),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(GuideTokens.Space.base),
+                                    verticalAlignment = Alignment.Top,
+                                ) {
+                                    Surface(
+                                        shape = RoundedCornerShape(10.dp),
+                                        color = Color(0xFFF59E0B),
+                                        modifier = Modifier.size(32.dp),
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = GuideIcons.Calendar,
+                                                contentDescription = null,
+                                                tint = Color.White,
+                                                modifier = Modifier.size(16.dp),
+                                            )
+                                        }
+                                    }
+                                    Spacer(Modifier.width(GuideTokens.Space.md))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = guide.app.data.AppStrings.happeningToday(language).uppercase(),
+                                            style = GuideTokens.Label.copy(
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 1.sp,
+                                            ),
+                                            color = if (androidx.compose.foundation.isSystemInDarkTheme()) Color(0xFFFBBF24) else Color(0xFFB45309),
+                                        )
+                                        Spacer(Modifier.height(GuideTokens.Space.xs))
+                                        Text(
+                                            text = event.title,
+                                            style = GuideTokens.Title.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp),
+                                            color = if (androidx.compose.foundation.isSystemInDarkTheme()) Color(0xFFFEF3C7) else Color(0xFF78350F),
+                                        )
+                                        if (!event.note.isNullOrBlank()) {
+                                            Spacer(Modifier.height(GuideTokens.Space.xs))
+                                            Text(
+                                                text = event.note,
+                                                style = GuideTokens.Body.copy(fontSize = 13.sp, lineHeight = 19.sp),
+                                                color = if (androidx.compose.foundation.isSystemInDarkTheme()) Color(0xFFFDE68A) else Color(0xFF92400E),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
                         // Highlighted Secret / Surprise Callout Card
                         if (displaySecret != null) {

@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import guide.app.data.AppLanguage
+import guide.app.data.AppStrings
 import guide.app.ui.components.EmptyState
 import guide.app.ui.components.GuideButton
 import guide.app.ui.components.GuideButtonVariant
@@ -57,6 +59,7 @@ fun HistoryScreen(
     visits: List<VisitRow>,
     onSaveNote: (poiId: String, text: String) -> Unit,
     onExport: () -> Unit,
+    language: AppLanguage = AppLanguage.ENGLISH,
 ) {
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
     var draft by rememberSaveable { mutableStateOf("") }
@@ -77,12 +80,12 @@ fun HistoryScreen(
     ) {
         item(key = "header") {
             Column {
-                Text("Trip history", style = GuideTokens.Heading, maxLines = Lines.Single)
+                Text(AppStrings.historyTitle(language), style = GuideTokens.Heading, maxLines = Lines.Single)
                 Text(
                     text = if (visits.isEmpty()) {
-                        "Places visited and audio stories heard along your journey."
+                        AppStrings.historySubtitleEmpty(language)
                     } else {
-                        visitCountLabel(visits.size) + " · newest first"
+                        "${AppStrings.historyStopsVisited(language, visits.size)} · ${AppStrings.newestFirst(language)}"
                     },
                     style = GuideTokens.Chrome,
                     color = GuideTokens.Text2,
@@ -96,9 +99,8 @@ fun HistoryScreen(
         if (visits.isEmpty()) {
             item(key = "empty") {
                 EmptyState(
-                    title = "No visits yet",
-                    body = "Walk the loop and the stories will land here — each stop you pass, " +
-                        "with the time you reached it and a place for your own notes.",
+                    title = AppStrings.historyNoVisitsTitle(language),
+                    body = AppStrings.historyNoVisitsBody(language),
                     icon = GuideIcons.Footprints,
                 )
             }
@@ -112,6 +114,7 @@ fun HistoryScreen(
                 isLast = index == visits.lastIndex,
                 editing = editing == visit.poiId,
                 draft = draft,
+                language = language,
                 onDraftChange = { draft = it },
                 onStartEdit = {
                     editing = visit.poiId
@@ -130,15 +133,14 @@ fun HistoryScreen(
             Column(modifier = Modifier.padding(top = GuideTokens.Space.lg)) {
                 GuideDivider(modifier = Modifier.padding(bottom = GuideTokens.Space.base))
                 GuideButton(
-                    text = "Export this trip",
+                    text = AppStrings.exportTripBtn(language),
                     onClick = onExport,
                     variant = GuideButtonVariant.Primary,
                     icon = GuideIcons.Export,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    text = "Saves a Markdown file — the stops, the times and your notes — that " +
-                        "you can keep, print or send to anyone.",
+                    text = AppStrings.exportTripCaption(language),
                     style = GuideTokens.Caption,
                     maxLines = Lines.Supporting,
                     overflow = TextOverflow.Ellipsis,
@@ -153,9 +155,6 @@ fun HistoryScreen(
 // Pieces
 // ---------------------------------------------------------------------------
 
-private fun visitCountLabel(n: Int): String =
-    if (n == 1) "1 stop visited" else "$n stops visited"
-
 /**
  * A stop on the timeline. The rail: a filled dot at the stop and a hairline
  * running down to the next one, so the sequence is legible without numbers.
@@ -166,6 +165,7 @@ private fun TimelineStop(
     isLast: Boolean,
     editing: Boolean,
     draft: String,
+    language: AppLanguage,
     onDraftChange: (String) -> Unit,
     onStartEdit: () -> Unit,
     onCancelEdit: () -> Unit,
@@ -196,7 +196,7 @@ private fun TimelineStop(
                 if (visit.note != null && !editing) {
                     Spacer(Modifier.size(GuideTokens.Space.sm))
                     StatusTag(
-                        text = "Note saved",
+                        text = AppStrings.noteSavedTag(language),
                         color = GuideTokens.Primary,
                         icon = GuideIcons.Check,
                     )
@@ -220,11 +220,10 @@ private fun TimelineStop(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = GuideTokens.Space.huge),
-                    label = { Text("What you noticed here") },
+                    label = { Text(AppStrings.historyNoteLabel(language)) },
                     placeholder = {
                         Text(
-                            text = "The fishing nets creak as they tip — worth waiting for one " +
-                                "full lift.",
+                            text = AppStrings.historyNotePlaceholder(language),
                             maxLines = Lines.Supporting,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -232,7 +231,7 @@ private fun TimelineStop(
                     shape = RoundedCornerShape(GuideTokens.CardRadius),
                     supportingText = {
                         Text(
-                            text = "Kept on this phone and included in your trip export.",
+                            text = AppStrings.historyNoteSupporting(language),
                             maxLines = Lines.Supporting,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -243,19 +242,19 @@ private fun TimelineStop(
                     horizontalArrangement = Arrangement.spacedBy(GuideTokens.Space.sm),
                 ) {
                     GuideButton(
-                        text = "Save note",
+                        text = AppStrings.saveNoteAction(language),
                         onClick = onSaveNote,
                         variant = GuideButtonVariant.Tonal,
                     )
                     GuideButton(
-                        text = "Cancel",
+                        text = AppStrings.cancelAction(language),
                         onClick = onCancelEdit,
                         variant = GuideButtonVariant.Quiet,
                     )
                 }
             } else {
                 GuideButton(
-                    text = if (visit.note == null) "Add note" else "Edit note",
+                    text = if (visit.note == null) AppStrings.addNoteAction(language) else AppStrings.editNoteAction(language),
                     onClick = onStartEdit,
                     variant = GuideButtonVariant.Quiet,
                     icon = GuideIcons.Note,

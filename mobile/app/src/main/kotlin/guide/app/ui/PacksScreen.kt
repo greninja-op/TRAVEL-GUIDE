@@ -26,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import guide.app.data.AppLanguage
+import guide.app.data.AppStrings
 import guide.app.packs.PackManager
 import guide.app.ui.components.EmptyState
 import guide.app.ui.components.GuideButton
@@ -60,6 +62,7 @@ fun PacksScreen(
     downloadProgress: Pair<Long, Long>?,
     onDownloadCity: () -> Unit,
     onDelete: (String) -> Unit,
+    language: AppLanguage = AppLanguage.ENGLISH,
 ) {
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
 
@@ -78,9 +81,9 @@ fun PacksScreen(
     ) {
         item(key = "header") {
             Column {
-                Text("Offline packs", style = GuideTokens.Heading, maxLines = Lines.Single)
+                Text(AppStrings.packsTitle(language), style = GuideTokens.Heading, maxLines = Lines.Single)
                 Text(
-                    text = "Downloaded city guides for exploring without mobile data.",
+                    text = AppStrings.packsSubtitle(language),
                     style = GuideTokens.Chrome,
                     color = GuideTokens.Text2,
                     maxLines = Lines.Single,
@@ -102,14 +105,14 @@ fun PacksScreen(
                     )
                     Spacer(Modifier.size(GuideTokens.Space.md))
                     Text(
-                        text = "Works with no signal",
+                        text = AppStrings.worksNoSignalTitle(language),
                         style = GuideTokens.Title,
                         maxLines = Lines.Single,
                         modifier = Modifier.weight(1f),
                     )
                 }
                 Text(
-                    text = "Stories, audio, and maps run entirely on-device without cellular data or Wi-Fi.",
+                    text = AppStrings.worksNoSignalBody(language),
                     style = GuideTokens.Body,
                     color = GuideTokens.Text2,
                     maxLines = Lines.Supporting,
@@ -122,23 +125,22 @@ fun PacksScreen(
         item(key = "progress") {
             DownloadProgress(
                 progress = downloadProgress,
+                language = language,
                 onDownloadCity = onDownloadCity,
             )
         }
 
         // ---- Installed packs -----------------------------------------------
         if (packs.isNotEmpty()) {
-            item(key = "installed-header") { SectionHeader("On this device") }
+            item(key = "installed-header") { SectionHeader(AppStrings.onThisDeviceHeader(language)) }
             items(packs, key = { it.cityId }) { pack ->
-                InstalledPack(pack = pack, onDelete = { onDelete(pack.cityId) })
+                InstalledPack(pack = pack, language = language, onDelete = { onDelete(pack.cityId) })
             }
         } else {
             item(key = "empty") {
                 EmptyState(
-                    title = "No packs readable yet",
-                    body = "Fort Kochi ships inside the app, so this normally lists itself. " +
-                        "If it stays empty, close and reopen the guide — the bundled pack is " +
-                        "re-read on launch.",
+                    title = AppStrings.noPacksTitle(language),
+                    body = AppStrings.noPacksBody(language),
                     icon = GuideIcons.Package,
                 )
             }
@@ -149,9 +151,7 @@ fun PacksScreen(
             Column(modifier = Modifier.padding(top = GuideTokens.Space.lg)) {
                 GuideDivider(modifier = Modifier.padding(bottom = GuideTokens.Space.base))
                 Text(
-                    text = "Tiles are kept up to ${PackManager.MAX_CACHED_BYTES / 1024 / 1024} MB. " +
-                        "When that fills, the least recently used city is dropped first — the " +
-                        "Fort Kochi pack is never evicted.",
+                    text = AppStrings.storageBudgetFooter(language, PackManager.MAX_CACHED_BYTES / 1024 / 1024),
                     style = GuideTokens.Caption,
                     maxLines = Lines.Unbounded,
                 )
@@ -173,6 +173,7 @@ fun PacksScreen(
 @Composable
 private fun DownloadProgress(
     progress: Pair<Long, Long>?,
+    language: AppLanguage,
     onDownloadCity: () -> Unit,
 ) {
     GuideCard(modifier = Modifier.padding(top = GuideTokens.Space.base)) {
@@ -196,7 +197,7 @@ private fun DownloadProgress(
             )
             Spacer(Modifier.size(GuideTokens.Space.md))
             Text(
-                text = "Kochi map tiles",
+                text = AppStrings.kochiTilesTitle(language),
                 style = GuideTokens.Title,
                 maxLines = Lines.Single,
                 modifier = Modifier.weight(1f),
@@ -213,15 +214,14 @@ private fun DownloadProgress(
 
         if (progress == null) {
             Text(
-                text = "About 180 MB for zoom levels 12 to 16 — the detail you need to read a " +
-                    "street corner, not the whole country.",
+                text = AppStrings.kochiTilesIdleDesc(language),
                 style = GuideTokens.Chrome,
                 maxLines = Lines.Supporting,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(top = GuideTokens.Space.sm),
             )
             GuideButton(
-                text = "Download Kochi tiles",
+                text = AppStrings.downloadKochiTilesBtn(language),
                 onClick = onDownloadCity,
                 variant = GuideButtonVariant.Primary,
                 icon = GuideIcons.Download,
@@ -233,9 +233,9 @@ private fun DownloadProgress(
             ProgressBar(fraction = animated, modifier = Modifier.padding(top = GuideTokens.Space.md))
             Text(
                 text = if (total <= 0L) {
-                    "Starting the download — the first tiles land in a moment."
+                    AppStrings.tilesDownloadStarting(language)
                 } else {
-                    "$done of $total tiles stored. Keep the app open until this finishes."
+                    AppStrings.tilesDownloadProgress(language, done, total)
                 },
                 style = GuideTokens.Chrome,
                 maxLines = Lines.Supporting,
@@ -277,7 +277,8 @@ private fun ProgressBar(fraction: Float, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun InstalledPack(pack: PackRow, onDelete: () -> Unit) {
+private fun InstalledPack(pack: PackRow, language: AppLanguage, onDelete: () -> Unit) {
+    val cityName = AppStrings.cityName(pack.cityId, language)
     GuideCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -292,13 +293,13 @@ private fun InstalledPack(pack: PackRow, onDelete: () -> Unit) {
             Spacer(Modifier.size(GuideTokens.Space.md))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = cityLabel(pack.cityId),
+                    text = cityName,
                     style = GuideTokens.Title,
                     maxLines = Lines.Title,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = "${formatSize(pack.bytes)} · pack v${pack.version}",
+                    text = AppStrings.packVersionLabel(language, formatSize(pack.bytes), pack.version),
                     style = GuideTokens.Chrome,
                     maxLines = Lines.Single,
                     overflow = TextOverflow.Ellipsis,
@@ -311,7 +312,7 @@ private fun InstalledPack(pack: PackRow, onDelete: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(GuideTokens.Space.base),
         ) {
             StatusTag(
-                text = if (pack.bundled) "Built in · never removed" else "Downloaded · can be removed",
+                text = if (pack.bundled) AppStrings.packBuiltIn(language) else AppStrings.packDownloaded(language),
                 color = if (pack.bundled) GuideTokens.Primary else GuideTokens.Text2,
                 icon = if (pack.bundled) GuideIcons.Check else GuideIcons.Download,
             )
@@ -320,14 +321,13 @@ private fun InstalledPack(pack: PackRow, onDelete: () -> Unit) {
         if (!pack.bundled) {
             GuideDivider(modifier = Modifier.padding(vertical = GuideTokens.Space.md))
             GuideButton(
-                text = "Remove ${cityLabel(pack.cityId)}",
+                text = AppStrings.removePackBtn(language, cityName),
                 onClick = onDelete,
                 variant = GuideButtonVariant.Quiet,
                 icon = GuideIcons.Delete,
             )
             Text(
-                text = "Removes the pack from this phone. You can download it again whenever " +
-                    "you're back on Wi-Fi.",
+                text = AppStrings.removePackCaption(language),
                 style = GuideTokens.Caption,
                 maxLines = Lines.Supporting,
                 overflow = TextOverflow.Ellipsis,

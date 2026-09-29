@@ -66,6 +66,7 @@ object SpontaneousGuideAiEngine {
         userLat: Double? = null,
         userLng: Double? = null,
         language: guide.app.data.AppLanguage? = null,
+        activeEvent: String? = null,
     ): String = withContext(Dispatchers.IO) {
         val prefs = context.getSharedPreferences("guide_prefs", Context.MODE_PRIVATE)
         val apiKey = prefs.getString("openai_api_key", "")?.trim()?.ifBlank { null }
@@ -80,14 +81,14 @@ object SpontaneousGuideAiEngine {
 
         // If an OpenAI API key is supplied, attempt live GPT-4o-mini generation
         if (apiKey.isNotBlank()) {
-            val cloudStory = tryCloudGeneration(apiKey, card, persona, timeContext, proximityContext, lang)
+            val cloudStory = tryCloudGeneration(apiKey, card, persona, timeContext, proximityContext, lang, activeEvent)
             if (!cloudStory.isNullOrBlank()) {
                 return@withContext cleanVoiceText(cloudStory)
             }
         }
 
         // Seamless, high-variety on-device generative fallback
-        cleanVoiceText(generateLocalSpontaneousStory(card, persona, timeContext, proximityContext, lang))
+        cleanVoiceText(generateLocalSpontaneousStory(card, persona, timeContext, proximityContext, lang, activeEvent))
     }
 
     /**
@@ -100,6 +101,7 @@ object SpontaneousGuideAiEngine {
         timeContext: String,
         proximityContext: String,
         lang: guide.app.data.AppLanguage,
+        activeEvent: String? = null,
     ): String? {
         return try {
             val langInstruction = when (lang) {
@@ -133,13 +135,14 @@ object SpontaneousGuideAiEngine {
                 """.trimIndent()
             }
 
+            val eventContext = if (!activeEvent.isNullOrBlank()) "Active Live Event happening here today: $activeEvent." else ""
             val userPrompt = """
                 Landmark: ${card.name}
                 Summary: ${card.summary}
                 Key History: ${card.history}
                 Fun Facts: ${card.funFacts.joinToString("; ")}
                 What to look for: ${card.seeList.joinToString("; ")}
-                Current Ambience: $timeContext. $proximityContext.
+                Current Ambience: $timeContext. $proximityContext. $eventContext
                 
                 Speak a fresh, spontaneous oral guide observation tailored for this moment.
             """.trimIndent()
@@ -204,10 +207,12 @@ object SpontaneousGuideAiEngine {
         timeContext: String,
         proximityContext: String,
         lang: guide.app.data.AppLanguage = guide.app.data.AppLanguage.ENGLISH,
+        activeEvent: String? = null,
     ): String {
+        val eventSuffix = if (!activeEvent.isNullOrBlank()) " ${guide.app.data.AppStrings.happeningToday(lang)}: $activeEvent." else ""
         val localized = guide.app.data.AppStrings.getLocalizedPoi(card.id, lang)
         if (localized != null) {
-            return "${localized.name}. ${localized.summary} ${localized.secret}"
+            return "${localized.name}. ${localized.summary} ${localized.secret}$eventSuffix"
         }
         val rand = Random(System.currentTimeMillis())
 

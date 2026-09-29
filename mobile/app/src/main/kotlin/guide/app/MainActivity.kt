@@ -426,12 +426,8 @@ fun GuideApp(
         var seeingAnswer by remember { mutableStateOf<String?>(null) }
         var userPos by remember { mutableStateOf<LatLng?>(null) }
         var downloadProgress by remember { mutableStateOf<Pair<Long, Long>?>(null) }
-        // No events asset ships with the beta pack, so this is empty by design
-        // — the Local Events layer lights up when a pack update carries them
-        // (SPEC §3.2). Filtering through the real API keeps the shape correct.
-        val events = remember {
-            Events.forDate(emptyList(), LocalDate.now().toString())
-        }
+        // Active local events layer (festivals, exhibitions, biennale, cultural rites)
+        val events = app.activeEvents
 
         // Background location is a SEPARATE, plain-language opt-in (SPEC §1.1):
         // the OS only grants ACCESS_BACKGROUND_LOCATION as its own prompt, and
@@ -513,11 +509,14 @@ fun GuideApp(
                     } else {
                         seeingAnswer = "Observing ${card.name}..."
                         scope.launch {
+                            val activeEventInfo = app.eventForPoi(card.id)?.let { "${it.title}: ${it.note ?: ""}" }
                             val aiStory = guide.app.voice.SpontaneousGuideAiEngine.generateStory(
                                 context = context,
                                 card = card,
                                 userLat = lat,
                                 userLng = lng,
+                                language = app.appLanguage,
+                                activeEvent = activeEventInfo,
                             )
                             seeingAnswer = aiStory
                             GuideService.speak(context, aiStory)
@@ -696,6 +695,7 @@ fun GuideApp(
                                     )
                                 },
                                 onDelete = { /* bundled pack is never evicted */ },
+                                language = app.appLanguage,
                             )
                         }
                     }
@@ -705,6 +705,7 @@ fun GuideApp(
                                 visits = app.visits,
                                 onSaveNote = { poiId, text -> app.saveNote(poiId, text) },
                                 onExport = { exportTrip(context, app) },
+                                language = app.appLanguage,
                             )
                         }
                     }
@@ -760,6 +761,7 @@ fun GuideApp(
                                 hoursText = card.hours,
                                 openNow = isOpenNow(card.hours),
                                 language = app.appLanguage,
+                                event = app.eventForPoi(id),
                                 initialNote = currentNote?.text,
                                 initialPhotoUri = currentNote?.photoUri,
                                 onSaveNote = { text, photoUri ->
@@ -773,10 +775,12 @@ fun GuideApp(
                                 onStartAudio = {
                                     activePoiId = id
                                     val localized = guide.app.data.AppStrings.getLocalizedPoi(card.id, app.appLanguage)
+                                    val event = app.eventForPoi(id)
+                                    val eventText = if (event != null) " ${guide.app.data.AppStrings.happeningToday(app.appLanguage)}: ${event.title}." else ""
                                     val spoken = if (localized != null) {
-                                        "${localized.name}. ${localized.summary} ${localized.secret}"
+                                        "${localized.name}. ${localized.summary} ${localized.secret}$eventText"
                                     } else {
-                                        "${card.name}. ${card.summary}"
+                                        "${card.name}. ${card.summary}$eventText"
                                     }
                                     GuideService.speak(context, spoken)
                                 },

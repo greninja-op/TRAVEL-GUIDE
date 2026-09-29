@@ -20,6 +20,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import guide.app.extras.Events
+import guide.app.extras.LocalEvent
 
 /**
  * The one place that turns on-device data into what the screens render.
@@ -82,6 +84,14 @@ class AppState(private val context: Context) {
     var cachedPins by mutableStateOf<List<MapPins.Pin>>(emptyList())
         private set
 
+    /** Active cultural events and seasonal festivals for Fort Kochi. */
+    val allEvents: List<LocalEvent>
+    var activeEvents by mutableStateOf<List<LocalEvent>>(emptyList())
+        private set
+
+    fun eventForPoi(poiId: String): LocalEvent? =
+        activeEvents.find { it.poiId == poiId }
+
     /** Active UI and Spoken Voice Language. */
     var appLanguage by mutableStateOf(
         AppLanguage.fromCode(
@@ -141,6 +151,9 @@ class AppState(private val context: Context) {
             ),
         )
 
+        allEvents = Events.loadFromAssets(context)
+        activeEvents = Events.forDate(allEvents, java.time.LocalDate.now().toString())
+
         recomputePins()
         refreshNearby()
         loadVisits()
@@ -151,11 +164,13 @@ class AppState(private val context: Context) {
     }
 
     private fun recomputePins() {
+        val eventPoiIds = activeEvents.map { it.poiId }.toSet()
         cachedPins = order.mapNotNull { id ->
             byId[id]?.let { c ->
                 MapPins.Pin(
                     id = c.id, name = c.name, lat = c.lat, lng = c.lng,
                     visited = c.id in visitedIds,
+                    hasEvent = c.id in eventPoiIds,
                 )
             }
         }
