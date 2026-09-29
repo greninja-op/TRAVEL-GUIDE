@@ -372,35 +372,12 @@ fun PoiDetailScreen(
             shadowElevation = 16.dp,
             border = BorderStroke(1.dp, GuideTokens.Border),
         ) {
-            Row(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
                     .padding(horizontal = GuideTokens.Space.base, vertical = GuideTokens.Space.md),
-                horizontalArrangement = Arrangement.spacedBy(GuideTokens.Space.md),
-                verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Heart Save Icon Button
-                Surface(
-                    shape = RoundedCornerShape(GuideTokens.ButtonRadius),
-                    color = if (saved) GuideTokens.PrimaryWash else GuideTokens.Surface2,
-                    border = BorderStroke(1.dp, if (saved) GuideTokens.Primary else GuideTokens.Border),
-                    modifier = Modifier.size(52.dp),
-                    onClick = {
-                        saved = !saved
-                        onAddNote()
-                    },
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = GuideIcons.Heart,
-                            contentDescription = "Bookmark",
-                            tint = if (saved) GuideTokens.Primary else GuideTokens.Text,
-                            modifier = Modifier.size(22.dp),
-                        )
-                    }
-                }
-
                 // Wide Sunset Coral CTA Button
                 GuideButton(
                     text = "Start Audio Story",
@@ -408,7 +385,7 @@ fun PoiDetailScreen(
                     variant = GuideButtonVariant.Primary,
                     icon = GuideIcons.Speak,
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxWidth()
                         .height(52.dp),
                 )
             }
