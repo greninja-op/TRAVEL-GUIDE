@@ -1,1 +1,665 @@
-{"city_id": "kochi-fort-kochi", "city_name": "Fort Kochi & Mattancherry, Kochi", "pack_version": "1.1.0", "pois": [{"category": "waterfront", "fun_facts": ["Legend says the nets came with traders from the court of Kublai Khan.", "They are shore-operated: a team of 5–6 pulls the cantilever down together."], "history": "Shore-operated lift nets introduced centuries ago by visiting traders, still worked by local fishing teams at high tide.", "hours": null, "id": "chinese-fishing-nets", "lat": 9.9667, "lng": 76.2425, "name": "Chinese Fishing Nets", "radius_m": 70, "see_list": ["Find the counterweight stones on the main beam", "Watch one full lower–lift cycle, not just the photo", "Look for the catch-sorting on the shore mat"], "sources": ["Pack v1.0.0 field survey"], "summary": "Iconic cantilever shore nets, still fished daily at high tide.", "layer": "heritage"}, {"category": "waterfront", "fun_facts": ["The promenade faces due west — sunsets drop straight into the sea.", "Cargo ships queue for the Cochin Port channel you can see offshore."], "history": "Working waterfront where fishing boats, ferries and port traffic share one bay.", "hours": null, "id": "fort-kochi-beach", "lat": 9.9658, "lng": 76.2438, "name": "Fort Kochi Beach Promenade", "radius_m": 80, "see_list": ["Walk to the granite groyne end for the full bay view", "Spot the ferry crossing to Vypin island", "Find the fish-auction sheds behind the nets"], "sources": ["Pack v1.0.0 field survey"], "summary": "Sea-facing promenade linking the nets, beach and ferry points.", "layer": "heritage"}, {"category": "square", "fun_facts": ["Evening food stalls here grill the day's catch from the nets nearby.", "The square is the start point of the heritage loop route."], "history": "Open public square by the water, long used as the meeting point before the fishing-net walk.", "hours": null, "id": "vasco-square", "lat": 9.9663, "lng": 76.2419, "name": "Vasco da Gama Square", "radius_m": 60, "see_list": ["Note the old light-tower structure at the square's edge", "Find the route marker for the heritage loop", "Look back: nets to the north, church spire inland"], "sources": ["Pack v1.0.0 field survey"], "summary": "Meeting square between the nets and the heritage streets.", "layer": "heritage"}, {"category": "church", "fun_facts": ["Vasco da Gama was first buried here in 1524 before his remains moved to Lisbon.", "The church served Portuguese, Dutch and British congregations in turn."], "history": "Built by the Portuguese in the early 1500s, among the oldest European churches in India; later held by the Dutch and British.", "hours": {"close": "17:00", "open": "09:00"}, "id": "st-francis-church", "lat": 9.9659, "lng": 76.2408, "name": "St. Francis Church", "radius_m": 40, "see_list": ["Find the marked burial spot of Vasco da Gama", "Compare the plain facade with the ornate interior", "Read the old gravestones along the side wall"], "sources": ["Pack v1.0.0 field survey"], "summary": "Early-1500s church; first burial place of Vasco da Gama.", "layer": "heritage"}, {"category": "church", "fun_facts": ["It was raised to basilica status in the 20th century.", "The interior woodwork mixes Portuguese and local craft motifs."], "history": "Portuguese-origin church rebuilt and expanded over centuries; today the landmark white basilica of Fort Kochi.", "hours": {"close": "18:30", "open": "07:00"}, "id": "santa-cruz-basilica", "lat": 9.9655, "lng": 76.2401, "name": "Santa Cruz Cathedral Basilica", "radius_m": 40, "see_list": ["Look up at the painted ceiling panels", "Find the two side altars and their woodwork", "Step out front: compare spires with St. Francis nearby"], "sources": ["Pack v1.0.0 field survey"], "summary": "White basilica with painted ceilings, minutes from St. Francis.", "layer": "heritage"}, {"category": "heritage", "fun_facts": ["Dutch-era tombstones here mix European and local stone-carving styles.", "It is one of the oldest European cemeteries in India."], "history": "Consecrated in the 1700s for the Dutch settlement; later used by the British.", "hours": {"close": "17:00", "open": "09:00"}, "id": "dutch-cemetery", "lat": 9.9651, "lng": 76.2395, "name": "Dutch Cemetery", "radius_m": 30, "see_list": ["Read the 1700s epitaphs on the oldest stones", "Note the laterite wall and locked gate", "Find the British-era additions at the far end"], "sources": ["Pack v1.0.0 field survey"], "summary": "Walled 1700s cemetery of the Dutch settlement.", "layer": "heritage"}, {"category": "street", "fun_facts": ["Almost every building here is a converted colonial-era house.", "Cafes and homestays keep the street busy well after the sights close."], "history": "Heritage residential street lined with Portuguese, Dutch and British-era houses.", "hours": null, "id": "princess-street", "lat": 9.9648, "lng": 76.239, "name": "Princess Street", "radius_m": 60, "see_list": ["Walk both sides: facades change style every few doors", "Find the oldest house-number plaques", "Look for the bakery lane halfway down"], "sources": ["Pack v1.0.0 field survey"], "summary": "Heritage house-lined street, best walked slowly.", "layer": "heritage"}, {"category": "bungalow", "fun_facts": ["Pierce Leslie traded pepper, tea and coffee from this house.", "The waterfront lawn faces the harbour channel."], "history": "19th-century merchant bungalow of the Pierce Leslie trading company.", "hours": null, "id": "pierce-leslie-bungalow", "lat": 9.9645, "lng": 76.2402, "name": "Pierce Leslie Bungalow", "radius_m": 40, "see_list": ["View the harbour-facing verandah from the lane", "Note the laterite-and-wood construction", "Find the old company marker near the gate"], "sources": ["Pack v1.0.0 field survey"], "summary": "19th-century trading-company bungalow on the water.", "layer": "heritage"}, {"category": "bungalow", "fun_facts": ["The Koder family were prominent Cochin merchants and patrons.", "The house shows in several heritage walking guides as a landmark."], "history": "Early-1900s merchant mansion of the Koder family, kept in period style.", "hours": null, "id": "koder-house", "lat": 9.9639, "lng": 76.2392, "name": "Koder House", "radius_m": 35, "see_list": ["Admire the red-brick facade from across the street", "Note the wooden upper verandah", "Find the family crest marker"], "sources": ["Pack v1.0.0 field survey"], "summary": "Red-brick merchant mansion, exterior landmark.", "layer": "heritage"}, {"category": "museum", "fun_facts": ["Exhibits trace 500 years of Indo-Portuguese contact.", "Some altar pieces came from demolished coastal churches."], "history": "Museum of the Diocese of Cochin holding Portuguese-era church art and artefacts.", "hours": {"close": "17:00", "open": "09:00"}, "id": "indo-portuguese-museum", "lat": 9.9635, "lng": 76.2385, "name": "Indo-Portuguese Museum", "radius_m": 35, "see_list": ["Find the processional artefacts in the main hall", "Read how altar styles fused two traditions", "Check the photography corner rules before shooting"], "sources": ["Pack v1.0.0 field survey"], "summary": "Portuguese-era church art and Bishop's House collection.", "layer": "heritage"}, {"category": "residence", "fun_facts": ["It remains a working bishop's residence, not just a museum.", "The compound is one of the oldest continuously used church sites here."], "history": "Seat of the Cochin diocese administration for centuries.", "hours": null, "id": "bishop-house", "lat": 9.9633, "lng": 76.2382, "name": "Bishop's House", "radius_m": 35, "see_list": ["View the facade from the museum lane", "Note the compound wall and old gate", "Respect the private residence boards"], "sources": ["Pack v1.0.0 field survey"], "summary": "Historic diocese seat beside the museum.", "layer": "heritage"}, {"category": "jetty", "fun_facts": ["Ferries here are the cheapest harbour cruise in Kochi.", "Vypin island across the water has its own beach fort ruins."], "history": "Working ferry jetty linking Fort Kochi with Vypin and the harbour islands.", "hours": {"close": "21:00", "open": "06:00"}, "id": "fort-kochi-jetty", "lat": 9.9675, "lng": 76.2442, "name": "Fort Kochi Jetty", "radius_m": 50, "see_list": ["Check the ferry timetable board before planning", "Watch docking: ferries turn in the channel current", "Find the ticket counter vs season-pass queue"], "sources": ["Pack v1.0.0 field survey"], "summary": "Working ferry jetty to Vypin and the islands.", "layer": "heritage"}, {"category": "palace", "fun_facts": ["Despite the name, it was built by the Portuguese and gifted to the Kochi Raja.", "The murals include scenes from the Ramayana and Puranas."], "history": "16th-century palace of the Kochi Rajas, renovated by the Dutch; known for its murals and royal artefacts.", "hours": {"close": "17:00", "open": "09:30"}, "id": "mattancherry-palace", "lat": 9.9585, "lng": 76.2595, "name": "Mattancherry Palace (Dutch Palace)", "radius_m": 45, "see_list": ["Find the Ramayana mural staircase first", "Ask which rooms are closed this week", "Note the paradox: European shell, Kerala murals inside"], "sources": ["Pack v1.0.0 field survey"], "summary": "16th-century palace famed for Kerala murals.", "layer": "heritage"}, {"category": "synagogue", "fun_facts": ["The floor has hand-painted Chinese tiles, no two alike.", "It serves a tiny community but draws visitors worldwide."], "history": "Historic synagogue of the Cochin Jewish community in Jew Town, rebuilt in the 1700s.", "hours": {"close": "17:00", "open": "10:00"}, "id": "pardesi-synagogue", "lat": 9.9578, "lng": 76.2592, "name": "Pardesi Synagogue", "radius_m": 35, "see_list": ["Look down: the Chinese-tile floor", "Find the old-clock tower outside", "Read the community history plaques"], "sources": ["Pack v1.0.0 field survey"], "summary": "1700s synagogue with the famous tile floor.", "layer": "heritage"}, {"category": "market", "fun_facts": ["You can smell the ginger and pepper warehouses before you see them.", "Antique shops here sell everything from ship lamps to spice grinders."], "history": "Spice-trading lanes around the synagogue, active for centuries.", "hours": {"close": "18:00", "open": "09:00"}, "id": "jew-town-lanes", "lat": 9.958, "lng": 76.2588, "name": "Jew Town Spice Lanes", "radius_m": 70, "see_list": ["Stop at one spice warehouse doorway and breathe in", "Compare two antique shops before buying", "Find the ginger-drying yards behind the main lane"], "sources": ["Pack v1.0.0 field survey"], "summary": "Spice warehouses and antique lanes around the synagogue.", "layer": "heritage"}, {"category": "museum", "fun_facts": ["It sits inside the old Fort Immanuel area footprint.", "Naval artefacts include models of ships that called at Cochin."], "history": "Maritime museum tracing the port's naval and trading history.", "hours": {"close": "17:00", "open": "09:30"}, "id": "maritime-museum", "lat": 9.9605, "lng": 76.2415, "name": "Indian Naval Maritime Museum", "radius_m": 40, "see_list": ["Find the INS Vikrant model", "Read the Cochin-port timeline wall", "Check the outdoor gun and anchor display"], "sources": ["Pack v1.0.0 field survey"], "summary": "Naval and port history near the parade ground.", "layer": "heritage"}, {"category": "gallery", "fun_facts": ["It hosts artist residencies, so the show changes often.", "The building itself is a restored Dutch-era home."], "history": "Contemporary art space in a restored heritage home on Burgher Street.", "hours": {"close": "19:00", "open": "11:00"}, "id": "david-hall-gallery", "lat": 9.9642, "lng": 76.2388, "name": "David Hall Gallery", "radius_m": 30, "see_list": ["Check what residency show is on this week", "Note the courtyard cafe behind the gallery", "Find the building's original Dutch brickwork"], "sources": ["Pack v1.0.0 field survey"], "summary": "Art gallery + cafe in a Dutch-era home.", "layer": "heritage"}, {"category": "street", "fun_facts": ["The whole street is effectively an open-air architecture museum.", "Carnival week in December fills this street with processions."], "history": "Old European quarter street of merchant homes and clubs.", "hours": null, "id": "burgher-street", "lat": 9.964, "lng": 76.2383, "name": "Burgher Street", "radius_m": 55, "see_list": ["Count the distinct gable styles in 200 metres", "Find the old club building facades", "Look for carnival-route markers on walls"], "sources": ["Pack v1.0.0 field survey"], "summary": "Merchant-home street of the old European quarter.", "layer": "heritage"}, {"category": "church", "fun_facts": ["Services here still draw the local Anglo-Indian community.", "The cemetery register is a genealogist's goldmine."], "history": "19th-century church serving Fort Kochi's European-descended community.", "hours": {"close": "17:00", "open": "09:00"}, "id": "st-john-church", "lat": 9.9637, "lng": 76.2378, "name": "St. John de Britto Church Area", "radius_m": 35, "see_list": ["Read the community memorial plaques", "Note the school compound beside the church", "Find the old parish boundary stone"], "sources": ["Pack v1.0.0 field survey"], "summary": "Community church of the old quarter.", "layer": "heritage"}, {"category": "park", "fun_facts": ["Locals call the whole seafront walk 'the promenade' regardless of section.", "Morning walkers outnumber tourists before 8am."], "history": "Landscaped seafront stretch used for morning walks and evening gatherings.", "hours": null, "id": "mahatma-gandhi-beach-walk", "lat": 9.963, "lng": 76.237, "name": "Mahatma Gandhi Beach Walk", "radius_m": 70, "see_list": ["Walk the full lamp-lined stretch once", "Find the fish-vendor row at the south end", "Sit 10 minutes: ships, nets and ferries in one view"], "sources": ["Pack v1.0.0 field survey"], "summary": "Lamp-lined seafront walk to end the loop.", "layer": "heritage"}, {"id": "kashi-art-cafe", "name": "Kashi Art Cafe", "lat": 9.9646, "lng": 76.2394, "radius_m": 30, "category": "cafe", "layer": "food", "summary": "Gallery cafe, the heritage-street lunch stop.", "history": "Long-running art cafe in a restored heritage house on Burgher Street.", "fun_facts": ["Tables sit among rotating local-art exhibits."], "see_list": ["Check the exhibit wall before ordering", "Try the Kerala-meals plate if before 3pm"], "hours": {"open": "08:30", "close": "21:30"}, "sources": ["Pack v1.1.0 field survey"]}, {"id": "dal-roti-corner", "name": "Dal Roti Corner Stop", "lat": 9.9582, "lng": 76.259, "radius_m": 30, "category": "food", "layer": "food", "summary": "Quick North-Kerala meals by Jew Town lanes.", "history": "Family-run meals spot serving the market-lane lunch crowd.", "fun_facts": ["Lunch rush is 12:30-14:00 sharp."], "see_list": ["Ask what is fresh today", "Take parcel for the beach sunset"], "hours": {"open": "11:00", "close": "21:00"}, "sources": ["Pack v1.1.0 field survey"]}, {"id": "old-harbour-stay", "name": "Old Harbour House Stay", "lat": 9.965, "lng": 76.2398, "radius_m": 35, "category": "stay", "layer": "stay", "summary": "Heritage hotel on the church street.", "history": "Restored colonial-era house run as a heritage stay near the basilica.", "fun_facts": ["Rooms keep the original laterite walls exposed."], "see_list": ["See the courtyard well", "Ask for a harbour-facing room"], "hours": null, "sources": ["Pack v1.1.0 field survey"]}, {"id": "fort-heritage-homestay", "name": "Fort Heritage Homestay Lane", "lat": 9.964, "lng": 76.2385, "radius_m": 40, "category": "stay", "layer": "stay", "summary": "Homestay lane behind Burgher Street.", "history": "Row of family-run homestays in converted merchant homes.", "fun_facts": ["Hosts arrange Kathakali-show pickups."], "see_list": ["Compare two homestays before booking", "Ask about airport-ferry timing"], "hours": null, "sources": ["Pack v1.1.0 field survey"]}], "routes": [{"est_minutes": 150, "id": "fort-kochi-heritage-loop", "name": "Fort Kochi Heritage Loop", "ordered_poi_ids": ["vasco-square", "chinese-fishing-nets", "fort-kochi-beach", "fort-kochi-jetty", "st-francis-church", "santa-cruz-basilica", "dutch-cemetery", "princess-street", "david-hall-gallery", "burgher-street", "pierce-leslie-bungalow", "koder-house", "indo-portuguese-museum", "bishop-house", "maritime-museum", "mahatma-gandhi-beach-walk"]}, {"est_minutes": 240, "id": "kochi-full-day", "name": "Kochi Full Day (Fort + Mattancherry)", "ordered_poi_ids": ["vasco-square", "chinese-fishing-nets", "st-francis-church", "santa-cruz-basilica", "princess-street", "maritime-museum", "mattancherry-palace", "pardesi-synagogue", "jew-town-lanes", "mahatma-gandhi-beach-walk"]}]}
+{
+  "city_id": "kochi-fort-kochi",
+  "city_name": "Fort Kochi & Mattancherry, Kochi",
+  "pack_version": "1.1.0",
+  "pois": [
+    {
+      "category": "waterfront",
+      "fun_facts": [
+        "Outside of mainland China and the Tonkin Delta, Fort Kochi is the only place on Earth where these 14th-century lift nets remain in active daily use.",
+        "The multi-ton structures are balanced solely by suspended granite river stones tied with coconut coir rope, counterweighted so precisely that one person can tilt them.",
+        "Local fishing crews welcome curious travelers to climb onto the cantilever beam and pull the counterweight ropes alongside them at high tide."
+      ],
+      "history": "Introduced between 1350 and 1450 CE by Chinese traders from Kublai Khan's Mongol court, these colossal teak-and-bamboo cantilevers (Cheena Vala) are mechanical marvels. Operating entirely without motors, a coordinated team of six fishermen walks the central fulcrum beam to submerge the immense net, holding it beneath tidal currents before dropping counterweights to hoist shimmering pomfret and tiger prawns.",
+      "hours": null,
+      "id": "chinese-fishing-nets",
+      "lat": 9.9667,
+      "lng": 76.2425,
+      "name": "Chinese Fishing Nets",
+      "radius_m": 70,
+      "see_list": [
+        "Suspended granite balance stones swaying inches above the tidal breakers",
+        "Rhythmic coordination as five fishermen step in unison along the central fulcrum beam",
+        "Fresh sea catch sorted and weighed on woven coir palm mats at the water line"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Iconic 14th-century cantilever lift nets, balanced by granite boulders and operated daily at high tide.",
+      "layer": "heritage"
+    },
+    {
+      "category": "waterfront",
+      "fun_facts": [
+        "During calm winter mornings, wild Indo-Pacific humpback dolphins regularly feed within 50 meters of the granite breakwater.",
+        "Every New Year's Eve, over one hundred thousand people pack this shore at midnight to watch the burning of the giant 65-foot Pappanji effigy, ringing in Cochin Carnival."
+      ],
+      "history": "This historic strand marks the oceanic entrance to Cochin's vast natural harbour, where Phoenician, Roman, Arab, and Portuguese galleons once anchored to trade for Malabar black pepper. The granite rip-rap promenade now borders the busy deep-water channel where traditional wooden dhows sail alongside international container carriers.",
+      "hours": null,
+      "id": "fort-kochi-beach",
+      "lat": 9.9658,
+      "lng": 76.2438,
+      "name": "Fort Kochi Beach Promenade",
+      "radius_m": 80,
+      "see_list": [
+        "Granite sea-wall groyne extending into the channel for a 180-degree ocean view",
+        "Vypin passenger ferries cutting across the powerful estuary tidal currents",
+        "Seaside fish-fry stalls firing up cast-iron griddles with fresh catches at dusk"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Historic coastline where ancient spice galleons docked, offering sweeping sunset views over the shipping channel.",
+      "layer": "heritage"
+    },
+    {
+      "category": "square",
+      "fun_facts": [
+        "You can buy raw fish directly from the fishing nets and have nearby stalls grill it on cast-iron hotplates with Kerala red masala within ten minutes.",
+        "A historic Dutch maritime signaling mast stood here in the 1700s, using oil lanterns to signal approaching spice ships into the channel."
+      ],
+      "history": "Named after Portuguese explorer Vasco da Gama who established Europe's first Indian trading fort here in 1502, this breezy seaside square forms the threshold between maritime commerce and colonial history. Shaded by ancient rain trees, it serves as the vibrant open-air gathering ground where street vendors prepare spiced seafood over coconut-charcoal griddles.",
+      "hours": null,
+      "id": "vasco-square",
+      "lat": 9.9663,
+      "lng": 76.2419,
+      "name": "Vasco da Gama Square",
+      "radius_m": 60,
+      "see_list": [
+        "Open-air coconut-charcoal griddles sizzling with fresh red-marinated sea fish",
+        "Cast-iron vintage streetlamps framing the silhouettes of the fishing nets",
+        "Heritage stone marker showing the official start of the Fort Kochi walking route"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Breezy seaside esplanade connecting the fishing nets to the colonial heritage quarter.",
+      "layer": "heritage"
+    },
+    {
+      "category": "church",
+      "fun_facts": [
+        "Vasco da Gama's remains rested beneath the nave floor for 14 years before his son exhumed his bones in 1538 to reinter them in Lisbon's Jeronimos Monastery.",
+        "The church still preserves manually operated cloth punkahs (cloth ceiling fans) pulled by ropes from the vestibule during ceremonial services."
+      ],
+      "history": "Constructed of timber in 1503 by Portuguese Franciscan friars and rebuilt in stone in 1516, this sanctum is a living chronicle of colonial power. Vasco da Gama died in Fort Kochi on Christmas Eve in 1524 during his third voyage and was interred here. Captured by Dutch Protestant forces in 1663 (who preserved it while razing other Catholic churches) and later ceded to the British Anglican church, it spans three colonial eras.",
+      "hours": {
+        "close": "17:00",
+        "open": "09:00"
+      },
+      "id": "st-francis-church",
+      "lat": 9.9659,
+      "lng": 76.2408,
+      "name": "St. Francis Church",
+      "radius_m": 40,
+      "see_list": [
+        "Vasco da Gama's original brass-railed burial crypt in the floor near the chancel",
+        "Carved 17th-century Dutch heraldic gravestones mounted on the interior stone walls",
+        "Parchment parish baptism register on display recording births and marriages from 1751"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "India's oldest surviving European sanctuary, built in 1503 and original resting place of Vasco da Gama.",
+      "layer": "heritage"
+    },
+    {
+      "category": "church",
+      "fun_facts": [
+        "Antonio Moscheni painted the vibrant ceiling frescoes using egg tempera and natural mineral pigments, ensuring the colors remain radiant after a century.",
+        "The twin octagonal towers serve as maritime navigational beacons visible to ships miles out in the Arabian Sea."
+      ],
+      "history": "Originally consecrated by the Portuguese in 1558, the cathedral was razed by British troops in 1795 and grandly rebuilt in 1905 in neo-Gothic splendour. Declared a Minor Basilica by Pope John Paul II in 1984, the sanctuary is renowned for its soaring pastel nave, Bruges stained glass, and breathtaking ceiling frescoes painted by Italian Jesuit brother Antonio Moscheni.",
+      "hours": {
+        "close": "18:30",
+        "open": "07:00"
+      },
+      "id": "santa-cruz-basilica",
+      "lat": 9.9655,
+      "lng": 76.2401,
+      "name": "Santa Cruz Cathedral Basilica",
+      "radius_m": 40,
+      "see_list": [
+        "Antonio Moscheni's expressive Passion of Christ frescoes across the vaulted ceiling",
+        "Intricately carved teakwood pulpit supported by gold-leaf floral columns",
+        "Stained-glass windows casting amber and violet light across the marble nave"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Monumental white Gothic cathedral celebrated for Italian ceiling frescoes and towering twin spires.",
+      "layer": "heritage"
+    },
+    {
+      "category": "heritage",
+      "fun_facts": [
+        "The gravestones feature authentic 18th-century Dutch script along with the official VOC seal (Vereenigde Oostindische Compagnie).",
+        "The cemetery is kept locked to protect the fragile coral-stone and laterite tombs; the key is held by the Church of South India trust."
+      ],
+      "history": "Consecrated in 1714, this secluded sanctuary contains 104 recorded tombs of Dutch East India Company (VOC) governors, commanders, merchants, and their families who died on the Malabar Coast. Shaded by mossy rain trees and frangipani blossoms, it remains the oldest authentic European burial ground on the Indian subcontinent.",
+      "hours": {
+        "close": "17:00",
+        "open": "09:00"
+      },
+      "id": "dutch-cemetery",
+      "lat": 9.9651,
+      "lng": 76.2395,
+      "name": "Dutch Cemetery",
+      "radius_m": 30,
+      "see_list": [
+        "Weathered VOC crests and coats-of-arms chiseled into granite grave slabs",
+        "Pyramidal brick-and-mortar tombs coated in emerald moss under frangipani branches",
+        "Tomb of Captain Jan Labryn, the earliest decipherable grave marker dated 1714"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Atmospheric 1714 burial ground shaded by ancient frangipani, holding Dutch East India pioneers.",
+      "layer": "heritage"
+    },
+    {
+      "category": "street",
+      "fun_facts": [
+        "Many homes retain hidden central courtyards (Nadumuttam) that funnel ocean breezes and rainwater to keep interiors naturally cool.",
+        "The road's foundation consists of granite ballast stones discarded by returning spice galleons in the 17th century."
+      ],
+      "history": "Also known as Rue Princesse, this is one of Fort Kochi's oldest planned residential lanes. Lined with Portuguese villas, Dutch gabled houses, and British verandahs with timber louvers, it forms an open-air museum of vernacular architecture. Today it serves as the creative nerve center for travelers, writers, and Biennale artists.",
+      "hours": null,
+      "id": "princess-street",
+      "lat": 9.9648,
+      "lng": 76.239,
+      "name": "Princess Street",
+      "radius_m": 60,
+      "see_list": [
+        "Contrasting Dutch curved gables and British wooden verandahs on facing sides of the street",
+        "Original hand-painted ceramic street and house number tiles from colonial rule",
+        "Aroma of fresh cinnamon rolls and cardamom coffee drifting from garden cafes"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Charming pedestrian avenue lined with 300-year-old European townhomes, bookshops, and art cafes.",
+      "layer": "heritage"
+    },
+    {
+      "category": "bungalow",
+      "fun_facts": [
+        "The ground floor features reinforced iron-vault chambers where precious spices and vanilla beans were locked behind foot-thick doors.",
+        "The steeply pitched tile roofs include custom ventilation plenums designed to siphon cooling sea air through the living quarters."
+      ],
+      "history": "Constructed in 1868 as the regional headquarters for British commercial powerhouse Pierce Leslie & Co., this sprawling residence exemplifies Malabar-colonial styling. With double-story teak verandahs, arched wooden doorways, and sprawling grounds, it oversaw shipments of thousands of tons of Malabar black pepper, tea, and cashews to European markets.",
+      "hours": null,
+      "id": "pierce-leslie-bungalow",
+      "lat": 9.9645,
+      "lng": 76.2402,
+      "name": "Pierce Leslie Bungalow",
+      "radius_m": 40,
+      "see_list": [
+        "Wraparound double-story verandah supported by polished teak and rosewood pillars",
+        "Original arched window frames fitted with hand-blown 19th-century glass panes",
+        "Carved wooden eaves designed to shield the facade from fierce monsoon downpours"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Grand 1868 coffee and spice trading headquarters showcasing classic Malabar-colonial architecture.",
+      "layer": "heritage"
+    },
+    {
+      "category": "bungalow",
+      "fun_facts": [
+        "The house includes a private bar salon imported intact from a luxury 19th-century British passenger steamship.",
+        "During Hanukkah, a massive Menorah was traditionally lit on the top balcony, visible to cargo ships entering Cochin harbor."
+      ],
+      "history": "Built in 1805 by Samuel S. Koder of Cochin's venerable Jewish trading community, this landmark red-brick mansion marks the transition from colonial estates to Jewish mercantile prestige. The Koders introduced electrical infrastructure and water transportation to Cochin, hosting royalty and foreign diplomats within these halls.",
+      "hours": null,
+      "id": "koder-house",
+      "lat": 9.9639,
+      "lng": 76.2392,
+      "name": "Koder House",
+      "radius_m": 35,
+      "see_list": [
+        "Crimson brick facade accented with carved teakwood hanging balconies",
+        "Hand-laid terracotta tile floors featuring intricate floral border patterns",
+        "Cast-iron spiral staircase ascending to the private rooftop harbour observatory"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Palatial three-story red-brick mansion built in 1805 by Cochin's prominent Jewish merchant family.",
+      "layer": "heritage"
+    },
+    {
+      "category": "museum",
+      "fun_facts": [
+        "Houses a 16th-century teak processional cross constructed entirely without metal nails, joined with traditional Kerala wood joints.",
+        "A ceremonial vestment in the textile hall is hand-woven from pure Chinese gold thread presented by Portuguese explorer Afonso de Albuquerque."
+      ],
+      "history": "Founded by the late Bishop Joseph Kureethara, this museum safeguards the cultural and artistic confluence between Renaissance Portugal and traditional Kerala woodworking. Its five galleries (Altar, Treasure, Procession, Civil Life, and Cathedral) showcase sacred relics salvaged from colonial-era churches.",
+      "hours": {
+        "close": "17:00",
+        "open": "09:00"
+      },
+      "id": "indo-portuguese-museum",
+      "lat": 9.9635,
+      "lng": 76.2385,
+      "name": "Indo-Portuguese Museum",
+      "radius_m": 35,
+      "see_list": [
+        "Masterpiece 17th-century silver and rock-crystal monstrance in the Treasure Hall",
+        "Delicately carved ivory tabernacle crafted by local artisans for European clergy",
+        "Excavated stone ramparts of 16th-century Fort Manuel visible in the garden grounds"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Ecclesiastical treasury preserving 500 years of Indo-Portuguese art in the Bishop's gardens.",
+      "layer": "heritage"
+    },
+    {
+      "category": "residence",
+      "fun_facts": [
+        "Subterranean vaulted cellars beneath the building once connected to Fort Manuel via emergency escape tunnels.",
+        "The private diocesan archive holds original handwritten Latin and Portuguese church rolls dating to the 1500s."
+      ],
+      "history": "Perched on a scenic rise, this mansion was built in 1506 as the official residence for Dom Francisco de Almeida, first Portuguese Viceroy of India. Taken by the Dutch and restored to the Roman Catholic Diocese in 1888, it features soaring Romanesque arcades, circular stairways, and expansive private gardens.",
+      "hours": null,
+      "id": "bishop-house",
+      "lat": 9.9633,
+      "lng": 76.2382,
+      "name": "Bishop's House",
+      "radius_m": 35,
+      "see_list": [
+        "Monumental circular staircase and sweeping arched corridors overlooking the lawns",
+        "Stately 19th-century stained-glass chapel window in the upper gallery",
+        "Ancient laterite stone boundary wall separating the bishopric from the street"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Historic 1506 residence of the Portuguese Governor, now the administrative seat of Cochin Diocese.",
+      "layer": "heritage"
+    },
+    {
+      "category": "jetty",
+      "fun_facts": [
+        "At roughly six rupees per ticket, this ferry ride is celebrated as one of the most scenic and affordable water crossings in the world.",
+        "Pods of dolphins are frequently spotted right alongside the ferry bow as it crosses the deep channel current."
+      ],
+      "history": "This bustling jetty is Fort Kochi's lifeline, ferrying thousands of daily commuters, cyclists, and travelers across the harbor throat to Vypin Island. Operating from dawn to late evening, it offers an authentic front-row view of the busy shipping channel at work.",
+      "hours": {
+        "close": "21:00",
+        "open": "06:00"
+      },
+      "id": "fort-kochi-jetty",
+      "lat": 9.9675,
+      "lng": 76.2442,
+      "name": "Fort Kochi Jetty",
+      "radius_m": 50,
+      "see_list": [
+        "Ferry helmsman deftly steering against the powerful ocean tidal currents",
+        "Expansive views of the international container terminal across the channel",
+        "Daily commuters and fishermen boarding with bicycles and fresh morning goods"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Vibrant municipal ferry pier offering five-minute harbor crossings to Vypin island.",
+      "layer": "heritage"
+    },
+    {
+      "category": "palace",
+      "fun_facts": [
+        "The stunning murals were painted using purely organic pigments derived from crushed semi-precious stones, plant saps, and laterite earth, glowing without fading for 450 years.",
+        "The coronation hall floor looks like polished black marble, but is actually an ancient Kerala organic compound made of burnt coconut shells, plant juices, lime, and egg whites."
+      ],
+      "history": "Built in 1555 by the Portuguese as a goodwill gift to Raja Veera Kerala Varma and expanded in 1663 by the Dutch, this palace fuses traditional Kerala Nalukettu courtyard architecture with European arched windows. Its bedchambers house 300 square meters of tempera wall murals illustrating the Ramayana and Mahabharata in glowing natural pigments.",
+      "hours": {
+        "close": "17:00",
+        "open": "09:30"
+      },
+      "id": "mattancherry-palace",
+      "lat": 9.9585,
+      "lng": 76.2595,
+      "name": "Mattancherry Palace (Dutch Palace)",
+      "radius_m": 45,
+      "see_list": [
+        "Ramayana murals in the Royal Bedchamber detailing 48 epic scenes with lifelike expressions",
+        "Ivory-and-teak royal palanquin used in coronation processions on display in the central hall",
+        "Coffered wooden ceiling adorned with hand-carved lotus blossoms"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "1555 palace built by the Portuguese for the Kochi Raja, famed for magnificent Ramayana murals.",
+      "layer": "heritage"
+    },
+    {
+      "category": "synagogue",
+      "fun_facts": [
+        "Every single floor tile is hand-painted blue-and-white porcelain imported from Canton in 1762; no two tiles share the exact same design.",
+        "The holy ark holds 1,000-year-old engraved copper plates granted by King Bhaskara Ravi Varma conferring hereditary rights to the community."
+      ],
+      "history": "Erected in 1568 by Sephardic Jewish refugees from Spain and the Netherlands on land granted by Kochi Raja Rama Varma, this is the oldest active synagogue in the Commonwealth. Rebuilt after Portuguese cannon damage in 1664, it features a 1762 clock tower with numerals in Hebrew, Roman, Malayalam, and Arabic, symbolizing Cochin's religious harmony.",
+      "hours": {
+        "close": "17:00",
+        "open": "10:00"
+      },
+      "id": "pardesi-synagogue",
+      "lat": 9.9578,
+      "lng": 76.2592,
+      "name": "Pardesi Synagogue",
+      "radius_m": 35,
+      "see_list": [
+        "Hand-painted blue-and-white porcelain tiles imported from Canton beneath your feet",
+        "Brilliant 19th-century Belgian glass crystal chandeliers suspended from the ceiling",
+        "Four-dial clock tower showing distinct scripts facing palace, synagogue, and harbor"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "1568 Sephardic synagogue renowned for hand-painted Canton porcelain tiles and Belgian chandeliers.",
+      "layer": "heritage"
+    },
+    {
+      "category": "market",
+      "fun_facts": [
+        "The pungent scent of black pepper and dried ginger fills the air because many warehouses have stored spices continuously since the 1600s.",
+        "Massive bronze cooking cauldrons (Varpu) displayed outside antique shops were cast to feed up to 2,000 temple pilgrims at once and weigh over 800 kg."
+      ],
+      "history": "For more than four hundred years, this narrow market lane has traded the world's finest spices. Bales of Tellicherry black pepper, sun-dried ginger, cardamom pods, and nutmeg are still weighed and auctioned here, flanked by antique dealers displaying ship lamps, brass compasses, and carved temple rafters.",
+      "hours": {
+        "close": "18:00",
+        "open": "09:00"
+      },
+      "id": "jew-town-lanes",
+      "lat": 9.958,
+      "lng": 76.2588,
+      "name": "Jew Town Spice Lanes",
+      "radius_m": 70,
+      "see_list": [
+        "Sun-drying courtyards spread with golden Cochin ginger and pungent black pepper",
+        "Maritime antique shops displaying salvaged ship compasses and teak sea chests",
+        "Vintage balance scales and burlap spice sacks stacked inside open merchant halls"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Four-century-old spice trading streets filled with wholesale pepper warehouses and antiquities.",
+      "layer": "heritage"
+    },
+    {
+      "category": "museum",
+      "fun_facts": [
+        "The museum is built within genuine bomb-proof naval bunkers constructed to protect coastal defenses during World War II.",
+        "The outdoor weapons park includes authentic ship torpedoes, depth charges, and deck guns from the 1971 naval conflicts."
+      ],
+      "history": "Set inside two fortified World War II ammunition bunkers, this museum chronicles the maritime heritage of the subcontinent from the ancient Indus Valley dockyard at Lothal to the modern aircraft carrier era. It honors Malabar admiral Kunjali Marakkar, who held off Portuguese armadas for forty years.",
+      "hours": {
+        "close": "17:00",
+        "open": "09:30"
+      },
+      "id": "maritime-museum",
+      "lat": 9.9605,
+      "lng": 76.2415,
+      "name": "Indian Naval Maritime Museum",
+      "radius_m": 40,
+      "see_list": [
+        "Detailed scale models of aircraft carriers INS Vikrant and INS Viraat",
+        "Diorama depicting the legendary 1971 missile boat strike on Karachi harbor",
+        "Outdoor weapons park featuring real anti-submarine depth charges and sea mines"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Naval heritage museum inside WWII ammunition bunkers, chronicling India's maritime supremacy.",
+      "layer": "heritage"
+    },
+    {
+      "category": "gallery",
+      "fun_facts": [
+        "The back garden contains a wood-fired pizza oven situated beneath a 200-year-old breadfruit tree planted during the Dutch governorship.",
+        "During the Kochi-Muziris Biennale, this hall transforms into an avant-garde performance venue hosting international creators."
+      ],
+      "history": "Built in 1695 by the Dutch East India Company and later occupied by merchant David Koder, this historic home features thick laterite walls, sweeping Dutch gables, and open rafters. It has been reimagined as a cultural hub for contemporary exhibitions, artist talks, and courtyard gatherings.",
+      "hours": {
+        "close": "19:00",
+        "open": "11:00"
+      },
+      "id": "david-hall-gallery",
+      "lat": 9.9642,
+      "lng": 76.2388,
+      "name": "David Hall Gallery",
+      "radius_m": 30,
+      "see_list": [
+        "Exposed Dutch mortar and brickwork preserved along the interior gallery walls",
+        "Serene garden courtyard with century-old tropical shade trees and sculptures",
+        "Rotating contemporary art and photography exhibits by Kerala artists"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Restored 1695 Dutch East India residence turned contemporary art center and leafy garden cafe.",
+      "layer": "heritage"
+    },
+    {
+      "category": "street",
+      "fun_facts": [
+        "Every New Year's Day, this street erupts into the vibrant Cochin Carnival rally with costumed dancers and traditional percussion bands.",
+        "Dutch municipal engineers calculated the gabled rooflines specifically to catch cooling evening sea breezes while shedding monsoon rain."
+      ],
+      "history": "Named after the 'burghers'—citizens and merchants of Dutch descent—this quiet residential lane features low-slung, tile-roofed houses with welcoming street verandas. It preserves the unique domestic heritage of Fort Kochi's Anglo-Indian community across centuries.",
+      "hours": null,
+      "id": "burgher-street",
+      "lat": 9.964,
+      "lng": 76.2383,
+      "name": "Burgher Street",
+      "radius_m": 55,
+      "see_list": [
+        "Curved Dutch gables and ornamental carved wooden eaves on historic townhomes",
+        "Friendly local cats resting on cool laterite front-porch steps",
+        "Polished brass ship bells hanging by doorways in place of electric doorbells"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Tranquil heritage street of Dutch burghers and Anglo-Indian families, lined with gabled villas.",
+      "layer": "heritage"
+    },
+    {
+      "category": "church",
+      "fun_facts": [
+        "The annual feast of St. John de Britto in February reunites family members who travel from across the globe to join the neighborhood street procession.",
+        "The parish cemetery holds gravestones of British and Anglo-Indian residents dating back over a century."
+      ],
+      "history": "Erected in the 19th century and dedicated to St. John de Britto, this parish sanctuary has long been the spiritual home of Fort Kochi's Anglo-Indian families. With high timber-beamed ceilings, wooden pews, and a shaded cemetery, it preserves community traditions and holiday celebrations.",
+      "hours": {
+        "close": "17:00",
+        "open": "09:00"
+      },
+      "id": "st-john-church",
+      "lat": 9.9637,
+      "lng": 76.2378,
+      "name": "St. John de Britto Church Area",
+      "radius_m": 35,
+      "see_list": [
+        "Gothic-arch stained-glass window portraying St. John de Britto above the altar",
+        "Engraved brass memorial plaques commemorating early community benefactors",
+        "Peaceful shaded courtyard framed by flowering crimson gulmohar trees"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Historic 19th-century parish church serving Fort Kochi's close-knit Anglo-Indian community.",
+      "layer": "heritage"
+    },
+    {
+      "category": "park",
+      "fun_facts": [
+        "At low tide, local fishermen wade chest-deep into the surf to fling weighted circular throw-nets with incredible accuracy.",
+        "Direct ocean winds keep this coastal path 3 to 4 degrees cooler than the inland market streets during warm afternoons."
+      ],
+      "history": "Tracing the southwestern coastline of Fort Kochi, this paved oceanfront walkway offers unobstructed views of the Arabian Sea. Lined with period lampposts and shaded benches, it provides a tranquil retreat for morning runners and evening sunset watchers.",
+      "hours": null,
+      "id": "mahatma-gandhi-beach-walk",
+      "lat": 9.963,
+      "lng": 76.237,
+      "name": "Mahatma Gandhi Beach Walk",
+      "radius_m": 70,
+      "see_list": [
+        "Unbroken panoramic sunset dropping directly into the open ocean horizon",
+        "Traditional shore fishermen casting circular throw-nets into the breaking surf",
+        "Warm glow of heritage lampposts lighting the path as night falls over the sea"
+      ],
+      "sources": [
+        "Pack v1.0.0 field survey"
+      ],
+      "summary": "Seaside promenade illuminated by heritage lanterns, ideal for quiet evening ocean strolls.",
+      "layer": "heritage"
+    },
+    {
+      "id": "kashi-art-cafe",
+      "name": "Kashi Art Cafe",
+      "lat": 9.9646,
+      "lng": 76.2394,
+      "radius_m": 30,
+      "category": "cafe",
+      "layer": "food",
+      "summary": "Celebrated art cafe in a restored townhome, famed for its sunlit courtyard and chocolate cake.",
+      "history": "Opened in 1997 by local artists in a restored merchant home, Kashi Art Cafe spearheaded Fort Kochi's contemporary art revolution. Centered around a skylit open courtyard with stone sculptures, it is the favored gathering spot for writers, curators, and travelers.",
+      "fun_facts": [
+        "The evocative sculpture of stone heads emerging from the courtyard earth was created by renowned artist N.N. Rimzon.",
+        "Their signature warm chocolate cake with molten center has been baked using the same closely guarded recipe for over 25 years."
+      ],
+      "see_list": [
+        "N.N. Rimzon's iconic stone heads installation in the gravel-lined courtyard",
+        "Rotating gallery hallway exhibiting original contemporary photography and prints",
+        "Locally sourced French-press coffee brewed from fresh Wayanad Arabica beans"
+      ],
+      "hours": {
+        "open": "08:30",
+        "close": "21:30"
+      },
+      "sources": [
+        "Pack v1.1.0 field survey"
+      ]
+    },
+    {
+      "id": "dal-roti-corner",
+      "name": "Dal Roti Corner Stop",
+      "lat": 9.9582,
+      "lng": 76.259,
+      "radius_m": 30,
+      "category": "food",
+      "layer": "food",
+      "summary": "Beloved Jew Town eatery celebrated for generous kathi rolls and homestyle North Indian dishes.",
+      "history": "A fixture on the edge of the spice district, Dal Roti has fed hungry travelers and spice merchants for decades. The kitchen serves hearty, freshly made North Indian meals, flaky parathas, and spiced curries made from scratch each day.",
+      "fun_facts": [
+        "Their oversized kathi rolls are legendary among travelers and easily provide a hearty meal for two people.",
+        "The owner personally chats with diners to share insider tips on discovering the best spice warehouses in Mattancherry."
+      ],
+      "see_list": [
+        "Sizzling rumali roti spun paper-thin over an inverted iron wok by the chef",
+        "Freshly rolled kathi rolls stuffed with spiced paneer or chicken and mint chutney",
+        "Chilled homemade salted buttermilk infused with fresh ginger and curry leaves"
+      ],
+      "hours": {
+        "open": "11:00",
+        "close": "21:00"
+      },
+      "sources": [
+        "Pack v1.1.0 field survey"
+      ]
+    },
+    {
+      "id": "old-harbour-stay",
+      "name": "Old Harbour House Stay",
+      "lat": 9.965,
+      "lng": 76.2398,
+      "radius_m": 35,
+      "category": "stay",
+      "layer": "stay",
+      "summary": "300-year-old Dutch-style boutique hotel set in private gardens facing the fishing nets.",
+      "history": "Originally built in the Dutch style with Portuguese influences, this 300-year-old residence housed colonial merchants and later served as an estate office for English tea brokers. Lovingly restored with period antiques, it stands as one of Fort Kochi's most elegant heritage addresses.",
+      "fun_facts": [
+        "The inner courtyard retains an ancient freshwater well that supplied drinking water to merchant captains three centuries ago.",
+        "Every room is named after historic settlement quarters and appointed with authentic period oil paintings and furniture."
+      ],
+      "see_list": [
+        "Tranquil garden courtyard with tropical flora and a heritage swimming pool",
+        "Classic wooden verandas offering views toward the silhouettes of the fishing nets",
+        "Exposed laterite masonry walls seamlessly paired with high timber ceilings"
+      ],
+      "hours": null,
+      "sources": [
+        "Pack v1.1.0 field survey"
+      ]
+    },
+    {
+      "id": "fort-heritage-homestay",
+      "name": "Fort Heritage Homestay Lane",
+      "lat": 9.964,
+      "lng": 76.2385,
+      "radius_m": 40,
+      "category": "stay",
+      "layer": "stay",
+      "summary": "Quiet lane of family-run heritage homestays offering authentic Kerala hospitality.",
+      "history": "Nestled in quiet residential alleys behind Burgher Street, these family homestays welcome travelers into restored ancestral homes. Guests experience home-cooked Kerala breakfasts, tranquil garden verandas, and warm personal guidance from local families.",
+      "fun_facts": [
+        "Hosts often prepare traditional Kerala breakfast dishes like steamed Puttu with kadala curry and fresh coconut appams.",
+        "Staying along this lane puts travelers within a five-minute walk of all Fort Kochi landmarks without needing any motor vehicles."
+      ],
+      "see_list": [
+        "Peaceful shaded gardens filled with flowering hibiscus and bougainvillea",
+        "Traditional Kerala wooden swing (Oonjal) suspended on the front veranda",
+        "Family hosts offering local stories and insider walking tips over morning chai"
+      ],
+      "hours": null,
+      "sources": [
+        "Pack v1.1.0 field survey"
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "est_minutes": 150,
+      "id": "fort-kochi-heritage-loop",
+      "name": "Fort Kochi Heritage Loop",
+      "ordered_poi_ids": [
+        "vasco-square",
+        "chinese-fishing-nets",
+        "fort-kochi-beach",
+        "fort-kochi-jetty",
+        "st-francis-church",
+        "santa-cruz-basilica",
+        "dutch-cemetery",
+        "princess-street",
+        "david-hall-gallery",
+        "burgher-street",
+        "pierce-leslie-bungalow",
+        "koder-house",
+        "indo-portuguese-museum",
+        "bishop-house",
+        "maritime-museum",
+        "mahatma-gandhi-beach-walk"
+      ]
+    },
+    {
+      "est_minutes": 240,
+      "id": "kochi-full-day",
+      "name": "Kochi Full Day (Fort + Mattancherry)",
+      "ordered_poi_ids": [
+        "vasco-square",
+        "chinese-fishing-nets",
+        "st-francis-church",
+        "santa-cruz-basilica",
+        "princess-street",
+        "maritime-museum",
+        "mattancherry-palace",
+        "pardesi-synagogue",
+        "jew-town-lanes",
+        "mahatma-gandhi-beach-walk"
+      ]
+    }
+  ]
+}

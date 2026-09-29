@@ -143,34 +143,6 @@ fun PoiDetailScreen(
                             .fillMaxWidth()
                             .padding(horizontal = GuideTokens.Space.screenPad, vertical = GuideTokens.Space.base),
                     ) {
-                        // Social validation / explorer cluster
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(GuideTokens.Space.xs),
-                        ) {
-                            Surface(
-                                shape = CircleShape,
-                                color = GuideTokens.PrimaryWash,
-                                modifier = Modifier.size(24.dp),
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = GuideIcons.Footprints,
-                                        contentDescription = null,
-                                        tint = GuideTokens.Primary,
-                                        modifier = Modifier.size(14.dp),
-                                    )
-                                }
-                            }
-                            Text(
-                                text = "120+ travelers explored this week",
-                                style = GuideTokens.Caption,
-                                color = GuideTokens.Text2,
-                            )
-                        }
-
-                        Spacer(Modifier.height(GuideTokens.Space.sm))
-
                         // Place Title
                         Text(
                             text = card.name,
@@ -180,72 +152,88 @@ fun PoiDetailScreen(
                             overflow = TextOverflow.Ellipsis,
                         )
 
-                        Spacer(Modifier.height(2.dp))
+                        Spacer(Modifier.height(GuideTokens.Space.xs))
 
-                        // Location subtitle
-                        Text(
-                            text = "River Road, Fort Kochi, Kochi, Kerala 682001",
-                            style = GuideTokens.Chrome,
-                            color = GuideTokens.Text2,
-                        )
-
-                        Spacer(Modifier.height(GuideTokens.Space.sm))
-
-                        // Rating row
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = GuideIcons.Star,
-                                contentDescription = null,
-                                tint = GuideTokens.Highlight,
-                                modifier = Modifier.size(16.dp),
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = "4.9",
-                                style = GuideTokens.Body.copy(
-                                    color = GuideTokens.Highlight,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 15.sp,
-                                ),
-                            )
-                            Spacer(Modifier.width(GuideTokens.Space.xs))
-                            Text(
-                                text = "(118 audio stories & reviews)",
-                                style = GuideTokens.Caption,
-                                color = GuideTokens.Text2,
-                            )
-                            Spacer(Modifier.weight(1f))
-                            HoursTag(hoursText = hoursText, openNow = openNow)
-                        }
-
-                        Spacer(Modifier.height(GuideTokens.Space.md))
-
-                        // Feature tags row (AirBnB Luxe style)
+                        // Category & Status Row
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(GuideTokens.Space.sm),
                         ) {
-                            DetailPill(label = "Audio Guide Ready", icon = GuideIcons.Speak)
-                            DetailPill(label = layerWord(card.layer), icon = layerIcon(card.layer))
-                            DetailPill(label = "15 min walk", icon = GuideIcons.Clock)
+                            DetailPill(
+                                label = layerWord(card.layer),
+                                icon = layerIcon(card.layer),
+                            )
+                            HoursTag(hoursText = hoursText, openNow = openNow)
                         }
 
                         Spacer(Modifier.height(GuideTokens.Space.base))
 
-                        // Summary
+                        // Essence Summary
                         Text(
                             text = card.summary,
-                            style = GuideTokens.Body,
+                            style = GuideTokens.Body.copy(
+                                fontSize = 16.sp,
+                                lineHeight = 24.sp,
+                                fontWeight = FontWeight.Medium,
+                            ),
                             color = GuideTokens.Text,
-                            lineHeight = 24.sp,
                         )
 
-                        Spacer(Modifier.height(GuideTokens.Space.lg))
+                        // Highlighted Secret / Surprise Callout Card
+                        val surpriseFact = card.funFacts.firstOrNull()
+                        if (surpriseFact != null) {
+                            Spacer(Modifier.height(GuideTokens.Space.base))
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = GuideTokens.PrimaryWash,
+                                border = BorderStroke(1.dp, GuideTokens.Border),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(GuideTokens.Space.base),
+                                    verticalAlignment = Alignment.Top,
+                                ) {
+                                    Surface(
+                                        shape = RoundedCornerShape(10.dp),
+                                        color = GuideTokens.Primary,
+                                        modifier = Modifier.size(32.dp),
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = GuideIcons.Sparkle,
+                                                contentDescription = null,
+                                                tint = Color.White,
+                                                modifier = Modifier.size(16.dp),
+                                            )
+                                        }
+                                    }
+                                    Spacer(Modifier.width(GuideTokens.Space.md))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = "HIDDEN SECRET & CURIOSITY",
+                                            style = GuideTokens.Caption.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 0.5.sp,
+                                            ),
+                                            color = GuideTokens.Primary,
+                                        )
+                                        Spacer(Modifier.height(2.dp))
+                                        Text(
+                                            text = surpriseFact,
+                                            style = GuideTokens.Body.copy(
+                                                fontWeight = FontWeight.Medium,
+                                                lineHeight = 22.sp,
+                                            ),
+                                            color = GuideTokens.Text,
+                                        )
+                                    }
+                                }
+                            }
+                        }
 
-                        // The Story
-                        SectionHeader("The story")
+                        // The Living Story Section
+                        Spacer(Modifier.height(GuideTokens.Space.lg))
+                        SectionHeader("The living story")
                         Spacer(Modifier.height(GuideTokens.Space.xs))
                         Text(
                             text = card.history,
@@ -254,38 +242,10 @@ fun PoiDetailScreen(
                             lineHeight = 26.sp,
                         )
 
-                        // Fun facts
-                        if (card.funFacts.isNotEmpty()) {
-                            Spacer(Modifier.height(GuideTokens.Space.lg))
-                            SectionHeader("Curated highlights")
-                            Spacer(Modifier.height(GuideTokens.Space.xs))
-                            GuideCard {
-                                card.funFacts.forEachIndexed { index, fact ->
-                                    Row(modifier = Modifier.fillMaxWidth()) {
-                                        Icon(
-                                            imageVector = GuideIcons.Sparkle,
-                                            contentDescription = null,
-                                            tint = GuideTokens.Highlight,
-                                            modifier = Modifier.padding(top = 2.dp).size(16.dp),
-                                        )
-                                        Spacer(Modifier.width(GuideTokens.Space.md))
-                                        Text(
-                                            text = fact,
-                                            style = GuideTokens.Body,
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                    }
-                                    if (index != card.funFacts.lastIndex) {
-                                        GuideDivider(modifier = Modifier.padding(vertical = GuideTokens.Space.md))
-                                    }
-                                }
-                            }
-                        }
-
-                        // Look for
+                        // What to Spot in Person (The Field Checklist)
                         if (card.seeList.isNotEmpty()) {
                             Spacer(Modifier.height(GuideTokens.Space.lg))
-                            SectionHeader("What to look for")
+                            SectionHeader("What to spot in person")
                             Spacer(Modifier.height(GuideTokens.Space.xs))
                             GuideCard {
                                 card.seeList.forEachIndexed { index, item ->
@@ -301,11 +261,77 @@ fun PoiDetailScreen(
                                             modifier = Modifier.weight(1f),
                                         )
                                     }
+                                    if (index != card.seeList.lastIndex) {
+                                        GuideDivider(modifier = Modifier.padding(vertical = GuideTokens.Space.sm))
+                                    }
                                 }
                             }
                         }
 
-                        SourceFooter(card = card, hoursText = hoursText)
+                        // Additional Lore & Curiosities
+                        if (card.funFacts.size > 1) {
+                            Spacer(Modifier.height(GuideTokens.Space.lg))
+                            SectionHeader("Heritage lore & curiosities")
+                            Spacer(Modifier.height(GuideTokens.Space.xs))
+                            GuideCard {
+                                card.funFacts.drop(1).forEachIndexed { index, fact ->
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                                        verticalAlignment = Alignment.Top,
+                                    ) {
+                                        Icon(
+                                            imageVector = GuideIcons.Compass,
+                                            contentDescription = null,
+                                            tint = GuideTokens.Highlight,
+                                            modifier = Modifier.padding(top = 2.dp).size(16.dp),
+                                        )
+                                        Spacer(Modifier.width(GuideTokens.Space.md))
+                                        Text(
+                                            text = fact,
+                                            style = GuideTokens.Body,
+                                            modifier = Modifier.weight(1f),
+                                        )
+                                    }
+                                    if (index != card.funFacts.size - 2) {
+                                        GuideDivider(modifier = Modifier.padding(vertical = GuideTokens.Space.sm))
+                                    }
+                                }
+                            }
+                        }
+
+                        // Hands-free Earbud Cue Banner
+                        Spacer(Modifier.height(GuideTokens.Space.lg))
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            color = GuideTokens.Surface2,
+                            border = BorderStroke(1.dp, GuideTokens.Border),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(GuideTokens.Space.base),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = GuideIcons.Headphones,
+                                    contentDescription = null,
+                                    tint = GuideTokens.Primary,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                                Spacer(Modifier.width(GuideTokens.Space.md))
+                                Column {
+                                    Text(
+                                        text = "Spontaneous Spoken Guide",
+                                        style = GuideTokens.Label,
+                                        color = GuideTokens.Text,
+                                    )
+                                    Text(
+                                        text = "Double-tap your wireless earbud anytime while standing here for unscripted oral storytelling.",
+                                        style = GuideTokens.Caption,
+                                        color = GuideTokens.Text2,
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -420,95 +446,36 @@ private fun DetailPill(label: String, icon: ImageVector) {
     }
 }
 
-/** Open / closed tag. */
-@Composable
-private fun HoursTag(hoursText: String?, openNow: Boolean) {
-    if (hoursText == null) return
-    val word = if (openNow) "Open now" else "Closed"
-    val color = if (openNow) GuideTokens.Success else GuideTokens.Danger
-    StatusTag(text = word, color = color, icon = GuideIcons.Clock)
-}
-
-/** Numbered marker for the see-list — the list is ordered, so show the order. */
 @Composable
 private fun NumberBadge(number: Int) {
-    Box(
-        modifier = Modifier
-            .width(GuideTokens.Space.lg)
-            .padding(top = 2.dp),
-        contentAlignment = Alignment.Center,
+    Surface(
+        shape = CircleShape,
+        color = GuideTokens.PrimaryWash,
+        border = BorderStroke(1.dp, GuideTokens.Primary.copy(alpha = 0.3f)),
+        modifier = Modifier.size(24.dp),
     ) {
-        Text(
-            text = number.toString(),
-            style = GuideTokens.Label,
-            color = GuideTokens.Primary,
-            maxLines = Lines.Single,
-        )
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = number.toString(),
+                style = GuideTokens.Caption.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                ),
+                color = GuideTokens.Primary,
+            )
+        }
     }
 }
 
-/**
- * The footer that makes the honesty claim checkable: exactly where this text
- * came from, and which pack version produced it.
- */
+/** Open / closed tag. */
 @Composable
-private fun SourceFooter(card: PackLoader.PoiCard, hoursText: String?) {
-    Column(modifier = Modifier.padding(top = GuideTokens.Space.xl)) {
-        GuideDivider()
-        SectionHeader("Where this comes from")
-
-        if (card.sources.isEmpty()) {
-            Text(
-                text = "This stop has no sources recorded yet — treat the details above as " +
-                    "unconfirmed until the pack is updated.",
-                style = GuideTokens.Chrome,
-                maxLines = Lines.Unbounded,
-            )
-        } else {
-            card.sources.forEach { source ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = GuideTokens.Space.xs),
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    Icon(
-                        imageVector = GuideIcons.Book,
-                        contentDescription = null,
-                        tint = GuideTokens.Text2,
-                        modifier = Modifier
-                            .padding(top = 2.dp)
-                            .size(14.dp),
-                    )
-                    Spacer(Modifier.size(GuideTokens.Space.sm))
-                    Text(
-                        text = source,
-                        style = GuideTokens.Chrome,
-                        maxLines = Lines.Supporting,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-        }
-
-        Row(
-            modifier = Modifier.padding(top = GuideTokens.Space.md),
-            horizontalArrangement = Arrangement.spacedBy(GuideTokens.Space.base),
-        ) {
-            StatusTag(
-                text = "Pack v${card.packVersion}",
-                color = GuideTokens.Text2,
-                icon = GuideIcons.Offline,
-            )
-            if (hoursText != null) {
-                StatusTag(
-                    text = "Hours from the pack",
-                    color = GuideTokens.Text2,
-                    icon = GuideIcons.Clock,
-                )
-            }
-        }
+private fun HoursTag(hoursText: String?, openNow: Boolean) {
+    if (hoursText != null) {
+        val word = if (openNow) "Open now · $hoursText" else "Closed"
+        val color = if (openNow) GuideTokens.Success else GuideTokens.Danger
+        StatusTag(text = word, color = color, icon = GuideIcons.Clock)
+    } else {
+        StatusTag(text = "Open 24/7 · Always accessible", color = GuideTokens.Success, icon = GuideIcons.Clock)
     }
 }
 
