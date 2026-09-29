@@ -86,6 +86,7 @@ import guide.app.ui.components.GuideIcons
 import guide.app.ui.components.GuideNavBar
 import guide.app.ui.theme.GuideTokens
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.launch
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.model.LatLng
@@ -443,24 +444,39 @@ fun GuideApp(
             }
         }
 
-        // "What am I seeing?" — the app's signature question. Answered from the
-        // same seeing logic the narrator uses, against the pack, using the
-        // latest fix. Honest when there is no fix or nothing is near.
+        val scope = androidx.compose.runtime.rememberCoroutineScope()
+        // "What am I seeing?" — the app's signature question. Answered spontaneously by AI.
         val onSeeingTap: () -> Unit = {
             val lat = app.lastLat
             val lng = app.lastLng
-            seeingAnswer = if (lat == null || lng == null) {
-                "I don't have your location yet — give the GPS a moment outdoors."
+            if (lat == null || lng == null) {
+                val msg = "I don't have your location yet — give the GPS a moment outdoors."
+                seeingAnswer = msg
+                GuideService.speak(context, msg)
             } else {
                 val nearest = app.nearby.firstOrNull()
                 if (nearest == null) {
-                    "No stops in this pack are near you right now."
+                    val msg = "No stops in this pack are near you right now."
+                    seeingAnswer = msg
+                    GuideService.speak(context, msg)
                 } else {
                     val card = app.card(nearest.id)
                     if (card == null) {
-                        "No stops in this pack are near you right now."
+                        val msg = "No stops in this pack are near you right now."
+                        seeingAnswer = msg
+                        GuideService.speak(context, msg)
                     } else {
-                        "${card.name} — ${card.summary}"
+                        seeingAnswer = "Observing ${card.name}..."
+                        scope.launch {
+                            val aiStory = guide.app.voice.SpontaneousGuideAiEngine.generateStory(
+                                context = context,
+                                card = card,
+                                userLat = lat,
+                                userLng = lng,
+                            )
+                            seeingAnswer = aiStory
+                            GuideService.speak(context, aiStory)
+                        }
                     }
                 }
             }

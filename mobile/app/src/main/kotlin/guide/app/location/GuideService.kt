@@ -280,9 +280,15 @@ class GuideService : Service() {
                     currentCard = card
                     updateDynamicNotification(muted = narrator?.muted ?: false)
                     val n = narrator ?: continue
-                    n.enqueue(p.id, n.storyText(
-                        card.name, card.summary, card.funFacts.firstOrNull(),
-                    ), onRoute = true)
+                    scope.launch {
+                        val story = guide.app.voice.SpontaneousGuideAiEngine.generateStory(
+                            context = this@GuideService,
+                            card = card,
+                            userLat = fix.lat,
+                            userLng = fix.lng,
+                        )
+                        n.enqueue(p.id, story, onRoute = true)
+                    }
                 }
 
                 // If Google Maps Navigation Companion is active, prioritize POIs along the route corridor
@@ -298,11 +304,15 @@ class GuideService : Service() {
                             currentCard = cCard
                             updateDynamicNotification(muted = narrator?.muted ?: false)
                             val n = narrator ?: continue
-                            n.enqueue(
-                                cId,
-                                n.storyText(cCard.name, cCard.summary, cCard.funFacts.firstOrNull()),
-                                onRoute = true,
-                            )
+                            scope.launch {
+                                val story = guide.app.voice.SpontaneousGuideAiEngine.generateStory(
+                                    context = this@GuideService,
+                                    card = cCard,
+                                    userLat = fix.lat,
+                                    userLng = fix.lng,
+                                )
+                                n.enqueue(cId, story, onRoute = true)
+                            }
                         }
                     }
                 }

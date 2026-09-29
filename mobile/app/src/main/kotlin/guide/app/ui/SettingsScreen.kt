@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import guide.app.MainActivity
+import kotlinx.coroutines.launch
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.NotificationManagerCompat
@@ -129,6 +130,19 @@ fun SettingsScreen(
     var showNameDialog by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
     var showPrivacyPolicyDialog by remember { mutableStateOf(false) }
+
+    // Spontaneous AI Tour Guide state
+    var openAiKeyInput by remember { mutableStateOf(prefs.getString("openai_api_key", "") ?: "") }
+    var selectedPersonaId by remember {
+        mutableStateOf(
+            prefs.getString("ai_tour_persona", guide.app.voice.SpontaneousGuideAiEngine.Persona.INSIDER.id)
+                ?: guide.app.voice.SpontaneousGuideAiEngine.Persona.INSIDER.id
+        )
+    }
+    var keySaveFeedback by remember { mutableStateOf<String?>(null) }
+    var aiSampleStory by remember { mutableStateOf<String?>(null) }
+    var isGeneratingStory by remember { mutableStateOf(false) }
+    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
 
     // External Maps testing state
     var selectedTestPoiId by remember { mutableStateOf("chinese-fishing-nets") }
@@ -923,7 +937,217 @@ fun SettingsScreen(
         }
 
         // =====================================================================
-        // 6. Trip & Drawer Notifications (Real Working On/Off Controls)
+        // 6. Spontaneous AI Tour Guide Intelligence (OpenAI GPT-4o-mini)
+        // =====================================================================
+        item { SectionHeader("Spontaneous AI Tour Intelligence") }
+        item {
+            GuideCard {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Surface(
+                            modifier = Modifier.size(36.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            color = Color(0xFFFDF4FF),
+                            border = BorderStroke(1.dp, Color(0xFFF0ABFC)),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = GuideIcons.Compass,
+                                    contentDescription = null,
+                                    tint = Color(0xFFA855F7),
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Spontaneous Oral Storytelling",
+                                style = GuideTokens.Title,
+                                color = GuideTokens.Text,
+                            )
+                            Text(
+                                text = "Powered by OpenAI GPT-4o-mini & On-Device Generative Engine",
+                                style = GuideTokens.Caption,
+                                color = GuideTokens.Text2,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    StatusTag(
+                        text = if (openAiKeyInput.isNotBlank()) "GPT-4o-mini ACTIVE" else "SMART LOCAL AI",
+                        color = if (openAiKeyInput.isNotBlank()) GuideTokens.Success else GuideTokens.Highlight,
+                    )
+                }
+
+                Spacer(Modifier.height(GuideTokens.Space.base))
+
+                Text(
+                    text = "Storytelling Persona & Vibe",
+                    style = GuideTokens.Label,
+                    color = GuideTokens.Text,
+                )
+                Text(
+                    text = "Controls how your AI companion perceives and narrates landmarks around you.",
+                    style = GuideTokens.Caption,
+                    color = GuideTokens.Text2,
+                )
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+
+                // Persona selection chips
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    guide.app.voice.SpontaneousGuideAiEngine.Persona.entries.forEach { p ->
+                        CategoryChip(
+                            text = p.title,
+                            selected = selectedPersonaId == p.id,
+                            onClick = {
+                                selectedPersonaId = p.id
+                                prefs.edit().putString("ai_tour_persona", p.id).apply()
+                            },
+                        )
+                    }
+                }
+
+                val currentPersonaDesc = guide.app.voice.SpontaneousGuideAiEngine.Persona.fromId(selectedPersonaId).description
+                Spacer(Modifier.height(GuideTokens.Space.xs))
+                Text(
+                    text = currentPersonaDesc,
+                    style = GuideTokens.Caption,
+                    color = GuideTokens.Primary,
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                )
+
+                Spacer(Modifier.height(GuideTokens.Space.base))
+                GuideDivider()
+                Spacer(Modifier.height(GuideTokens.Space.base))
+
+                // OpenAI API Key input
+                Text(
+                    text = "OpenAI API Key (GPT-4o-mini)",
+                    style = GuideTokens.Label,
+                    color = GuideTokens.Text,
+                )
+                Text(
+                    text = "Enables real-time contextual cloud reasoning incorporating time-of-day, sun angle, and walking context. If left empty, the built-in Smart On-Device Generative Engine generates unscripted stories locally.",
+                    style = GuideTokens.Caption,
+                    color = GuideTokens.Text2,
+                )
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+
+                OutlinedTextField(
+                    value = openAiKeyInput,
+                    onValueChange = {
+                        openAiKeyInput = it
+                        keySaveFeedback = null
+                    },
+                    placeholder = { Text("sk-proj-...") },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = GuideTokens.Primary,
+                        unfocusedBorderColor = GuideTokens.Border,
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    GuideButton(
+                        text = "Save API Key",
+                        onClick = {
+                            prefs.edit().putString("openai_api_key", openAiKeyInput.trim()).apply()
+                            keySaveFeedback = if (openAiKeyInput.isNotBlank()) {
+                                "OpenAI GPT-4o-mini key saved! Spontaneous live cloud stories active."
+                            } else {
+                                "Key cleared. Using Smart On-Device Generative Engine."
+                            }
+                        },
+                        variant = GuideButtonVariant.Primary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    GuideButton(
+                        text = if (isGeneratingStory) "Generating..." else "Test AI Story Now",
+                        onClick = {
+                            isGeneratingStory = true
+                            coroutineScope.launch {
+                                val dummyCard = appState?.card("chinese-fishing-nets") ?: guide.app.data.PackLoader.PoiCard(
+                                    id = "chinese-fishing-nets",
+                                    name = "Chinese Fishing Nets",
+                                    summary = "Centuries-old cantilevered fishing nets along Fort Kochi beach.",
+                                    history = "Introduced by Chinese explorer Zheng He in the 14th century.",
+                                    funFacts = listOf("Operated by teams of 4 to 6 fishermen using counterweights."),
+                                    seeList = listOf("Teakwood pivot beams", "Granite counterweight stones"),
+                                    sources = listOf("ASI Survey"),
+                                    lat = 9.9674, lng = 76.2429, radiusM = 65.0,
+                                    hours = "06:00–18:00", layer = "heritage", packVersion = "live",
+                                )
+                                val story = guide.app.voice.SpontaneousGuideAiEngine.generateStory(
+                                    context = context,
+                                    card = dummyCard,
+                                )
+                                aiSampleStory = story
+                                isGeneratingStory = false
+                                GuideService.speak(context, story)
+                            }
+                        },
+                        variant = GuideButtonVariant.Tonal,
+                        modifier = Modifier.weight(1f),
+                        enabled = !isGeneratingStory,
+                    )
+                }
+
+                keySaveFeedback?.let { msg ->
+                    Spacer(Modifier.height(6.dp))
+                    Text(text = msg, style = GuideTokens.Caption, color = GuideTokens.Primary)
+                }
+
+                // AI Sample Story Result
+                aiSampleStory?.let { sample ->
+                    Spacer(Modifier.height(GuideTokens.Space.md))
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = GuideTokens.Surface2,
+                        border = BorderStroke(1.dp, GuideTokens.Border),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                StatusTag(text = "LIVE SPONTANEOUS OUTPUT", color = GuideTokens.Highlight)
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = "Spoken by Sarvam Neural Voice",
+                                    style = GuideTokens.Caption,
+                                    color = GuideTokens.Text2,
+                                )
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "\"$sample\"",
+                                style = GuideTokens.Body,
+                                color = GuideTokens.Text,
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // =====================================================================
+        // 7. Trip & Drawer Notifications (Real Working On/Off Controls)
         // =====================================================================
         item { SectionHeader("Trip & Drawer Notifications") }
         item {
