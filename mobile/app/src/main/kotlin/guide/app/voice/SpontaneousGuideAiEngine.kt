@@ -68,7 +68,9 @@ object SpontaneousGuideAiEngine {
         language: guide.app.data.AppLanguage? = null,
     ): String = withContext(Dispatchers.IO) {
         val prefs = context.getSharedPreferences("guide_prefs", Context.MODE_PRIVATE)
-        val apiKey = prefs.getString("openai_api_key", "")?.trim().orEmpty()
+        val apiKey = prefs.getString("openai_api_key", "")?.trim()?.ifBlank { null }
+            ?: runCatching { guide.app.BuildConfig.OPENAI_API_KEY }.getOrNull()?.trim()?.ifBlank { null }
+            ?: ""
         val personaId = prefs.getString("ai_tour_persona", Persona.INSIDER.id)
         val persona = Persona.fromId(personaId)
         val lang = language ?: guide.app.data.AppLanguage.fromCode(prefs.getString("app_language", guide.app.data.AppLanguage.ENGLISH.code))

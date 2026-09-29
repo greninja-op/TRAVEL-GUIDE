@@ -136,7 +136,12 @@ fun SettingsScreen(
     var showPrivacyPolicyDialog by remember { mutableStateOf(false) }
 
     // Spontaneous AI Tour Guide state
-    var openAiKeyInput by remember { mutableStateOf(prefs.getString("openai_api_key", "") ?: "") }
+    val defaultOpenAiKey = remember {
+        runCatching { guide.app.BuildConfig.OPENAI_API_KEY }.getOrDefault("")
+    }
+    var openAiKeyInput by remember {
+        mutableStateOf(prefs.getString("openai_api_key", "")?.ifBlank { null } ?: defaultOpenAiKey)
+    }
     var selectedPersonaId by remember {
         mutableStateOf(
             prefs.getString("ai_tour_persona", guide.app.voice.SpontaneousGuideAiEngine.Persona.INSIDER.id)
