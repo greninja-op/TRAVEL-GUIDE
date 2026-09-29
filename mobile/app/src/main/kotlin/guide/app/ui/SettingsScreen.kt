@@ -119,7 +119,9 @@ fun SettingsScreen(
     onClearData: () -> Unit = {},
     themeMode: String = "system",
     onThemeMode: (String) -> Unit = {},
+    language: AppLanguage = appState?.appLanguage ?: AppLanguage.ENGLISH,
 ) {
+    val currentLanguage = language
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("guide_prefs", Context.MODE_PRIVATE) }
 
@@ -228,11 +230,11 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text("Settings & Privacy", style = GuideTokens.Heading)
+                    Text(AppStrings.settingsTitle(currentLanguage), style = GuideTokens.Heading)
                 }
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Manage your local identity, Google Maps sync, security & offline privacy.",
+                    AppStrings.settingsSubtitle(currentLanguage),
                     style = GuideTokens.Caption,
                     color = GuideTokens.Text2,
                 )
@@ -242,7 +244,7 @@ fun SettingsScreen(
         // =====================================================================
         // 1. Explorer Account & Identity Card
         // =====================================================================
-        item { SectionHeader("Explorer Profile") }
+        item { SectionHeader(AppStrings.explorerProfileHeader(currentLanguage)) }
         item {
             GuideCard {
                 Row(
@@ -280,7 +282,7 @@ fun SettingsScreen(
                                 modifier = Modifier.clickable { showNameDialog = true },
                             ) {
                                 Text(
-                                    text = "Edit",
+                                    text = AppStrings.editBtn(currentLanguage),
                                     style = GuideTokens.Caption,
                                     color = GuideTokens.Primary,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
@@ -288,7 +290,7 @@ fun SettingsScreen(
                             }
                         }
                         Text(
-                            text = "Heritage Explorer • Fort Kochi Pack v1.1.0",
+                            text = AppStrings.heritageExplorerSubtitle(currentLanguage),
                             style = GuideTokens.Caption,
                             color = GuideTokens.Text2,
                         )
@@ -310,15 +312,15 @@ fun SettingsScreen(
 
                     ProfileStatColumn(
                         value = "$visitedCount / $totalStops",
-                        label = "Places Discovered",
+                        label = AppStrings.placesDiscoveredStat(currentLanguage),
                     )
                     ProfileStatColumn(
                         value = "$notesCount",
-                        label = "Trip Notes",
+                        label = AppStrings.tripNotesStat(currentLanguage),
                     )
                     ProfileStatColumn(
-                        value = "Zero Cloud",
-                        label = "Data Sovereignty",
+                        value = AppStrings.zeroCloudStat(currentLanguage),
+                        label = AppStrings.dataSovereigntyStat(currentLanguage),
                     )
                 }
             }
@@ -327,7 +329,7 @@ fun SettingsScreen(
         // =====================================================================
         // 2. Appearance & Display (Crisp Light & Obsidian Carbon Dark)
         // =====================================================================
-        item { SectionHeader("Appearance & Display") }
+        item { SectionHeader(AppStrings.appearanceSection(currentLanguage)) }
         item {
             GuideCard {
                 Column {
@@ -338,12 +340,12 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Theme Mode",
+                                text = AppStrings.themeModeTitle(currentLanguage),
                                 style = GuideTokens.Title,
                                 color = GuideTokens.Text,
                             )
                             Text(
-                                text = "Obsidian dark mode saves OLED battery & enhances night walks",
+                                text = AppStrings.themeModeDesc(currentLanguage),
                                 style = GuideTokens.Caption,
                                 color = GuideTokens.Text2,
                             )
@@ -366,24 +368,24 @@ fun SettingsScreen(
                     ) {
                         ThemeOptionTile(
                             modifier = Modifier.weight(1f),
-                            title = "System",
-                            subtitle = "Auto adapt",
+                            title = AppStrings.themeSystemLabel(currentLanguage),
+                            subtitle = AppStrings.themeSystemDesc(currentLanguage),
                             icon = GuideIcons.Sliders,
                             isSelected = themeMode == "system",
                             onClick = { onThemeMode("system") },
                         )
                         ThemeOptionTile(
                             modifier = Modifier.weight(1f),
-                            title = "Light",
-                            subtitle = "Warm ivory",
+                            title = AppStrings.themeLightLabel(currentLanguage),
+                            subtitle = AppStrings.themeLightDesc(currentLanguage),
                             icon = GuideIcons.Sun,
                             isSelected = themeMode == "light",
                             onClick = { onThemeMode("light") },
                         )
                         ThemeOptionTile(
                             modifier = Modifier.weight(1f),
-                            title = "Dark",
-                            subtitle = "Obsidian",
+                            title = AppStrings.themeDarkLabel(currentLanguage),
+                            subtitle = AppStrings.themeDarkDesc(currentLanguage),
                             icon = GuideIcons.Moon,
                             isSelected = themeMode == "dark",
                             onClick = { onThemeMode("dark") },
@@ -396,7 +398,7 @@ fun SettingsScreen(
         // =====================================================================
         // 3. Google Maps Navigation Companion (Auto-Sync & Desk Testing)
         // =====================================================================
-        item { SectionHeader("Google Maps Navigation Companion") }
+        item { SectionHeader(AppStrings.companionSectionHeader(currentLanguage)) }
         item {
             GuideCard {
                 Row(
@@ -406,12 +408,12 @@ fun SettingsScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Live Navigation Sync",
+                            text = AppStrings.companionSyncTitle(currentLanguage),
                             style = GuideTokens.Title,
                             color = GuideTokens.Text,
                         )
                         Text(
-                            text = "Detects active Google Maps routes & pre-warms corridor stories",
+                            text = AppStrings.companionSyncDesc(currentLanguage),
                             style = GuideTokens.Caption,
                             color = GuideTokens.Text2,
                         )
@@ -455,12 +457,12 @@ fun SettingsScreen(
                                 Spacer(Modifier.width(10.dp))
                                 Column {
                                     Text(
-                                        text = "Direct Accessibility Companion",
+                                        text = AppStrings.accessibilityCompanionTitle(currentLanguage),
                                         style = GuideTokens.Label,
                                         color = GuideTokens.Text,
                                     )
                                     Text(
-                                        text = "Zero notification reliance • Direct screen reader",
+                                        text = AppStrings.accessibilityCompanionDesc(currentLanguage),
                                         style = GuideTokens.Caption,
                                         color = GuideTokens.Text2,
                                     )
@@ -675,7 +677,7 @@ fun SettingsScreen(
         // =====================================================================
         // 3. Privacy, Security & Data Sovereignty Shield
         // =====================================================================
-        item { SectionHeader("Privacy & Data Security") }
+        item { SectionHeader(AppStrings.securitySectionHeader(currentLanguage)) }
         item {
             GuideCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -732,8 +734,8 @@ fun SettingsScreen(
 
                 // App Lock Toggle
                 ToggleRow(
-                    title = "App Lock / Biometric Protection",
-                    subtitle = "Require screen lock or fingerprint authentication when opening Travel Guide.",
+                    title = AppStrings.appLockTitle(currentLanguage),
+                    subtitle = AppStrings.appLockDesc(currentLanguage),
                     checked = appLock,
                     onCheckedChange = {
                         appLock = it
@@ -760,13 +762,13 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     GuideButton(
-                        text = "Export Data (Markdown)",
+                        text = AppStrings.exportDataBtn(currentLanguage),
                         onClick = onExportData,
                         variant = GuideButtonVariant.Tonal,
                         modifier = Modifier.weight(1f),
                     )
                     GuideButton(
-                        text = "Wipe Travel History",
+                        text = AppStrings.clearDataBtn(currentLanguage),
                         onClick = { showClearConfirmDialog = true },
                         variant = GuideButtonVariant.Quiet,
                         modifier = Modifier.weight(1f),
@@ -778,7 +780,7 @@ fun SettingsScreen(
         // =====================================================================
         // 4. Permissions Transparency & System Settings
         // =====================================================================
-        item { SectionHeader("Required Permissions Audit") }
+        item { SectionHeader(AppStrings.permissionsSectionHeader(currentLanguage)) }
         item {
             GuideCard {
                 Text(
@@ -843,9 +845,6 @@ fun SettingsScreen(
         // =====================================================================
         // 5. Language & Spoken Voice (Sarvam Indic Neural Voice + App UI)
         // =====================================================================
-        val currentLanguage = appState?.appLanguage
-            ?: AppLanguage.fromCode(prefs.getString("app_language", AppLanguage.ENGLISH.code))
-
         item { SectionHeader(AppStrings.languageSectionTitle(currentLanguage)) }
         item {
             GuideCard {
@@ -971,19 +970,19 @@ fun SettingsScreen(
         // =====================================================================
         // 6. Audio & Voice Settings
         // =====================================================================
-        item { SectionHeader("Audio & Voice Guidance") }
+        item { SectionHeader(AppStrings.audioVoiceSectionHeader(currentLanguage)) }
         item {
             GuideCard {
                 ToggleRow(
-                    title = "Quiet hours (22:00 – 07:00)",
-                    subtitle = "Cards still appear on screen, but audio stories stay silent.",
+                    title = AppStrings.quietHoursLabel(currentLanguage),
+                    subtitle = AppStrings.quietHoursDesc(currentLanguage),
                     checked = quiet,
                     onCheckedChange = { quiet = it; onQuiet(it) },
                 )
                 GuideDivider(modifier = Modifier.padding(vertical = GuideTokens.Space.sm))
                 ToggleRow(
-                    title = "Auto-play nearby stories",
-                    subtitle = "Starts a story automatically when you reach a stop without requiring a tap.",
+                    title = AppStrings.autoplayStoriesLabel(currentLanguage),
+                    subtitle = AppStrings.autoplayStoriesDesc(currentLanguage),
                     checked = auto,
                     onCheckedChange = { auto = it; onAutoPlay(it) },
                 )
@@ -998,7 +997,7 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Voice Playback Speed",
+                        text = AppStrings.speechRateLabel(currentLanguage),
                         style = GuideTokens.Label,
                         modifier = Modifier.weight(1f),
                     )
@@ -1103,7 +1102,7 @@ fun SettingsScreen(
         // =====================================================================
         // 6. Spontaneous AI Tour Guide Intelligence (OpenAI GPT-4o-mini)
         // =====================================================================
-        item { SectionHeader("Spontaneous AI Tour Intelligence") }
+        item { SectionHeader(AppStrings.aiGuideSectionHeader(currentLanguage)) }
         item {
             GuideCard {
                 Row(
@@ -1598,7 +1597,7 @@ fun SettingsScreen(
         // =====================================================================
         // 7. Battery & Tracking Optimization
         // =====================================================================
-        item { SectionHeader("Battery & Tracking Optimization") }
+        item { SectionHeader(AppStrings.batterySectionHeader(currentLanguage)) }
         item {
             GuideCard {
                 Text(
@@ -1612,6 +1611,7 @@ fun SettingsScreen(
                         profile = p,
                         selected = p == profile,
                         onSelect = { onProfile(p) },
+                        language = currentLanguage,
                     )
                 }
             }
@@ -1626,13 +1626,9 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Screen-Off Tracking", style = GuideTokens.Label)
+                        Text(AppStrings.screenOffTrackingTitle(currentLanguage), style = GuideTokens.Label)
                         Text(
-                            text = if (backgroundOptIn) {
-                                "Narration continues with the screen turned off in your pocket."
-                            } else {
-                                "Currently narration only triggers while the app is actively on screen."
-                            },
+                            text = AppStrings.screenOffTrackingDesc(currentLanguage, backgroundOptIn),
                             style = GuideTokens.Caption,
                             color = GuideTokens.Text2,
                         )
@@ -1645,7 +1641,7 @@ fun SettingsScreen(
                 if (!backgroundOptIn) {
                     Spacer(Modifier.height(GuideTokens.Space.base))
                     GuideButton(
-                        text = "Opt into Screen-Off Background GPS",
+                        text = AppStrings.screenOffTrackingBtn(currentLanguage),
                         onClick = onBackgroundOptIn,
                         variant = GuideButtonVariant.Tonal,
                         modifier = Modifier.fillMaxWidth(),
@@ -1809,11 +1805,17 @@ private fun BatteryOption(
     profile: BatteryProfile,
     selected: Boolean,
     onSelect: () -> Unit,
+    language: AppLanguage = AppLanguage.ENGLISH,
 ) {
     val cost = when (profile) {
-        BatteryProfile.SAVER -> "Lowest battery use (~30s intervals) — saves battery on long walks"
-        BatteryProfile.BALANCED -> "Moderate battery use (~10s intervals) — ideal for walking loop"
-        BatteryProfile.PRECISE -> "Highest battery use (~3s intervals) — instant audio response"
+        BatteryProfile.SAVER -> AppStrings.batterySaverDesc(language)
+        BatteryProfile.BALANCED -> AppStrings.batteryBalancedDesc(language)
+        BatteryProfile.PRECISE -> AppStrings.batteryPreciseDesc(language)
+    }
+    val label = when (profile) {
+        BatteryProfile.SAVER -> AppStrings.batterySaverLabel(language)
+        BatteryProfile.BALANCED -> AppStrings.batteryBalancedLabel(language)
+        BatteryProfile.PRECISE -> AppStrings.batteryPreciseLabel(language)
     }
     Pressable(
         onClick = onSelect,
@@ -1852,8 +1854,11 @@ private fun BatteryOption(
             }
             Spacer(Modifier.width(GuideTokens.Space.md))
             Column(modifier = Modifier.weight(1f)) {
+                val activeSuffix = if (selected) {
+                    if (language == AppLanguage.MALAYALAM) " — സജീവം" else " — Active"
+                } else ""
                 Text(
-                    text = profile.label + if (selected) " — Active" else "",
+                    text = label + activeSuffix,
                     style = GuideTokens.Label,
                     color = if (selected) GuideTokens.Primary else GuideTokens.Text,
                 )

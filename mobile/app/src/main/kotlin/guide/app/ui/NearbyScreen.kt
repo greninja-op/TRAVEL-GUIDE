@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -286,6 +287,7 @@ private fun NearbyPoiCard(row: NearbyRow, language: guide.app.data.AppLanguage, 
                 shape = RoundedCornerShape(GuideTokens.ChipRadius),
                 color = GuideTokens.Surface2,
                 border = BorderStroke(1.dp, GuideTokens.Border),
+                modifier = Modifier.clickable { onClick() },
             ) {
                 Text(
                     text = badgeText,

@@ -558,17 +558,17 @@ fun GuideApp(
                             if (tab == "map") {
                                 if (!nav.popBackStack("map", inclusive = false)) {
                                     nav.navigate("map") {
-                                        popUpTo(nav.graph.findStartDestination().id) { inclusive = false }
+                                        popUpTo(0)
                                         launchSingleTop = true
                                     }
                                 }
-                            } else {
+                            } else if (tab != activeTab) {
                                 nav.navigate(tab) {
-                                    popUpTo(nav.graph.findStartDestination().id) {
-                                        saveState = true
+                                    popUpTo("map") {
+                                        saveState = false
                                     }
                                     launchSingleTop = true
-                                    restoreState = true
+                                    restoreState = false
                                 }
                             }
                         },
@@ -658,7 +658,7 @@ fun GuideApp(
                             mapView = mapView,
                             offRoute = false,
                             seeingAnswer = null,
-                            onSeeingTap = { nav.navigate("nearby") },
+                            onSeeingTap = onSeeingTap,
                             onPinTap = { id -> nav.navigate("poi/$id") },
                             onSettingsTap = { nav.navigate("settings") },
                             pins = app.pins(),
@@ -733,6 +733,7 @@ fun GuideApp(
                                     themeMode = newMode
                                     prefs.edit().putString("theme_mode", newMode).apply()
                                 },
+                                language = app.appLanguage,
                             )
                         }
                     }

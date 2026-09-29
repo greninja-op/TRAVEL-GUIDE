@@ -294,8 +294,337 @@ object AppStrings {
     fun sampleVoiceText(lang: AppLanguage): String = when (lang) {
         AppLanguage.MALAYALAM -> "നമസ്കാരം, ഫോർട്ട് കൊച്ചിയിലേക്ക് സ്വാഗതം. നിങ്ങളുടെ സർവം എഐ യാത്രാ സഹായിയുടെ ശബ്ദ പരിശോധനയാണിത്."
         AppLanguage.HINDI -> "नमस्ते, फोर्ट कोच्चि में आपका स्वागत है। यह आपके सर्वम एआई यात्रा साथी का वॉयस टेस्ट है।"
-        AppLanguage.TAMIL -> "வணக்கம், போர்ட் கொச்சிக்கு உங்களை வரவேற்கிறோம். இது உங்கள் சர்வம் ஏஐ பயண வழிகாட்டியின் குரல் சோதனை."
+        AppLanguage.TAMIL -> "வணக்கம், போர்ட் கொச்சிக்கு உங்களை வரவேற்கிறோம். ഇത് உங்கள் சர்வம் ஏஐ பயண வழிகாட்டியின் குரல் சோதனை."
         AppLanguage.ENGLISH -> "Welcome to Fort Kochi. This is a voice test of your Sarvam AI travel companion."
+    }
+
+    fun settingsTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ക്രമീകരണങ്ങളും സ്വകാര്യതയും"
+        AppLanguage.HINDI -> "सेटिंग्स और गोपनीयता"
+        AppLanguage.TAMIL -> "அமைப்புகள் மற்றும் தனியுரிமை"
+        AppLanguage.ENGLISH -> "Settings & Privacy"
+    }
+
+    fun settingsSubtitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "നിങ്ങളുടെ പ്രൊഫൈൽ, മാപ്സ് സമന്വയം, സുരക്ഷ എന്നിവ നിയന്ത്രിക്കുക."
+        AppLanguage.HINDI -> "अपनी प्रोफ़ाइल, मैप्स सिंक और सुरक्षा प्रबंधित करें।"
+        AppLanguage.TAMIL -> "உங்கள் சுயவிவரம், வரைபட ஒத்திசைவு மற்றும் பாதுகாப்பை நிர்வகிக்கவும்."
+        AppLanguage.ENGLISH -> "Manage your local identity, Google Maps sync, security & offline privacy."
+    }
+
+    fun explorerProfileHeader(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സഞ്ചാരിയുടെ പ്രൊഫൈൽ"
+        AppLanguage.HINDI -> "यात्री प्रोफ़ाइल"
+        AppLanguage.TAMIL -> "பயணி சுயவிவரம்"
+        AppLanguage.ENGLISH -> "Explorer Profile"
+    }
+
+    fun editBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "മാറ്റുക"
+        AppLanguage.HINDI -> "बदलें"
+        AppLanguage.TAMIL -> "திருத்து"
+        AppLanguage.ENGLISH -> "Edit"
+    }
+
+    fun heritageExplorerSubtitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "പൈതൃക സഞ്ചാരി • ഫോർട്ട് കൊച്ചി പാക്ക് v1.1.0"
+        AppLanguage.HINDI -> "विरासत यात्री • फोर्ट कोच्चि पैक v1.1.0"
+        AppLanguage.TAMIL -> "பாரம்பரிய பயணி • போர்ட் கொச்சி பேக் v1.1.0"
+        AppLanguage.ENGLISH -> "Heritage Explorer • Fort Kochi Pack v1.1.0"
+    }
+
+    fun placesDiscoveredStat(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കണ്ടെത്തിയ സ്ഥലങ്ങൾ"
+        AppLanguage.HINDI -> "खोजे गए स्थान"
+        AppLanguage.TAMIL -> "கண்டறிந்த இடங்கள்"
+        AppLanguage.ENGLISH -> "Places Discovered"
+    }
+
+    fun tripNotesStat(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "യാത്രാ കുറിപ്പുകൾ"
+        AppLanguage.HINDI -> "यात्रा नोट्स"
+        AppLanguage.TAMIL -> "பயணக் குறிப்புகள்"
+        AppLanguage.ENGLISH -> "Trip Notes"
+    }
+
+    fun dataSovereigntyStat(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഡാറ്റാ സുരക്ഷ"
+        AppLanguage.HINDI -> "डेटा संप्रभुता"
+        AppLanguage.TAMIL -> "தரவு இறையாண்மை"
+        AppLanguage.ENGLISH -> "Data Sovereignty"
+    }
+
+    fun zeroCloudStat(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "പൂർണ്ണ സ്വകാര്യം"
+        AppLanguage.HINDI -> "पूर्णतः निजी"
+        AppLanguage.TAMIL -> "முழு தனியுரிமை"
+        AppLanguage.ENGLISH -> "Zero Cloud"
+    }
+
+    fun appearanceSection(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഡിസ്പ്ലേ & ദൃശ്യരൂപം"
+        AppLanguage.HINDI -> "दिखावट और डिस्प्ले"
+        AppLanguage.TAMIL -> "காட்சி மற்றும் தோற்றம்"
+        AppLanguage.ENGLISH -> "Appearance & Display"
+    }
+
+    fun themeModeTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "തീം മോഡ്"
+        AppLanguage.HINDI -> "थीम मोड"
+        AppLanguage.TAMIL -> "தீம் பயன்முறை"
+        AppLanguage.ENGLISH -> "Theme Mode"
+    }
+
+    fun themeModeDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഡാർക്ക് മോഡ് ഒഎൽഇഡി ബാറ്ററി ലാഭിക്കുകയും രാത്രി നടത്തം സുഖകരമാക്കുകയും ചെയ്യുന്നു"
+        AppLanguage.HINDI -> "डार्क मोड बैटरी बचाता है और रात के समय देखने में आसान है"
+        AppLanguage.TAMIL -> "டார்க் மோட் பேட்டரியைச் சேமிக்கிறது மற்றும் இரவு நடையை எளிதாக்குகிறது"
+        AppLanguage.ENGLISH -> "Obsidian dark mode saves OLED battery & enhances night walks"
+    }
+
+    fun themeSystemLabel(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സിസ്റ്റം"
+        AppLanguage.HINDI -> "सिस्टम"
+        AppLanguage.TAMIL -> "சிஸ்டம்"
+        AppLanguage.ENGLISH -> "System"
+    }
+
+    fun themeSystemDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സ്വയം മാറുക"
+        AppLanguage.HINDI -> "स्वतः अनुकूल"
+        AppLanguage.TAMIL -> "தானாக மாறு"
+        AppLanguage.ENGLISH -> "Auto adapt"
+    }
+
+    fun themeLightLabel(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ലൈറ്റ്"
+        AppLanguage.HINDI -> "लाइट"
+        AppLanguage.TAMIL -> "லைட்"
+        AppLanguage.ENGLISH -> "Light"
+    }
+
+    fun themeLightDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഇളം നിറം"
+        AppLanguage.HINDI -> "हल्का रंग"
+        AppLanguage.TAMIL -> "வெளிர் நிறம்"
+        AppLanguage.ENGLISH -> "Warm ivory"
+    }
+
+    fun themeDarkLabel(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഡാർക്ക്"
+        AppLanguage.HINDI -> "डार्क"
+        AppLanguage.TAMIL -> "டார்க்"
+        AppLanguage.ENGLISH -> "Dark"
+    }
+
+    fun themeDarkDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഒബ്സിഡിയൻ"
+        AppLanguage.HINDI -> "ऑब्सिडियन"
+        AppLanguage.TAMIL -> "அடர் நிறம்"
+        AppLanguage.ENGLISH -> "Obsidian"
+    }
+
+    fun companionSectionHeader(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഗൂഗിൾ മാപ്സ് യാത്രാ സഹായി"
+        AppLanguage.HINDI -> "गूगल मैप्स यात्रा साथी"
+        AppLanguage.TAMIL -> "கூகிள் வரைபட பயண வழிகாட்டி"
+        AppLanguage.ENGLISH -> "Google Maps Navigation Companion"
+    }
+
+    fun companionSyncTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "തത്സമയ നാവിഗേഷൻ സമന്വയം"
+        AppLanguage.HINDI -> "लाइव नेविगेशन सिंक"
+        AppLanguage.TAMIL -> "நேரடி வழிசெலுத்தல் ஒத்திசைவு"
+        AppLanguage.ENGLISH -> "Live Navigation Sync"
+    }
+
+    fun companionSyncDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഗൂഗിൾ മാപ്സ് റൂട്ടുകൾ കണ്ടെത്തി വഴിയരികിലെ കഥകൾ തയ്യാറാക്കുന്നു"
+        AppLanguage.HINDI -> "सक्रिय गूगल मैप्स रूट का पता लगाकर रास्ते के पड़ाव तैयार करता है"
+        AppLanguage.TAMIL -> "கூகிள் வரைபட வழியைக் கண்டறிந்து வழியிலுள்ள கதைகளைத் தயார் செய்கிறது"
+        AppLanguage.ENGLISH -> "Detects active Google Maps routes & pre-warms corridor stories"
+    }
+
+    fun accessibilityCompanionTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "നേരിട്ടുള്ള ആക്സസിബിലിറ്റി സഹായി"
+        AppLanguage.HINDI -> "डायरेक्ट एक्सेसिबिलिटी कंपैनियन"
+        AppLanguage.TAMIL -> "நேரடி அணுகல் வழிகாட்டி"
+        AppLanguage.ENGLISH -> "Direct Accessibility Companion"
+    }
+
+    fun accessibilityCompanionDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "നോട്ടിഫിക്കേഷൻ ആവശ്യമില്ല • സ്ക്രീൻ റീഡർ വഴി തത്സമയം ലക്ഷ്യം മനസ്സിലാക്കുന്നു"
+        AppLanguage.HINDI -> "नोटिफिकेशन की आवश्यकता नहीं • स्क्रीन रीडर द्वारा गंतव्य पढ़ता है"
+        AppLanguage.TAMIL -> "அறிவிப்புகள் தேவையில்லை • திரைப் படிப்பான் மூலம் இலக்கைப் படிக்கிறது"
+        AppLanguage.ENGLISH -> "Zero notification reliance • Direct screen reader"
+    }
+
+    fun permissionsSectionHeader(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സിസ്റ്റം അനുമതികൾ"
+        AppLanguage.HINDI -> "सिस्टम अनुमतियाँ"
+        AppLanguage.TAMIL -> "கணினி அனுமதிகள்"
+        AppLanguage.ENGLISH -> "Operating System Permissions Audit"
+    }
+
+    fun audioVoiceSectionHeader(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ശബ്ദ ക്രമീകരണങ്ങൾ"
+        AppLanguage.HINDI -> "ऑडियो और वॉयस सेटिंग्स"
+        AppLanguage.TAMIL -> "ஆடியோ மற்றும் குரல் அமைப்புகள்"
+        AppLanguage.ENGLISH -> "Audio & Voice Settings"
+    }
+
+    fun speechRateLabel(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സംസാര വേഗത"
+        AppLanguage.HINDI -> "बोलने की गति"
+        AppLanguage.TAMIL -> "பேச்சு வேகம்"
+        AppLanguage.ENGLISH -> "Speech Speed"
+    }
+
+    fun speechRateDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "വിവരണത്തിന്റെ വേഗത ക്രമീകരിക്കുക"
+        AppLanguage.HINDI -> "ऑडियो विवरण की गति नियंत्रित करें"
+        AppLanguage.TAMIL -> "விவரிப்பின் வேகத்தைக் கட்டுப்படுத்துங்கள்"
+        AppLanguage.ENGLISH -> "Fine-tune speech rate for outdoor listening"
+    }
+
+    fun autoplayStoriesLabel(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "അടുത്തുള്ള കഥകൾ സ്വയം കേൾപ്പിക്കുക"
+        AppLanguage.HINDI -> "आस-पास की कहानियाँ स्वतः चलाएँ"
+        AppLanguage.TAMIL -> "அருகிலுள்ள கதைகளை தானாக இயக்கு"
+        AppLanguage.ENGLISH -> "Auto-play nearby stories"
+    }
+
+    fun autoplayStoriesDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സ്ഥലങ്ങൾക്ക് സമീപമെത്തുമ്പോൾ കഥകൾ തനിയെ തുടങ്ങും"
+        AppLanguage.HINDI -> "किसी पड़ाव के पास पहुँचने पर विवरण अपने आप शुरू होगा"
+        AppLanguage.TAMIL -> "இடங்களை அடையும் போது கதைகள் தானாகவே தொடங்கும்"
+        AppLanguage.ENGLISH -> "Stories start hands-free as you approach each location"
+    }
+
+    fun quietHoursLabel(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ശബ്ദമില്ലാത്ത സമയം"
+        AppLanguage.HINDI -> "शांत समय"
+        AppLanguage.TAMIL -> "அமைதியான நேரம்"
+        AppLanguage.ENGLISH -> "Quiet Hours"
+    }
+
+    fun quietHoursDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "രാത്രി 10 മുതൽ രാവിലെ 7 വരെ ഓട്ടോപ്ലേ ഒഴിവാക്കുന്നു"
+        AppLanguage.HINDI -> "रात 10 बजे से सुबह 7 बजे तक स्वतः ऑडियो नहीं बजेगा"
+        AppLanguage.TAMIL -> "இரவு 10 முதல் காலை 7 வரை தானியங்கி ஆடியோ தவிர்க்கப்படும்"
+        AppLanguage.ENGLISH -> "Suppresses automatic audio between 10 PM and 7 AM"
+    }
+
+    fun aiGuideSectionHeader(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "തത്സമയ എഐ ഗൈഡ്"
+        AppLanguage.HINDI -> "सहज एआई टूर गाइड"
+        AppLanguage.TAMIL -> "உடனடி ஏஐ வழிகாட்டி"
+        AppLanguage.ENGLISH -> "Spontaneous AI Tour Guide"
+    }
+
+    fun batterySectionHeader(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ബാറ്ററിയും ജിപിഎസും"
+        AppLanguage.HINDI -> "बैटरी और जीपीएस प्रोफ़ाइल"
+        AppLanguage.TAMIL -> "பேட்டரி மற்றும் ஜிபிஎஸ்"
+        AppLanguage.ENGLISH -> "Battery & GPS Profile"
+    }
+
+    fun securitySectionHeader(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സുരക്ഷയും ഡാറ്റാ സ്വകാര്യതയും"
+        AppLanguage.HINDI -> "सुरक्षा और डेटा संप्रभुता"
+        AppLanguage.TAMIL -> "பாதுகாப்பு மற்றும் தரவு தனியுரிமை"
+        AppLanguage.ENGLISH -> "Data Sovereignty & Security"
+    }
+
+    fun appLockTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ആപ്പ് ലോക്കും ബയോമെട്രിക് സുരക്ഷയും"
+        AppLanguage.HINDI -> "ऐप लॉक और बायोमेट्रिक सुरक्षा"
+        AppLanguage.TAMIL -> "ஆப் லாக் மற்றும் பயோமெட்ரிக் பாதுகாப்பு"
+        AppLanguage.ENGLISH -> "App Lock & Biometric Protection"
+    }
+
+    fun appLockDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "വിരലടയാളം അല്ലെങ്കിൽ ഫോൺ പിൻ ഉപയോഗിച്ച് സംരക്ഷിക്കുന്നു"
+        AppLanguage.HINDI -> "फ़िंगरप्रिंट या पिन द्वारा ऐप को सुरक्षित करें"
+        AppLanguage.TAMIL -> "கைரேகை அல்லது பின் மூலம் ஆப்-ஐப் பாதுகாக்கவும்"
+        AppLanguage.ENGLISH -> "Requires biometric fingerprint, face, or device PIN to open"
+    }
+
+    fun exportDataBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "യാത്രാ വിവരങ്ങൾ എക്സ്പോർട്ട് ചെയ്യുക"
+        AppLanguage.HINDI -> "यात्रा डेटा निर्यात करें"
+        AppLanguage.TAMIL -> "பயணத் தரவை ஏற்றுமதி செய்"
+        AppLanguage.ENGLISH -> "Export Trip Data"
+    }
+
+    fun clearDataBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "വിവരങ്ങൾ മായ്ക്കുക"
+        AppLanguage.HINDI -> "सभी डेटा साफ़ करें"
+        AppLanguage.TAMIL -> "எல்லா தரவையும் அழி"
+        AppLanguage.ENGLISH -> "Clear All Data"
+    }
+
+    fun batterySaverLabel(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ബാറ്ററി സേവർ"
+        AppLanguage.HINDI -> "बैटरी सेवर"
+        AppLanguage.TAMIL -> "பேட்டரி சேவர்"
+        AppLanguage.ENGLISH -> "Battery Saver"
+    }
+
+    fun batterySaverDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കുറഞ്ഞ ബാറ്ററി ഉപയോഗം (~30സെക്കൻഡ്) — ദീർഘദൂര നടത്തത്തിന് അനുയോജ്യം"
+        AppLanguage.HINDI -> "कम बैटरी उपयोग (~30 सेकंड) — लंबी पैदल यात्रा के लिए आदर्श"
+        AppLanguage.TAMIL -> "குறைந்த பேட்டரி பயன்பாடு (~30 வினாடி) — நீண்ட நடைக்கு சிறந்தது"
+        AppLanguage.ENGLISH -> "Lowest battery use (~30s intervals) — saves battery on long walks"
+    }
+
+    fun batteryBalancedLabel(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "തുലനം"
+        AppLanguage.HINDI -> "संतुलित"
+        AppLanguage.TAMIL -> "சமச்சீர்"
+        AppLanguage.ENGLISH -> "Balanced"
+    }
+
+    fun batteryBalancedDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "മിതമായ ബാറ്ററി ഉപയോഗം (~10സെക്കൻഡ്) — സാധാരണ നടത്തത്തിന് ഉത്തമം"
+        AppLanguage.HINDI -> "मध्यम बैटरी उपयोग (~10 सेकंड) — सामान्य यात्रा के लिए सर्वोत्तम"
+        AppLanguage.TAMIL -> "மிதமான பேட்டரி பயன்பாடு (~10 வினாடி) — நடைப்பயணத்திற்கு ஏற்றது"
+        AppLanguage.ENGLISH -> "Moderate battery use (~10s intervals) — ideal for walking loop"
+    }
+
+    fun batteryPreciseLabel(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കൃത്യതയുള്ളത്"
+        AppLanguage.HINDI -> "सटीक"
+        AppLanguage.TAMIL -> "துல்லியமானது"
+        AppLanguage.ENGLISH -> "Precise"
+    }
+
+    fun batteryPreciseDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "കൂടിയ ബാറ്ററി ഉപയോഗം (~3സെക്കൻഡ്) — തത്സമയ ശബ്ദ പ്രതികരണം"
+        AppLanguage.HINDI -> "अधिक बैटरी उपयोग (~3 सेकंड) — तुरंत ऑडियो प्रतिक्रिया"
+        AppLanguage.TAMIL -> "அதிக பேட்டரி பயன்பாடு (~3 வினாடி) — உடனடி ஆடியோ பதில்"
+        AppLanguage.ENGLISH -> "Highest battery use (~3s intervals) — instant audio response"
+    }
+
+    fun screenOffTrackingTitle(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സ്ക്രീൻ ഓഫായുള്ള ട്രാക്കിംഗ്"
+        AppLanguage.HINDI -> "स्क्रीन-ऑफ ट्रैकिंग"
+        AppLanguage.TAMIL -> "திரை அணைத்த கண்காணிப்பு"
+        AppLanguage.ENGLISH -> "Screen-Off Tracking"
+    }
+
+    fun screenOffTrackingDesc(lang: AppLanguage, optIn: Boolean): String = when (lang) {
+        AppLanguage.MALAYALAM -> if (optIn) "ഫോൺ പോക്കറ്റിലിരിക്കുമ്പോൾ സ്ക്രീൻ ഓഫാണെങ്കിലും വിവരണം തുടരുന്നു." else "ആപ്പ് സ്ക്രീനിൽ സജീവമായിരിക്കുമ്പോൾ മാത്രമേ വിവരണം ലഭിക്കൂ."
+        AppLanguage.HINDI -> if (optIn) "स्क्रीन बंद होने पर भी ऑडियो विवरण जारी रहेगा।" else "वर्तमान में केवल स्क्रीन चालू रहने पर ही विवरण काम करेगा।"
+        AppLanguage.TAMIL -> if (optIn) "திரை அணைந்திருந்தாலும் ஆடியோ விளக்கம் தொடரும்." else "திரை இயக்கத்தில் இருக்கும்போது மட்டுமே ஆடியோ ஒலிக்கும்."
+        AppLanguage.ENGLISH -> if (optIn) "Narration continues with the screen turned off in your pocket." else "Currently narration only triggers while the app is actively on screen."
+    }
+
+    fun screenOffTrackingBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "പശ്ചാത്തല ജിപിഎസ് ഓൺ ചെയ്യുക"
+        AppLanguage.HINDI -> "बैकग्राउंड जीपीएस सक्षम करें"
+        AppLanguage.TAMIL -> "பின்னணி ஜிபிഎസ്-ஐ இயக்கு"
+        AppLanguage.ENGLISH -> "Opt into Screen-Off Background GPS"
     }
 
     // ---- Localized POI Names & Summaries ------------------------------------
