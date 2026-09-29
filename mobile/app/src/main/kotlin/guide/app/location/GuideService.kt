@@ -148,6 +148,9 @@ class GuideService : Service() {
     private var narrator: Narrator? = null
     private var engine: GuideEngine? = null
     private var notificationsEnabled: Boolean = true
+    private var wearableCompanion: guide.app.voice.WearableAudioCompanion? = null
+    private var lastSpokenStory: Pair<String, String>? = null
+    private var lastFix: LocationTracker.Fix? = null
 
     /** Battery profile the tracker is currently armed with. */
     private var activeProfile: BatteryProfile = BatteryProfile.BALANCED
@@ -170,6 +173,7 @@ class GuideService : Service() {
             }
             ACTION_MUTE -> {
                 narrator?.setMuted(true)
+                wearableCompanion?.setPlaybackState(false)
                 if (notificationsEnabled) {
                     startForeground(NOTIF_ID, notification(muted = true))
                 } else {
@@ -179,6 +183,7 @@ class GuideService : Service() {
             }
             ACTION_UNMUTE -> {
                 narrator?.setMuted(false)
+                wearableCompanion?.setPlaybackState(true)
                 if (notificationsEnabled) {
                     startForeground(NOTIF_ID, notification(muted = false))
                 } else {
@@ -219,6 +224,8 @@ class GuideService : Service() {
                 running = false
                 tracker?.stop()
                 narrator?.shutdown()
+                wearableCompanion?.release()
+                wearableCompanion = null
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
                 return START_NOT_STICKY
@@ -262,8 +269,65 @@ class GuideService : Service() {
         narrator = Narrator(this)
         val db = GuideDb.getInstance(this)
         val byId = cards.associateBy { it.id }
+
+        // Initialize Bluetooth Earbuds & Wearables MediaSession Companion
+        wearableCompanion = guide.app.voice.WearableAudioCompanion(
+            context = this,
+            onPlayRequested = {
+                narrator?.setMuted(false)
+                currentCard?.let { c ->
+                    scope.launch {
+                        wearableCompanion?.playArrivalChime()
+                        val story = guide.app.voice.SpontaneousGuideAiEngine.generateStory(
+                            context = this@GuideService,
+                            card = c,
+                            userLat = lastFix?.lat,
+                            userLng = lastFix?.lng,
+                        )
+                        lastSpokenStory = c.id to story
+                        wearableCompanion?.setPlaybackState(true)
+                        narrator?.enqueue(c.id, story, onRoute = true)
+                    }
+                }
+            },
+            onPauseRequested = {
+                narrator?.setMuted(true)
+                wearableCompanion?.setPlaybackState(false)
+            },
+            onWhatAmISeeingRequested = {
+                // Earbud double-tap: "What am I seeing?"
+                val fix = lastFix
+                val card = currentCard ?: byId.values.firstOrNull()
+                if (card != null) {
+                    narrator?.setMuted(false)
+                    scope.launch {
+                        wearableCompanion?.playArrivalChime()
+                        val story = guide.app.voice.SpontaneousGuideAiEngine.generateStory(
+                            context = this@GuideService,
+                            card = card,
+                            userLat = fix?.lat,
+                            userLng = fix?.lng,
+                        )
+                        lastSpokenStory = card.id to story
+                        wearableCompanion?.setPlaybackState(true)
+                        narrator?.enqueue("seeing-${card.id}", story, onRoute = true)
+                    }
+                }
+            },
+            onReplayRequested = {
+                // Earbud triple-tap: Replay last spoken story
+                lastSpokenStory?.let { (id, story) ->
+                    narrator?.setMuted(false)
+                    wearableCompanion?.playArrivalChime()
+                    wearableCompanion?.setPlaybackState(true)
+                    narrator?.enqueue("replay-$id", story, onRoute = true)
+                }
+            },
+        )
+
         tracker = LocationTracker(this).also { t ->
             t.start(profile) { fix ->
+                lastFix = fix
                 val update = engine?.onFix(fix.lat, fix.lng, fix.speedMps, fix.atS) ?: return@start
                 for (a in update.arrived) arrivals[a.id] = fix.atS
                 for (d in update.departed) {
@@ -279,14 +343,18 @@ class GuideService : Service() {
                     val card = byId[p.id] ?: continue
                     currentCard = card
                     updateDynamicNotification(muted = narrator?.muted ?: false)
+                    wearableCompanion?.updateMetadata(card.name, card.summary)
                     val n = narrator ?: continue
                     scope.launch {
+                        wearableCompanion?.playArrivalChime()
                         val story = guide.app.voice.SpontaneousGuideAiEngine.generateStory(
                             context = this@GuideService,
                             card = card,
                             userLat = fix.lat,
                             userLng = fix.lng,
                         )
+                        lastSpokenStory = card.id to story
+                        wearableCompanion?.setPlaybackState(true)
                         n.enqueue(p.id, story, onRoute = true)
                     }
                 }
@@ -303,14 +371,18 @@ class GuideService : Service() {
                             arrivals[cId] = fix.atS
                             currentCard = cCard
                             updateDynamicNotification(muted = narrator?.muted ?: false)
+                            wearableCompanion?.updateMetadata(cCard.name, cCard.summary)
                             val n = narrator ?: continue
                             scope.launch {
+                                wearableCompanion?.playArrivalChime()
                                 val story = guide.app.voice.SpontaneousGuideAiEngine.generateStory(
                                     context = this@GuideService,
                                     card = cCard,
                                     userLat = fix.lat,
                                     userLng = fix.lng,
                                 )
+                                lastSpokenStory = cCard.id to story
+                                wearableCompanion?.setPlaybackState(true)
                                 n.enqueue(cId, story, onRoute = true)
                             }
                         }
@@ -435,6 +507,15 @@ class GuideService : Service() {
         }
 
         return builder.build()
+    }
+
+    override fun onDestroy() {
+        running = false
+        tracker?.stop()
+        narrator?.shutdown()
+        wearableCompanion?.release()
+        wearableCompanion = null
+        super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

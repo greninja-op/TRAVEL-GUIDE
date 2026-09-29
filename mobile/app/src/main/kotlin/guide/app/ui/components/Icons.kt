@@ -249,6 +249,30 @@ object GuideIcons {
         verticalLineTo(17f)
     }
 
+    /** Wireless headphones and earbuds icon (Lucide 24x24). */
+    val Headphones: ImageVector = icon("Headphones") {
+        moveTo(3f, 14f)
+        verticalLineToRelative(-2f)
+        arcTo(9f, 9f, 0f, false, true, 21f, 12f)
+        verticalLineToRelative(2f)
+        moveTo(3f, 14f)
+        arcToRelative(2f, 2f, 0f, false, false, 2f, 2f)
+        horizontalLineToRelative(1f)
+        arcToRelative(2f, 2f, 0f, false, false, 2f, -2f)
+        verticalLineToRelative(-3f)
+        arcToRelative(2f, 2f, 0f, false, false, -2f, -2f)
+        horizontalLineTo(3f)
+        close()
+        moveTo(21f, 14f)
+        arcToRelative(2f, 2f, 0f, false, true, -2f, 2f)
+        horizontalLineToRelative(-1f)
+        arcToRelative(2f, 2f, 0f, false, true, -2f, -2f)
+        verticalLineToRelative(-3f)
+        arcToRelative(2f, 2f, 0f, false, true, 2f, -2f)
+        horizontalLineToRelative(3f)
+        close()
+    }
+
     /** Sun icon for light mode (Lucide 24x24). */
     val Sun: ImageVector = icon("Sun") {
         moveTo(12f, 16f)

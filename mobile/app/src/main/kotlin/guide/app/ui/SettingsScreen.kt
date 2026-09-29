@@ -142,6 +142,8 @@ fun SettingsScreen(
     var keySaveFeedback by remember { mutableStateOf<String?>(null) }
     var aiSampleStory by remember { mutableStateOf<String?>(null) }
     var isGeneratingStory by remember { mutableStateOf(false) }
+    var earbudsChime by remember { mutableStateOf(prefs.getBoolean("earbuds_chime_enabled", true)) }
+    var earbudsAutoPause by remember { mutableStateOf(prefs.getBoolean("earbuds_autopause_enabled", true)) }
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
 
     // External Maps testing state
@@ -1147,7 +1149,131 @@ fun SettingsScreen(
         }
 
         // =====================================================================
-        // 7. Trip & Drawer Notifications (Real Working On/Off Controls)
+        // 7. Wearables & Bluetooth Earbuds Intelligence
+        // =====================================================================
+        item { SectionHeader("Wearables & Bluetooth Earbuds") }
+        item {
+            GuideCard {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Surface(
+                            modifier = Modifier.size(36.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            color = Color(0xFFF0FDF4),
+                            border = BorderStroke(1.dp, Color(0xFFBBF7D0)),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = GuideIcons.Headphones,
+                                    contentDescription = null,
+                                    tint = Color(0xFF16A34A),
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Screen-Free Earbud Controls",
+                                style = GuideTokens.Title,
+                                color = GuideTokens.Text,
+                            )
+                            Text(
+                                text = "Hardware & touch button gestures mapped via Android MediaSession",
+                                style = GuideTokens.Caption,
+                                color = GuideTokens.Text2,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    StatusTag(
+                        text = "BLUETOOTH AVRCP",
+                        color = GuideTokens.Success,
+                    )
+                }
+
+                Spacer(Modifier.height(GuideTokens.Space.base))
+
+                Text(
+                    text = "Earbud Physical & Touch Button Mapping",
+                    style = GuideTokens.Label,
+                    color = GuideTokens.Text,
+                )
+                Text(
+                    text = "Controls mapped directly to AirPods, Galaxy Buds, Pixel Buds, Sony, Nothing, and smartwatches:",
+                    style = GuideTokens.Caption,
+                    color = GuideTokens.Text2,
+                )
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+
+                // Gesture mapping list
+                EarbudGestureRow(
+                    gesture = "Single Tap / Click",
+                    action = "Play / Pause",
+                    description = "Pauses current narration or speaks the current landmark story.",
+                )
+                EarbudGestureRow(
+                    gesture = "Double Tap / Click",
+                    action = "What am I seeing?",
+                    description = "Triggers on-demand spontaneous AI observation of the nearest stop without pulling your phone out.",
+                )
+                EarbudGestureRow(
+                    gesture = "Triple Tap / Click",
+                    action = "Replay Story",
+                    description = "Repeats the last spoken landmark story from the beginning.",
+                )
+                EarbudGestureRow(
+                    gesture = "Long Press",
+                    action = "Mute / Silence",
+                    description = "Instantly silences active audio playback in under 500ms.",
+                )
+
+                Spacer(Modifier.height(GuideTokens.Space.base))
+                GuideDivider()
+                Spacer(Modifier.height(GuideTokens.Space.base))
+
+                // Toggles
+                ToggleRow(
+                    title = "Gentle Arrival Audio Chime",
+                    subtitle = "Plays a subtle 280ms dual-tone acoustic chime right before the AI voice begins speaking so you never miss the first words.",
+                    checked = earbudsChime,
+                    onCheckedChange = {
+                        earbudsChime = it
+                        prefs.edit().putBoolean("earbuds_chime_enabled", it).apply()
+                    },
+                )
+
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+
+                ToggleRow(
+                    title = "Auto-Pause on Earbud Removal",
+                    subtitle = "Immediately silences speech if you take an earbud out or if Bluetooth disconnects, preventing loud audio in quiet public places.",
+                    checked = earbudsAutoPause,
+                    onCheckedChange = {
+                        earbudsAutoPause = it
+                        prefs.edit().putBoolean("earbuds_autopause_enabled", it).apply()
+                    },
+                )
+
+                Spacer(Modifier.height(GuideTokens.Space.sm))
+
+                GuideButton(
+                    text = "Preview Acoustic Arrival Chime",
+                    onClick = {
+                        guide.app.voice.NavigationChime.play()
+                    },
+                    variant = GuideButtonVariant.Tonal,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+
+        // =====================================================================
+        // 8. Trip & Drawer Notifications (Real Working On/Off Controls)
         // =====================================================================
         item { SectionHeader("Trip & Drawer Notifications") }
         item {
@@ -1737,6 +1863,52 @@ private fun ThemeOptionTile(
                 style = GuideTokens.Caption,
                 color = GuideTokens.Text2,
                 fontSize = 11.sp,
+            )
+        }
+    }
+}
+
+@Composable
+private fun EarbudGestureRow(
+    gesture: String,
+    action: String,
+    description: String,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = GuideTokens.Surface2,
+            border = BorderStroke(1.dp, GuideTokens.Border),
+            modifier = Modifier.width(135.dp),
+        ) {
+            Box(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                Text(
+                    text = gesture,
+                    style = GuideTokens.Caption,
+                    color = GuideTokens.Primary,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = action,
+                style = GuideTokens.Label,
+                color = GuideTokens.Text,
+            )
+            Text(
+                text = description,
+                style = GuideTokens.Caption,
+                color = GuideTokens.Text2,
             )
         }
     }
