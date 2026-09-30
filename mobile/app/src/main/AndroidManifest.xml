@@ -98,5 +98,17 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- GPS Simulation & Route Playback Receiver -->
+        <receiver
+            android:name=".location.MockLocationReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="guide.app.location.MOCK_FIX" />
+                <action android:name="guide.app.location.SIMULATE_STOP" />
+                <action android:name="guide.app.location.START_WALK" />
+                <action android:name="guide.app.location.STOP_WALK" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

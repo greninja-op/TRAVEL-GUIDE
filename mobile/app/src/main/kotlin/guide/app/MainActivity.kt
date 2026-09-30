@@ -100,6 +100,10 @@ import java.time.format.DateTimeFormatter
  * and callbacks only. MapView lifecycle is forwarded below (all callbacks).
  */
 class MainActivity : FragmentActivity() {
+    companion object {
+        var currentAppState: AppState? = null
+    }
+
     private var mapView: MapView? = null
     private var appState: AppState? = null
     private var pendingRoute by mutableStateOf<String?>(null)
@@ -413,7 +417,7 @@ fun GuideApp(
         // The one seam between the engine's data and the screens. Built once,
         // scoped to the composition. Before this, every screen received
         // emptyList()/{} and could only ever show its empty state.
-        val app = remember { AppState(context).also { onAppStateReady(it) } }
+        val app = remember { AppState(context).also { onAppStateReady(it); MainActivity.currentAppState = it } }
 
         // Settings that the service must also know about (they change how the
         // guide behaves while it runs, not just what the screen shows).

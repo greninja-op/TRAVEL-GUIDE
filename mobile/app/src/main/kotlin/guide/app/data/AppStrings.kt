@@ -1222,5 +1222,34 @@ object AppStrings {
         AppLanguage.TAMIL -> "வழிகாட்டியின் பதில்"
         AppLanguage.ENGLISH -> "Guide's Answer"
     }
+
+    // ---- GPS Field Route Playback Simulator ---------------------------------
+    fun gpsSimulatorHeader(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ജിപിഎസ് ഫീൽഡ് വാക്ക് സിമുലേഷൻ"
+        AppLanguage.HINDI -> "जीपीएस फ़ील्ड वॉक सिमुलेशन"
+        AppLanguage.TAMIL -> "ஜிபிஎஸ் ஃபீல்ட் வாக் உருவகப்படுத்துதல்"
+        AppLanguage.ENGLISH -> "GPS Field Walk Simulation"
+    }
+
+    fun gpsSimulatorDesc(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "ഫോർട്ട് കൊച്ചി പൈതൃക നടത്തം കൃത്രിമമായി സിമുലേറ്റ് ചെയ്യുക — ജിയോഫെൻസ് എൻട്രി, അറൈവൽ ചൈമുകൾ, സ്വതസിദ്ധമായ ഓഡിയോ വിവരണം എന്നിവ പരിശോധിക്കാം."
+        AppLanguage.HINDI -> "फ़ोर्ट कोच्चि विरासत वॉक को सिम्युलेट करें — जियोफ़ेंस प्रविष्टि, आगमन की घंटी और ऑडियो गाइड का परीक्षण करें।"
+        AppLanguage.TAMIL -> "ஃபோர்ட் கொச்சி பாரம்பரிய நடையை உருவகப்படுத்தவும் — ஜியோஃபென்ஸ் வருகை மணி மற்றும் ஆடியோ வழிகாட்டியை சோதிக்கவும்."
+        AppLanguage.ENGLISH -> "Simulate the Fort Kochi heritage loop — test geofence entry, arrival chimes, and automatic story narration."
+    }
+
+    fun startWalkBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "നടത്തം തുടങ്ങുക"
+        AppLanguage.HINDI -> "वॉक शुरू करें"
+        AppLanguage.TAMIL -> "நடை தொடங்கு"
+        AppLanguage.ENGLISH -> "Start Walk Simulation"
+    }
+
+    fun stopWalkBtn(lang: AppLanguage): String = when (lang) {
+        AppLanguage.MALAYALAM -> "സിമുലേഷൻ നിർത്തുക"
+        AppLanguage.HINDI -> "सिमुलेशन रोकें"
+        AppLanguage.TAMIL -> "நிறுத்து"
+        AppLanguage.ENGLISH -> "Stop Simulation"
+    }
 }
 

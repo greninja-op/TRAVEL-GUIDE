@@ -54,6 +54,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -1355,6 +1356,86 @@ fun SettingsScreen(
                                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                             )
                         }
+                    }
+                }
+            }
+        }
+
+        // =====================================================================
+        // GPS Route Playback & Field Walk Simulation
+        // =====================================================================
+        item { SectionHeader(guide.app.data.AppStrings.gpsSimulatorHeader(language)) }
+        item {
+            val simState by guide.app.location.MockLocationSimulator.state.collectAsState()
+            GuideCard {
+                Text(
+                    text = guide.app.data.AppStrings.gpsSimulatorDesc(language),
+                    style = GuideTokens.Caption,
+                    color = GuideTokens.Text2,
+                )
+                Spacer(Modifier.height(GuideTokens.Space.md))
+
+                if (simState.isRunning) {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = GuideTokens.Surface2,
+                        border = BorderStroke(1.dp, GuideTokens.Border),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                StatusTag(text = "WALK ACTIVE", color = GuideTokens.Highlight)
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = "Stop ${simState.currentStepIndex}/${simState.totalSteps}",
+                                    style = GuideTokens.Label,
+                                    color = GuideTokens.Text,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                text = simState.progressText,
+                                style = GuideTokens.Body,
+                                color = GuideTokens.Text,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(GuideTokens.Space.md))
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    GuideButton(
+                        text = if (simState.isRunning) "Walking Loop..." else guide.app.data.AppStrings.startWalkBtn(language),
+                        onClick = {
+                            if (!simState.isRunning && appState != null) {
+                                guide.app.location.MockLocationSimulator.startRouteWalk(
+                                    context = context,
+                                    appState = appState,
+                                    stepDelayMs = 1200L,
+                                    onPoiVisited = { stop ->
+                                        guide.app.location.GuideService.speak(context, "${stop.name}. ${stop.summary}")
+                                    },
+                                )
+                            }
+                        },
+                        variant = GuideButtonVariant.Primary,
+                        modifier = Modifier.weight(1f),
+                        enabled = !simState.isRunning && appState != null,
+                    )
+
+                    if (simState.isRunning) {
+                        GuideButton(
+                            text = guide.app.data.AppStrings.stopWalkBtn(language),
+                            onClick = {
+                                guide.app.location.MockLocationSimulator.stopSimulation(context)
+                            },
+                            variant = GuideButtonVariant.Tonal,
+                            modifier = Modifier.weight(1f),
+                        )
                     }
                 }
             }
