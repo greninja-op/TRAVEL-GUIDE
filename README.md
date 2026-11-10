@@ -74,15 +74,13 @@ Five tabs, one job each:
 
 ## How it works
 
-```mermaid
-flowchart LR
-    GPS[GPS + heading] --> ENGINE[shared-core trigger engine]
-    MAPS[Google Maps companion] -. optional .-> ENGINE
-    ENGINE --> QUEUE[Narration queue]
-    QUEUE --> VOICE[On-device TTS / opt-in Sarvam]
-    ENGINE --> DB[(Room visits + encrypted notes)]
-    VOICE --> EARS[Earbuds / speaker]
-```
+| Stage | Responsibility |
+|---|---|
+| **Input** | GPS + heading, plus optional Google Maps companion cues |
+| **Engine** | `shared-core` — geofencing, dwell/cooldown, route order, narration queue |
+| **Voice** | On-device TTS by default; opt-in Sarvam neural voice |
+| **Storage** | Room — visits and notes, encrypted at rest |
+| **Output** | Earbuds or speaker; one voice at a time, mute in under 500 ms |
 
 - **`shared-core`** is pure Kotlin: geofencing, dwell/cooldown rules, route ordering, quiet hours, and the narration queue. It has no Android imports and is tested on the JVM.
 - **`mobile`** is the Android app: Compose UI, Room, Fused Location, MapLibre, foreground service, and TTS.

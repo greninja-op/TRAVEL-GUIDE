@@ -107,7 +107,8 @@ config instead of the root one and leave Output Directory empty.
 
 Then run the workflow once with **Run workflow**. If Vercel's native Git
 integration is already connected, disable one of the two mechanisms — otherwise
-every push deploys twice.
+every push deploys twice. Until the three secrets exist, the workflow exits with
+a warning instead of a red failure.
 
 ### What the config does
 

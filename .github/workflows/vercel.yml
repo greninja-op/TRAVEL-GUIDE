@@ -9,6 +9,9 @@
 #   VERCEL_ORG_ID      Vercel → Project → Settings → General → Team ID
 #   VERCEL_PROJECT_ID  Vercel → Project → Settings → General → Project ID
 #
+# Until all three secrets exist, the job exits with a warning instead of a red
+# failure. Once they are added, every push deploys automatically.
+#
 # The project root should be the repository root (leave Vercel's Root Directory
 # empty). Root `vercel.json` points Vercel at `website/`. If you set the root to
 # `website/`, use `website/vercel.json` and clear the Output Directory setting.
@@ -38,21 +41,36 @@ jobs:
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TELEMETRY_DISABLED: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Check Vercel secrets
+        id: vercel
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Vercel secrets are not configured. Add VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID to enable deployments."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Node
+        if: steps.vercel.outputs.configured == 'true'
         uses: actions/setup-node@v7
         with:
           node-version: "22"
 
       - name: Install Vercel CLI
+        if: steps.vercel.outputs.configured == 'true'
         run: npm install --global vercel@latest
 
       - name: Pull Vercel project settings
-        run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+        if: steps.vercel.outputs.configured == 'true'
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Deploy to production
-        run: vercel deploy --prod --yes --token="${{ secrets.VERCEL_TOKEN }}"
+        if: steps.vercel.outputs.configured == 'true'
+        run: vercel deploy --prod --yes --token="$VERCEL_TOKEN"
