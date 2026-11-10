@@ -24,8 +24,21 @@ demo-out/
 # Workspace-local toolchain (JDK etc.) — never committed
 .tools/
 
+# Vercel CLI local project link — never committed
+.vercel/
+
+# Local QA screenshots and reports
+website/shots/
+
 # Temporary device screencaps and test audio
 *.png
 **/*.png
 *.wav
+
+# The website's stitched map is a production asset, not a screencap
+!website/assets/img/fort-kochi-map.png
+
+# Python tool caches
+__pycache__/
+*.pyc
 

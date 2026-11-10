@@ -1,0 +1,28 @@
+# Vercel only needs the static website. Keep the repo upload small.
+mobile/
+shared-core/
+content/
+docs/
+design-reference/
+tools/
+
+website/tools/
+website/shots/
+website/README.md
+website/assets/icons-inline.html
+website/assets/img/osm_tiles/
+
+.github/
+.git/
+
+# Never deploy local secrets or build caches.
+.env
+.env.*
+secrets/
+mobile/local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+**/.gradle/
+**/build/

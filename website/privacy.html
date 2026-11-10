@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy — Travel Guide</title>
+  <meta name="description" content="How Travel Guide handles location, notes, companion mode, and voice. Local-first by default." />
+  <meta name="theme-color" content="#f4f1ea" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/fonts/fonts.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="legal-page">
+  <div class="legal-topbar">
+    <div class="container nav__inner">
+      <a class="brand" href="index.html" >
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 108 108" role="img">
+            <path d="M31 38C27 42 27 48 31 52" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".85" />
+            <path d="M77 38C81 42 81 48 77 52" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".85" />
+            <path d="M54 28C44.6 28 37 35.6 37 45C37 58.5 54 80 54 80C54 80 71 58.5 71 45C71 35.6 63.4 28 54 28Z" fill="currentColor" />
+            <circle cx="54" cy="44" r="6.5" fill="#F26419" />
+          </svg>
+        </span>
+        <span class="brand__name">Travel Guide<span>Fort Kochi · Kerala</span></span>
+      </a>
+      <a class="legal-back" href="index.html"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-left" /></svg>Back to the walk</a>
+    </div>
+  </div>
+
+  <main class="legal-wrap">
+    <header class="legal-head">
+      <p class="kicker"><span class="kicker__dot"></span>Legal documentation</p>
+      <h1>Privacy &amp; data architecture</h1>
+      <p class="legal-meta">Effective 28 September 2026 · Version 2.4.0 · Travel Guide for Android</p>
+    </header>
+
+    <div class="legal-body">
+      <section>
+        <h2>1. Architectural overview</h2>
+        <p>Travel Guide is built offline-first. The core of the app — location matching, route rendering, place search, notes, and on-device narration — runs on the phone. There is no remote user profile and no analytics backend.</p>
+      </section>
+
+      <section>
+        <h2>2. Location</h2>
+        <p>Location is used to work out which heritage stop is near you and how far it is.</p>
+        <ul>
+          <li><strong>Foreground first.</strong> GPS is sampled while the app is active to draw your position and calculate distances.</li>
+          <li><strong>Ephemeral memory.</strong> Live coordinates are processed in RAM. They are not written to log files or a remote location history.</li>
+          <li><strong>Separate opt-in.</strong> Background location is a distinct choice, never bundled into first launch. The app still works without it.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>3. Google Maps companion &amp; accessibility</h2>
+        <p>The optional companion feature works alongside Google Maps navigation using Android’s <code>AccessibilityService</code> and/or <code>NotificationListenerService</code>.</p>
+        <div class="legal-callout"><strong>Scope:</strong> the service is restricted to package <code>com.google.android.apps.maps</code>. It cannot observe, read, or interact with other applications.</div>
+        <ul>
+          <li><strong>Purpose.</strong> Read destination titles and navigation status when you start turn-by-turn directions.</li>
+          <li><strong>Route reactivity.</strong> Highlight corridor landmarks while navigation is active, and stop when navigation ends.</li>
+          <li><strong>Data handled.</strong> Public destination strings only — landmark names or addresses. No passwords, search boxes, payment data, or account details.</li>
+          <li><strong>Revocation.</strong> Accessibility and notification access can be revoked at any time in Android Settings.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>4. Storage &amp; encryption</h2>
+        <p>Visited places, notes, and preferences are stored locally in an on-device database.</p>
+        <ul>
+          <li><strong>Hardware KeyStore.</strong> Local encryption keys are managed through Android KeyStore, backed by the device’s secure element where supported.</li>
+          <li><strong>Authenticated encryption.</strong> Sensitive stored values use AES-256-GCM.</li>
+          <li><strong>You can erase it.</strong> A single confirmation in Settings permanently deletes the local database and notes.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>5. Voice &amp; narration</h2>
+        <p>The on-device voice works offline and is the default. If you choose a cloud voice or the optional AI guide, the text you ask it to speak is sent to that provider only for that request. Those features are opt-in and can be turned off without losing the offline guide.</p>
+      </section>
+
+      <section>
+        <h2>6. Third-party libraries &amp; telemetry</h2>
+        <p>The app does not include advertising frameworks, tracking pixels, or commercial telemetry SDKs. Maps use MapLibre Native with locally bundled style definitions and tiles.</p>
+      </section>
+
+      <section>
+        <h2>7. Your controls</h2>
+        <ul>
+          <li><strong>Export.</strong> Take your visit history, timestamps, and notes as a Markdown file whenever you want.</li>
+          <li><strong>Erase.</strong> Wipe all local tables and notes from Settings.</li>
+          <li><strong>Permissions.</strong> Audit and toggle location, notifications, accessibility, and notification access in Android Settings.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>8. Contact &amp; updates</h2>
+        <p>If this document changes, the revision date and version number change with it. Technical questions can go to the repository maintainers.</p>
+      </section>
+    </div>
+
+    <footer class="legal-footer">
+      <span>© 2026 Travel Guide · Fort Kochi Heritage Edition</span>
+      <span><a href="index.html">Home</a> · <a href="credits.html">Credits</a> · <a href="https://github.com/greninja-op/TRAVEL-GUIDE" target="_blank" rel="noreferrer">Source</a></span>
+    </footer>
+  </main>
+</body>
+</html>

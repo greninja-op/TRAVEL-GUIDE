@@ -1,0 +1,50 @@
+/* Self-hosted Google Fonts (OFL). Latin subsets only. */
+
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url('archivo-normal-100-900-latin.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DM Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: url('dm-mono-normal-400-latin.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DM Mono';
+  font-style: normal;
+  font-weight: 500;
+  src: url('dm-mono-normal-500-latin.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
+  src: url('instrument-serif-italic-400-latin.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: normal;
+  font-weight: 400;
+  src: url('instrument-serif-normal-400-latin.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  src: url('inter-normal-400-700-latin.woff2') format('woff2');
+  font-display: swap;
+}

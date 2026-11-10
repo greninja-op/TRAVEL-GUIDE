@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Travel Guide — Walk in. Listen. | Fort Kochi</title>
+  <meta name="description" content="A quiet, offline audio companion for Fort Kochi. 24 curated stops, two self-guided walks, and no account. It knows when you arrive, tells you what happened here, and then lets the place speak for itself." />
+  <meta name="theme-color" content="#f4f1ea" />
+  <meta name="color-scheme" content="light" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Travel Guide — Walk in. Listen." />
+  <meta property="og:description" content="A quiet audio companion for the old streets of Fort Kochi. 24 stops. Two walks. No signal needed." />
+  <meta property="og:image" content="assets/img/kochi_hero.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+  <link rel="preload" href="assets/fonts/archivo-normal-100-900-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/inter-normal-400-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="assets/fonts/fonts.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav" id="nav">
+    <div class="container nav__inner">
+      <a class="brand" href="#top">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 108 108" role="img">
+            <path d="M31 38C27 42 27 48 31 52" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".85" />
+            <path d="M77 38C81 42 81 48 77 52" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".85" />
+            <path d="M54 28C44.6 28 37 35.6 37 45C37 58.5 54 80 54 80C54 80 71 58.5 71 45C71 35.6 63.4 28 54 28Z" fill="currentColor" />
+            <circle cx="54" cy="44" r="6.5" fill="#F26419" />
+          </svg>
+        </span>
+        <span class="brand__name">Travel Guide<span>Fort Kochi · Kerala</span></span>
+      </a>
+
+      <nav class="nav__links" aria-label="Primary">
+        <a href="#app">The app</a>
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#privacy">Privacy</a>
+      </nav>
+
+      <a class="btn btn--dark nav__cta" href="#download">
+        Get the app
+        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-up-right" /></svg>
+      </a>
+
+      <button class="nav__toggle" type="button" id="menuToggle" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-menu" /></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+    <nav class="mobile-menu__links" aria-label="Mobile">
+      <a href="#app">The app</a>
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#download">Get the app</a>
+    </nav>
+    <div class="mobile-menu__foot">
+      <span>Fort Kochi · Kerala · Android 8.0+</span>
+      <a href="https://github.com/greninja-op/TRAVEL-GUIDE" target="_blank" rel="noreferrer">View the project</a>
+    </div>
+  </div>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="container">
+        <div class="hero__top">
+          <div class="hero__copy">
+            <p class="kicker"><span class="kicker__dot"></span>Fort Kochi, Kerala · A walking companion</p>
+            <h1 class="hero__title">
+              <span>Walk in.</span>
+              <span><em>Listen.</em></span>
+            </h1>
+          </div>
+          <div class="hero__aside">
+            <p class="hero__lede">A quiet audio guide for the old streets of Fort Kochi. It knows when you arrive, tells you what happened here, and then lets the place speak for itself.</p>
+            <div class="hero__actions">
+              <a class="btn btn--primary" href="#download">
+                Get the Android app
+                <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-up-right" /></svg>
+              </a>
+              <a class="btn btn--text" href="#how">
+                See how a walk works
+                <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-right" /></svg>
+              </a>
+              <button class="audio-pill" type="button" id="audioPill" aria-pressed="false">
+                <span class="audio-pill__play" aria-hidden="true">
+                  <svg class="icon audio-pill__icon audio-pill__icon--play"><use href="assets/icons.svg#i-play" /></svg>
+                  <svg class="icon audio-pill__icon audio-pill__icon--pause"><use href="assets/icons.svg#i-pause" /></svg>
+                </span>
+                <span class="audio-pill__wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="audio-pill__text">
+                  <b>Approaching Fort Kochi — 15&nbsp;m&nbsp;away</b>
+                  <span>Listen to the narration</span>
+                  <span class="audio-pill__meta">Visual preview · 0:20</span>
+                </span>
+                <span class="sr-only">Visual preview. Narration plays in the Android app.</span>
+              </button>
+            </div>
+            <ul class="hero__micro">
+              <li>No account</li>
+              <li>No signal needed</li>
+              <li>24 stories</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="hero__banner">
+          <img src="assets/img/kochi_hero.jpg" alt="Sunset over the Chinese fishing nets and the Fort Kochi shoreline, with nets silhouetted against the water." width="1376" height="768" fetchpriority="high" />
+          <div class="hero__now">
+            <span class="hero__now-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-audio-lines" /></svg></span>
+            <span><b>Now playing · Chinese Fishing Nets</b><span>Stop 02 · 2 min</span></span>
+          </div>
+          <div class="hero__banner-copy">
+            <p class="kicker kicker--light"><span class="kicker__dot"></span>Fort Kochi Heritage Loop</p>
+            <p>“The net was here before the Portuguese.”</p>
+          </div>
+          <div class="hero__devices">
+            <div class="phone" aria-hidden="true">
+              <div class="phone__screen">
+                <div class="phone__island"></div>
+                <div class="app app-detail">
+                  <div class="app-status app-status--over">
+                    <span class="app-status__time">9:41</span>
+                    <span class="app-status__icons">
+                      <svg class="icon"><use href="assets/icons.svg#i-signal" /></svg>
+                      <svg class="icon"><use href="assets/icons.svg#i-wifi" /></svg>
+                      <span class="app-status__battery"></span>
+                    </span>
+                  </div>
+                  <div class="detail-hero">
+                    <img src="assets/img/poi_chinese_fishing_nets.jpg" alt="" width="1200" height="800" />
+                  </div>
+                  <div class="detail-top">
+                    <span class="detail-circle"><svg class="icon"><use href="assets/icons.svg#i-chevron-left" /></svg></span>
+                    <span class="detail-circle detail-circle--heart"><svg class="icon"><use href="assets/icons.svg#i-heart" /></svg></span>
+                  </div>
+                  <div class="detail-sheet">
+                    <h3>Chinese Fishing Nets</h3>
+                    <div class="detail-meta">
+                      <span class="detail-chip"><svg class="icon"><use href="assets/icons.svg#i-landmark" /></svg>Heritage</span>
+                      <span class="detail-chip detail-chip--open"><svg class="icon"><use href="assets/icons.svg#i-clock" /></svg>Open 24/7</span>
+                    </div>
+                    <p class="detail-summary">Iconic 14th-century cantilever lift nets, balanced by granite boulders and operated daily at high tide.</p>
+                    <p class="detail-section">The living story</p>
+                    <p class="detail-story">Outside of mainland China and the Tonkin Delta, Fort Kochi is the only place on Earth where these 14th-century lift nets remain in active daily use.</p>
+                    <div class="detail-spot">
+                      <div class="detail-spot__row"><span class="detail-spot__num">1</span><span>Watch the net tip slowly at high tide.</span></div>
+                      <div class="detail-spot__row"><span class="detail-spot__num">2</span><span>Granite counterweights, hauled by hand.</span></div>
+                    </div>
+                    <div class="detail-buds">
+                      <svg class="icon"><use href="assets/icons.svg#i-headphones" /></svg>
+                      <span><b>Spontaneous Spoken Guide</b><span>Double-tap your earbud while standing here.</span></span>
+                    </div>
+                  </div>
+                  <div class="detail-dock">
+                    <span class="app-btn app-btn--primary app-btn--full"><svg class="icon"><use href="assets/icons.svg#i-speech" /></svg>Start Audio Story</span>
+                  </div>
+                  <div class="app-home"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="phone" aria-hidden="true">
+              <div class="phone__screen phone__screen--dark">
+                <div class="phone__island"></div>
+                <div class="app app--dark">
+                  <div class="app-status">
+                    <span class="app-status__time">9:41</span>
+                    <span class="app-status__icons">
+                      <svg class="icon"><use href="assets/icons.svg#i-signal" /></svg>
+                      <svg class="icon"><use href="assets/icons.svg#i-wifi" /></svg>
+                      <span class="app-status__battery"></span>
+                    </span>
+                  </div>
+                  <div class="app-player">
+                    <div class="app-player__head">
+                      <span class="app-player__label"><span class="app-dot"></span>Now playing · Stop 06</span>
+                      <span class="app-player__mute"><svg class="icon"><use href="assets/icons.svg#i-volume-x" /></svg>Mute</span>
+                    </div>
+                    <div class="player-art">
+                      <img src="assets/img/poi_st_francis_church.jpg" alt="" width="1200" height="800" />
+                      <div class="player-art__cap">
+                        <span>Fort Kochi Heritage Loop</span>
+                        <h4>St. Francis Church</h4>
+                      </div>
+                    </div>
+                    <p class="player-transcript">India's oldest surviving European sanctuary, built in 1503 and the original resting place of Vasco da Gama.</p>
+                    <div class="player-progress">
+                      <div class="player-progress__bar"><i></i></div>
+                      <div class="player-progress__time"><span>1:12</span><span>2:40</span></div>
+                    </div>
+                    <div class="player-controls">
+                      <svg class="icon"><use href="assets/icons.svg#i-skip-back" /></svg>
+                      <span class="player-play"><svg class="icon"><use href="assets/icons.svg#i-pause" /></svg></span>
+                      <svg class="icon"><use href="assets/icons.svg#i-skip-forward" /></svg>
+                      <span class="player-speed">1.0×</span>
+                    </div>
+                    <div class="player-next">
+                      <span class="player-next__label">Then</span>
+                      <div class="player-next__row"><span class="app-dot"></span>Santa Cruz Cathedral Basilica</div>
+                      <div class="player-next__row"><span class="app-dot"></span>Dutch Cemetery</div>
+                    </div>
+                  </div>
+                  <div class="app-home"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <span class="hero__banner-credit">Fort Kochi, Kerala · Pack v1.1.0</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Trail facts">
+      <div class="container stats__grid">
+        <div class="stat reveal">
+          <div class="stat__value">24</div>
+          <span class="stat__label">Curated stops</span>
+        </div>
+        <div class="stat reveal" style="--delay: 70ms">
+          <div class="stat__value">2</div>
+          <span class="stat__label">Self-guided walks</span>
+        </div>
+        <div class="stat reveal" style="--delay: 140ms">
+          <div class="stat__value"><span>0</span></div>
+          <span class="stat__label">Accounts or sign-ups</span>
+        </div>
+        <div class="stat reveal" style="--delay: 210ms">
+          <div class="stat__value">1.6<span> km</span></div>
+          <span class="stat__label">The heritage loop</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--white" id="how">
+      <div class="container feature">
+        <div class="feature__copy reveal">
+          <span class="section-index">01 / Ambient narration</span>
+          <h2 class="feature__title">It speaks when you <em>arrive.</em></h2>
+          <p class="feature__body">No buttons before every story. Walk into a stop and the guide begins — after a short dwell, so passing traffic doesn’t trigger chatter. A 30-minute cooldown keeps the same story from repeating.</p>
+          <dl class="spec-list">
+            <div class="spec-row"><dt>Stories start after</dt><dd>8 seconds in place</dd></div>
+            <div class="spec-row"><dt>Same story repeats</dt><dd>After 30 minutes</dd></div>
+            <div class="spec-row"><dt>Mute response</dt><dd>Under 500 ms</dd></div>
+          </dl>
+          <div class="feature__actions">
+            <a class="btn btn--primary" href="#features">See the walk <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-right" /></svg></a>
+            <a class="btn btn--text" href="#privacy">How location is used <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-right" /></svg></a>
+          </div>
+        </div>
+
+        <div class="feature__media stage reveal" role="img" aria-label="Travel Guide map screen with the Fort Kochi route, pins and next-stop card">
+          <svg class="stage__trail trail-draw" viewBox="0 0 620 620" aria-hidden="true">
+            <path pathLength="1" d="M 18 548 C 118 520 108 412 208 392 S 332 468 398 372 S 430 190 602 158" />
+            <path class="dash" pathLength="1" d="M 18 590 C 150 566 210 480 300 470 S 420 512 500 430 S 552 300 608 286" />
+          </svg>
+
+          <figure class="float-card float-card--a">
+            <span class="trigger-badge"><i class="trigger-badge__dot trigger-badge__dot--coral" aria-hidden="true"></i><span class="trigger-badge__label">50 m · <span class="trigger-badge__keep">Auto-play</span></span></span>
+            <img src="assets/img/poi_chinese_fishing_nets.jpg" alt="Chinese fishing nets over the water at Fort Kochi" width="1200" height="800" loading="lazy" />
+            <figcaption><b>Chinese nets</b><span>Stop 02 · 120 m</span></figcaption>
+          </figure>
+          <figure class="float-card float-card--b">
+            <span class="trigger-badge"><i class="trigger-badge__dot trigger-badge__dot--amber" aria-hidden="true"></i><span class="trigger-badge__label">8 s dwell</span></span>
+            <img src="assets/img/poi_st_francis_church.jpg" alt="The cream façade of St. Francis Church" width="1200" height="800" loading="lazy" />
+            <figcaption><b>St. Francis</b><span>Stop 06 · 340 m</span></figcaption>
+          </figure>
+          <figure class="float-card float-card--c">
+            <span class="trigger-badge"><span class="trigger-badge__wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="trigger-badge__label">Now speaking</span></span>
+            <img src="assets/img/poi_jew_town_lanes.jpg" alt="A narrow street in Jew Town, Mattancherry" width="1200" height="800" loading="lazy" />
+            <figcaption><b>Jew Town</b><span>Stop 14 · 1.2 km</span></figcaption>
+          </figure>
+
+          <div class="stage__phone" aria-hidden="true">
+            <div class="phone">
+              <div class="phone__screen">
+                <div class="phone__island"></div>
+                <div class="app">
+                  <div class="app-status">
+                    <span class="app-status__time">9:41</span>
+                    <span class="app-status__icons">
+                      <svg class="icon"><use href="assets/icons.svg#i-signal" /></svg>
+                      <svg class="icon"><use href="assets/icons.svg#i-wifi" /></svg>
+                      <span class="app-status__battery"></span>
+                    </span>
+                  </div>
+                  <div class="app-map">
+                    <img class="app-map__img" src="assets/img/fort-kochi-map.png" alt="" width="768" height="768" loading="lazy" />
+                    <div class="app-map__tint"></div>
+                    <svg class="app-map__route" viewBox="0 0 390 844" preserveAspectRatio="none" aria-hidden="true">
+                      <path d="M 42 706 C 118 662 128 570 196 532 S 258 438 244 366 S 286 302 330 262" />
+                      <circle cx="42" cy="706" r="4" />
+                      <circle cx="196" cy="532" r="4" />
+                      <circle cx="244" cy="366" r="4" />
+                      <circle cx="330" cy="262" r="4" />
+                    </svg>
+
+                    <div class="app-pin app-pin--active" style="left: 56%; top: 27%"><svg class="icon"><use href="assets/icons.svg#i-headphones" /></svg></div>
+                    <div class="app-pin app-pin--next" style="left: 39%; top: 39%"><svg class="icon"><use href="assets/icons.svg#i-map-pin" /></svg></div>
+                    <div class="app-pin" style="left: 29%; top: 50%"><svg class="icon"><use href="assets/icons.svg#i-map-pin" /></svg></div>
+                    <div class="app-pin" style="left: 21%; top: 61%"><svg class="icon"><use href="assets/icons.svg#i-map-pin" /></svg></div>
+                    <div class="app-pin" style="left: 47%; top: 68%"><svg class="icon"><use href="assets/icons.svg#i-map-pin" /></svg></div>
+
+                    <div class="app-map__top">
+                      <div class="app-place-card">
+                        <span class="app-place-card__icon"><svg class="icon"><use href="assets/icons.svg#i-map-pin" /></svg></span>
+                        <span class="app-place-card__text">
+                          <div class="app-place-card__title">Fort Kochi &amp; Mattancherry</div>
+                          <p>24 stops <span>•</span> <span class="app-dot"></span> Audio Guide Ready</p>
+                        </span>
+                        <span class="app-square-btn"><svg class="icon"><use href="assets/icons.svg#i-sliders" /></svg></span>
+                      </div>
+                      <div class="app-pills">
+                        <span class="app-pill app-pill--active"><svg class="icon"><use href="assets/icons.svg#i-check" /></svg>All Stops (24)</span>
+                        <span class="app-pill">Heritage</span>
+                        <span class="app-pill">Food &amp; Cafes</span>
+                        <span class="app-pill">Stays</span>
+                      </div>
+                    </div>
+
+                    <div class="app-map__controls">
+                      <span class="app-ctrl"><svg class="icon"><use href="assets/icons.svg#i-compass" /></svg></span>
+                      <span class="app-ctrl app-ctrl--follow"><svg class="icon"><use href="assets/icons.svg#i-navigation" /></svg></span>
+                    </div>
+
+                    <div class="app-preview">
+                      <div class="app-preview__head">
+                        <span class="app-tag"><span class="app-dot"></span>Next Stop</span>
+                        <span class="app-preview__route">Fort Kochi Walking Tour</span>
+                      </div>
+                      <div class="app-preview__main">
+                        <h4>Chinese Fishing Nets</h4>
+                        <span class="app-preview__thumb"><img src="assets/img/poi_chinese_fishing_nets.jpg" alt="" width="1200" height="800" loading="lazy" /></span>
+                      </div>
+                      <div class="app-preview__actions">
+                        <span class="app-btn app-btn--primary"><svg class="icon"><use href="assets/icons.svg#i-navigation" /></svg>What am I seeing?</span>
+                        <span class="app-btn app-btn--dark">Story</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="app-nav">
+                    <span class="app-nav__item app-nav__item--active"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-map" /></svg></span>Map</span>
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-compass" /></svg></span>Nearby</span>
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-download" /></svg></span>Packs</span>
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-clock" /></svg></span>History</span>
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-sliders" /></svg></span>Settings</span>
+                  </div>
+                  <div class="app-home"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <span class="stage__note"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-timer" /></svg>8s dwell · 30 min cooldown</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alabaster" id="app">
+      <div class="container feature feature--reverse">
+        <div class="feature__copy reveal">
+          <span class="section-index">02 / What am I seeing?</span>
+          <h2 class="feature__title">Point. Tap. <em>Know.</em></h2>
+          <p class="feature__body">Stand in front of a façade and tap once. The guide uses your position and heading to name the closest landmark, then reads the answer from the pack already on your phone.</p>
+          <dl class="spec-list">
+            <div class="spec-row"><dt>Reads</dt><dd>Position + heading</dd></div>
+            <div class="spec-row"><dt>Answer source</dt><dd>The on-device pack</dd></div>
+            <div class="spec-row"><dt>Works from</dt><dd>Map or Nearby</dd></div>
+          </dl>
+          <div class="feature__actions">
+            <a class="btn btn--primary" href="#features">See the Nearby screen <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-right" /></svg></a>
+            <a class="btn btn--text" href="#privacy">Read the privacy note <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-right" /></svg></a>
+          </div>
+        </div>
+
+        <div class="feature__media stage stage--left reveal" role="img" aria-label="Travel Guide Nearby screen with the What am I seeing card and nearby stops">
+          <svg class="stage__trail trail-draw" viewBox="0 0 620 620" aria-hidden="true">
+            <path pathLength="1" d="M 604 560 C 496 536 520 430 420 404 S 286 472 220 380 S 180 196 18 170" />
+          </svg>
+
+          <div class="stage__phone" aria-hidden="true">
+            <div class="phone">
+              <div class="phone__screen">
+                <div class="phone__island"></div>
+                <div class="app">
+                  <div class="app-status">
+                    <span class="app-status__time">9:41</span>
+                    <span class="app-status__icons">
+                      <svg class="icon"><use href="assets/icons.svg#i-signal" /></svg>
+                      <svg class="icon"><use href="assets/icons.svg#i-wifi" /></svg>
+                      <span class="app-status__battery"></span>
+                    </span>
+                  </div>
+                  <div class="app-nearby">
+                    <div class="nearby-head">
+                      <h3>Nearby</h3>
+                      <p>Places near your path, sorted by distance.</p>
+                    </div>
+
+                    <div class="seeing-card">
+                      <div class="seeing-card__top">
+                        <span class="seeing-card__eye"><svg class="icon"><use href="assets/icons.svg#i-eye" /></svg></span>
+                        <div style="flex:1">
+                          <b>What am I seeing?</b>
+                          <span>Point the phone at what’s in front of you. The guide names it from where you’re standing.</span>
+                        </div>
+                        <svg class="icon" style="width:1em;height:1em;color:var(--app-text-2)"><use href="assets/icons.svg#i-chevron-right" /></svg>
+                      </div>
+                      <p class="seeing-card__answer">“The cantilevered teak nets in front of you are the last working 14th-century lift nets outside China.”</p>
+                    </div>
+
+                    <div class="nearby-filters">
+                      <span class="app-pill app-pill--active"><svg class="icon"><use href="assets/icons.svg#i-check" /></svg>All Stops (24)</span>
+                      <span class="app-pill">Heritage</span>
+                      <span class="app-pill">Food</span>
+                      <span class="app-pill">Stays</span>
+                    </div>
+
+                    <div class="nearby-event">
+                      <svg class="icon"><use href="assets/icons.svg#i-sun" /></svg>
+                      <div>
+                        <b>Cantilever Net Sunset Drops &amp; Fishermen Gathering</b>
+                        <span>At Mahatma Gandhi Beach Walk · today</span>
+                      </div>
+                    </div>
+
+                    <p class="nearby-count">24 stops in range</p>
+
+                    <div class="poi-row">
+                      <span class="poi-row__img"><img src="assets/img/poi_chinese_fishing_nets.jpg" alt="" width="1200" height="800" loading="lazy" /></span>
+                      <span class="poi-row__text">
+                        <span class="poi-row__layer">Heritage</span>
+                        <h4>Chinese Fishing Nets</h4>
+                        <p>120 m away</p>
+                      </span>
+                      <span class="poi-row__distance">120 m</span>
+                    </div>
+                    <div class="poi-row">
+                      <span class="poi-row__img"><img src="assets/img/poi_st_francis_church.jpg" alt="" width="1200" height="800" loading="lazy" /></span>
+                      <span class="poi-row__text">
+                        <span class="poi-row__layer">Heritage</span>
+                        <h4>St. Francis Church</h4>
+                        <p>340 m away</p>
+                      </span>
+                      <span class="poi-row__distance">340 m</span>
+                    </div>
+                    <div class="poi-row">
+                      <span class="poi-row__img"><img src="assets/img/poi_kashi_art_cafe.jpg" alt="" width="1200" height="800" loading="lazy" /></span>
+                      <span class="poi-row__text">
+                        <span class="poi-row__layer poi-row__layer--food">Food &amp; Cafes</span>
+                        <h4>Kashi Art Cafe</h4>
+                        <p>600 m away</p>
+                      </span>
+                      <span class="poi-row__distance">600 m</span>
+                    </div>
+                  </div>
+                  <div class="app-nav">
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-map" /></svg></span>Map</span>
+                    <span class="app-nav__item app-nav__item--active"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-compass" /></svg></span>Nearby</span>
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-download" /></svg></span>Packs</span>
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-clock" /></svg></span>History</span>
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-sliders" /></svg></span>Settings</span>
+                  </div>
+                  <div class="app-home"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <span class="stage__note" style="left:0;right:auto"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-scan-eye" /></svg>Position + heading</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--white" id="features">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 class="section-title">Built for the way you <em>wander.</em></h2>
+          <p class="section-lede">Three things we refused to compromise on: the order of the walk, the signal you don’t need, and the quiet when you want it.</p>
+        </div>
+
+        <div class="value-grid">
+          <article class="value-card reveal">
+            <div class="value-card__media">
+              <img src="assets/img/poi_jew_town_lanes.jpg" alt="A narrow lane in Jew Town, Mattancherry, with shops and a rickshaw." width="1200" height="800" loading="lazy" />
+            </div>
+            <div class="value-card__body">
+              <span class="value-card__index">01 / Route planning</span>
+              <h3>Two walks, already in order</h3>
+              <p>The 16-stop Heritage Loop runs waterfront to church to cemetery to Jew Town. Or let a 2-hour, half-day or full-day plan choose the next stop for you.</p>
+              <a class="value-card__link" href="#how">See the routes <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-right" /></svg></a>
+            </div>
+          </article>
+
+          <article class="value-card reveal" style="--delay: 80ms">
+            <div class="value-card__media">
+              <img src="assets/img/poi_fort_kochi_jetty.jpg" alt="Boats at the Fort Kochi jetty under a wide sky." width="1200" height="800" loading="lazy" />
+            </div>
+            <div class="value-card__body">
+              <span class="value-card__index">02 / Offline packs</span>
+              <h3>Download once. Then airplane mode.</h3>
+              <p>The Fort Kochi pack is built in: 24 stories, opening hours, two routes, and the map. About 180 MB of tiles if you want the basemap offline.</p>
+              <a class="value-card__link" href="#offline">See the packs <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-right" /></svg></a>
+            </div>
+          </article>
+
+          <article class="value-card reveal" style="--delay: 160ms">
+            <div class="value-card__media">
+              <img src="assets/img/poi_dutch_cemetery.jpg" alt="Old headstones under trees at the Dutch Cemetery in Fort Kochi." width="1200" height="800" loading="lazy" />
+            </div>
+            <div class="value-card__body">
+              <span class="value-card__index">03 / Quiet by design</span>
+              <h3>A guide that knows when to stop</h3>
+              <p>Quiet hours from 10 pm to 7 am. A 30-minute cooldown. Mute in under half a second. Audio only starts when you ask it to.</p>
+              <a class="value-card__link" href="#privacy">See the settings <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-right" /></svg></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--dark companion" id="companion">
+      <div class="container companion__grid">
+        <div class="feature__copy reveal">
+          <span class="section-index">03 / Google Maps companion</span>
+          <h2 class="feature__title">Your maps app, <em>with stories.</em></h2>
+          <p class="feature__body">Start directions in Google Maps and Travel Guide follows along. It reads the active route, pre-loads the stops within 450 m of your path, and clears itself when navigation ends.</p>
+          <dl class="spec-list">
+            <div class="spec-row"><dt>Companion scope</dt><dd>Google Maps only</dd></div>
+            <div class="spec-row"><dt>Stops pre-loaded</dt><dd>Within 450 m</dd></div>
+            <div class="spec-row"><dt>Route history</dt><dd>Never stored</dd></div>
+          </dl>
+          <div class="feature__actions">
+            <a class="btn btn--primary" href="#features">How companion mode works <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-right" /></svg></a>
+          </div>
+        </div>
+
+        <div class="companion__media reveal" role="img" aria-label="Travel Guide running alongside Google Maps navigation">
+          <div class="phone" aria-hidden="true">
+            <div class="phone__screen phone__screen--dark">
+              <div class="phone__island"></div>
+              <div class="app app--dark">
+                <div class="app-status">
+                  <span class="app-status__time">9:41</span>
+                  <span class="app-status__icons">
+                    <svg class="icon"><use href="assets/icons.svg#i-signal" /></svg>
+                    <svg class="icon"><use href="assets/icons.svg#i-wifi" /></svg>
+                    <span class="app-status__battery"></span>
+                  </span>
+                </div>
+                <div class="app-map">
+                  <img class="app-map__img" src="assets/img/fort-kochi-map.png" alt="" width="768" height="768" loading="lazy" />
+                  <div class="app-map__tint"></div>
+                  <svg class="app-map__route" viewBox="0 0 390 844" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M 48 690 C 118 648 140 560 208 520 S 264 430 252 366 S 296 300 336 266" />
+                    <circle cx="48" cy="690" r="4" />
+                    <circle cx="208" cy="520" r="4" />
+                    <circle cx="252" cy="366" r="4" />
+                  </svg>
+
+                  <div class="app-pin app-pin--next" style="left: 57%; top: 28%"><svg class="icon"><use href="assets/icons.svg#i-navigation" /></svg></div>
+                  <div class="app-pin" style="left: 39%; top: 40%"><svg class="icon"><use href="assets/icons.svg#i-map-pin" /></svg></div>
+                  <div class="app-pin" style="left: 28%; top: 52%"><svg class="icon"><use href="assets/icons.svg#i-map-pin" /></svg></div>
+
+                  <div class="app-map__top">
+                    <div class="app-place-card">
+                      <span class="app-place-card__icon"><svg class="icon"><use href="assets/icons.svg#i-map-pin" /></svg></span>
+                      <span class="app-place-card__text">
+                        <div class="app-place-card__title">Fort Kochi &amp; Mattancherry</div>
+                        <p>24 stops <span>•</span> <span class="app-dot app-dot--green"></span> Companion active</p>
+                      </span>
+                      <span class="app-square-btn"><svg class="icon"><use href="assets/icons.svg#i-sliders" /></svg></span>
+                    </div>
+
+                    <div class="companion-banner">
+                      <div class="companion-banner__top">
+                        <span class="companion-banner__icon"><svg class="icon"><use href="assets/icons.svg#i-navigation" /></svg></span>
+                        <span style="flex:1">
+                          <b>Maps companion active</b>
+                          <span>Navigating to St. Francis Church</span>
+                        </span>
+                      </div>
+                      <p>6 spots along path pre-loaded · 12 min</p>
+                      <div class="companion-banner__actions">
+                        <span class="app-btn app-btn--tonal">Exit Nav</span>
+                        <span class="app-btn app-btn--quiet">Mute</span>
+                      </div>
+                    </div>
+
+                    <div class="app-pills">
+                      <span class="app-pill app-pill--active"><svg class="icon"><use href="assets/icons.svg#i-check" /></svg>All Stops (24)</span>
+                      <span class="app-pill">Heritage</span>
+                      <span class="app-pill">Food &amp; Cafes</span>
+                    </div>
+                  </div>
+
+                  <div class="app-map__controls app-map__controls--low">
+                    <span class="app-ctrl"><svg class="icon"><use href="assets/icons.svg#i-compass" /></svg></span>
+                    <span class="app-ctrl app-ctrl--follow"><svg class="icon"><use href="assets/icons.svg#i-navigation" /></svg></span>
+                  </div>
+
+                  <div class="app-preview">
+                    <div class="app-preview__head">
+                      <span class="app-tag app-tag--green"><span class="app-dot"></span>Companion</span>
+                      <span class="app-preview__route">Route to St. Francis Church</span>
+                    </div>
+                    <div class="app-preview__main">
+                      <h4>Santa Cruz Cathedral Basilica</h4>
+                      <span class="app-preview__thumb"><img src="assets/img/poi_santa_cruz_basilica.jpg" alt="" width="1200" height="800" loading="lazy" /></span>
+                    </div>
+                    <div class="app-preview__actions">
+                      <span class="app-btn app-btn--primary"><svg class="icon"><use href="assets/icons.svg#i-headphones" /></svg>Play story</span>
+                      <span class="app-btn app-btn--quiet">Skip</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="app-nav">
+                  <span class="app-nav__item app-nav__item--active"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-map" /></svg></span>Map</span>
+                  <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-compass" /></svg></span>Nearby</span>
+                  <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-download" /></svg></span>Packs</span>
+                  <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-clock" /></svg></span>History</span>
+                  <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-sliders" /></svg></span>Settings</span>
+                </div>
+                <div class="app-home"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="notif-card">
+            <div class="notif-card__top">
+              <svg class="icon"><use href="assets/icons.svg#i-bell" /></svg>
+              Travel Guide · now
+              <span class="app-dot app-dot--green" style="margin-left:auto"></span>
+            </div>
+            <div class="notif-card__title">St. Francis Church is 120 m ahead</div>
+            <p>Tap to hear the story. Keep walking — it will wait.</p>
+            <div class="notif-card__actions">
+              <span class="mute">Mute Audio</span>
+              <span class="explore">Explore Place</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--white" id="offline">
+      <div class="container feature">
+        <div class="feature__copy reveal">
+          <span class="section-index">04 / Offline packs</span>
+          <h2 class="feature__title">Works where the signal <em>doesn’t.</em></h2>
+          <p class="feature__body">Download the district once and the map, stories and narration keep working. No roaming bill, no loading spinner at the corner of a 16th-century street.</p>
+          <dl class="spec-list">
+            <div class="spec-row"><dt>Built-in pack</dt><dd>24 stops · v1.1.0</dd></div>
+            <div class="spec-row"><dt>Map tiles</dt><dd>Zoom 12–16 · ~180 MB</dd></div>
+            <div class="spec-row"><dt>Storage cap</dt><dd>500 MB · oldest city dropped first</dd></div>
+          </dl>
+          <div class="feature__actions">
+            <a class="btn btn--primary" href="#download">Get the app <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-up-right" /></svg></a>
+            <a class="btn btn--text" href="#features">See all features <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-right" /></svg></a>
+          </div>
+        </div>
+
+        <div class="feature__media stage reveal" role="img" aria-label="Travel Guide offline packs screen showing the built-in Fort Kochi pack and map tile download">
+          <svg class="stage__trail trail-draw" viewBox="0 0 620 620" aria-hidden="true">
+            <path pathLength="1" d="M 22 180 C 128 210 120 320 214 344 S 338 276 404 366 S 452 534 606 560" />
+          </svg>
+
+          <div class="stage__phone" aria-hidden="true">
+            <div class="phone">
+              <div class="phone__screen">
+                <div class="phone__island"></div>
+                <div class="app">
+                  <div class="app-status">
+                    <span class="app-status__time">9:41</span>
+                    <span class="app-status__icons">
+                      <svg class="icon"><use href="assets/icons.svg#i-signal" /></svg>
+                      <svg class="icon"><use href="assets/icons.svg#i-wifi" /></svg>
+                      <span class="app-status__battery"></span>
+                    </span>
+                  </div>
+                  <div class="app-packs">
+                    <div class="packs-head">
+                      <h3>Offline packs</h3>
+                      <p>Downloaded city guides for exploring without mobile data.</p>
+                    </div>
+
+                    <div class="pack-promise">
+                      <span class="pack-promise__icon"><svg class="icon"><use href="assets/icons.svg#i-wifi-off" /></svg></span>
+                      <div>
+                        <b>Works with no signal</b>
+                        <p>Stories, audio, and maps run entirely on-device without cellular data or Wi-Fi.</p>
+                      </div>
+                    </div>
+
+                    <div class="pack-download">
+                      <div class="pack-download__top">
+                        <b>Kochi map tiles</b>
+                        <span>53%</span>
+                      </div>
+                      <p>About 180 MB for zoom levels 12 to 16 — the detail you need to read a street corner, not the whole country.</p>
+                      <div class="pack-bar"><i></i></div>
+                      <p class="pack-caption">128 of 240 tiles stored. Keep the app open until this finishes.</p>
+                      <span class="app-btn app-btn--primary app-btn--full" style="margin-top:.55em;min-height:2.6em;font-size:.72em"><svg class="icon"><use href="assets/icons.svg#i-download" /></svg>Download Kochi tiles</span>
+                    </div>
+
+                    <p class="pack-section">On this device</p>
+                    <div class="pack-card">
+                      <div class="pack-card__top">
+                        <span class="pack-card__icon"><svg class="icon"><use href="assets/icons.svg#i-layers" /></svg></span>
+                        <div style="flex:1">
+                          <b>Fort Kochi</b>
+                          <span>32.9 KB · pack v1.1.0</span>
+                        </div>
+                      </div>
+                      <span class="pack-tag"><svg class="icon"><use href="assets/icons.svg#i-check" /></svg>Built in · never removed</span>
+                      <p class="pack-foot">Tiles are kept up to 500 MB. When that fills, the least recently used city is dropped first — the Fort Kochi pack is never evicted.</p>
+                    </div>
+                  </div>
+                  <div class="app-nav">
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-map" /></svg></span>Map</span>
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-compass" /></svg></span>Nearby</span>
+                    <span class="app-nav__item app-nav__item--active"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-download" /></svg></span>Packs</span>
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-clock" /></svg></span>History</span>
+                    <span class="app-nav__item"><span class="app-nav__pill"><svg class="icon"><use href="assets/icons.svg#i-sliders" /></svg></span>Settings</span>
+                  </div>
+                  <div class="app-home"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <span class="stage__note"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-wifi-off" /></svg>No signal · still talking</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alabaster" id="notes">
+      <div class="container">
+        <div class="fieldnotes reveal-img">
+          <img src="assets/img/poi_chinese_fishing_nets.jpg" alt="Looking up through the teak poles and blue nets of a Chinese fishing net at Fort Kochi." width="1200" height="800" loading="lazy" />
+          <div class="fieldnotes__inner">
+            <div class="fieldnotes__copy reveal">
+              <p class="kicker kicker--light"><span class="kicker__dot"></span>Field notes · Fort Kochi</p>
+              <h2 class="section-title" style="margin-top:14px">Three stories from the walk.</h2>
+              <p>Not reviews. Just the kind of thing the guide tells you when you’re standing in front of it.</p>
+              <a class="btn btn--light" href="#download">Get the app <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-up-right" /></svg></a>
+            </div>
+
+            <div class="story-stack">
+              <article class="story-card reveal" style="--delay: 60ms">
+                <div class="story-card__top"><span>Stop 02 · Chinese Fishing Nets</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-waves" /></svg></div>
+                <h3>The net was here before the Portuguese.</h3>
+                <p>“Cantilevered teak, granite counterweights, and the last working 14th-century lift nets outside China.”</p>
+              </article>
+              <article class="story-card reveal" style="--delay: 130ms">
+                <div class="story-card__top"><span>Stop 06 · St. Francis Church</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-landmark" /></svg></div>
+                <h3>A church that moved three times.</h3>
+                <p>“Built in 1503, it held Vasco da Gama’s body before his remains were taken to Lisbon.”</p>
+              </article>
+              <article class="story-card reveal" style="--delay: 200ms">
+                <div class="story-card__top"><span>Stop 14 · Jew Town</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-layers" /></svg></div>
+                <h3>The floor tells a story.</h3>
+                <p>“In the Pardesi Synagogue, hand-painted Chinese tiles arrived in the 18th century — no two the same.”</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--white" id="privacy">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2 class="section-title">Your walk stays <em>yours.</em></h2>
+          <p class="section-lede">No account. No ads. No analytics. The guide works from the pack on your phone, and your location stays in memory while you walk.</p>
+        </div>
+
+        <div class="privacy-grid">
+          <article class="privacy-item reveal">
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-shield-check" /></svg>
+            <h3>No account, no tracking</h3>
+            <p>There is no sign-in, no advertising SDK, and no analytics SDK. The app has nothing to sell.</p>
+          </article>
+          <article class="privacy-item reveal" style="--delay: 80ms">
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-lock" /></svg>
+            <h3>Notes encrypted at rest</h3>
+            <p>Trip notes are sealed with a hardware-backed Android Keystore key using AES-256-GCM. The key never leaves the phone.</p>
+          </article>
+          <article class="privacy-item reveal" style="--delay: 160ms">
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-smartphone" /></svg>
+            <h3>Location in memory</h3>
+            <p>GPS fixes are used while you walk and are not uploaded. Background location is a separate opt-in, never bundled with first launch.</p>
+          </article>
+        </div>
+
+        <p class="privacy-note reveal">The on-device voice works offline. Cloud voices and the optional AI guide only run when you turn them on. <a href="privacy.html">Read the full privacy policy <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-right" /></svg></a></p>
+      </div>
+    </section>
+
+    <section class="section section--sand" id="download">
+      <div class="container cta">
+        <div class="cta__copy reveal">
+          <span class="section-index">05 / Take the walk</span>
+          <h2 class="section-title">Start at <em>Vasco Square.</em></h2>
+          <p class="cta__body">Install the app, put the phone in your pocket, and walk. The first story arrives when you reach the water.</p>
+          <div class="cta__actions">
+            <a class="btn btn--primary" href="https://github.com/greninja-op/TRAVEL-GUIDE" target="_blank" rel="noreferrer">
+              Get the Android app
+              <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-arrow-up-right" /></svg>
+            </a>
+            <a class="btn btn--outline" href="https://github.com/greninja-op/TRAVEL-GUIDE" target="_blank" rel="noreferrer">View the source</a>
+          </div>
+          <p class="cta__meta">Android 8.0+ · 70 MB APK · Pack v1.1.0 · No account</p>
+        </div>
+
+        <div class="cta__media reveal-img">
+          <img src="assets/img/poi_fort_kochi_beach.jpg" alt="The Fort Kochi beach at dusk, with fishing boats resting on the sand." width="1200" height="800" loading="lazy" />
+          <span class="cta__badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-circle-check" /></svg>Built in · 24 stops · offline ready</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a class="brand" href="#top">
+            <span class="brand__mark" aria-hidden="true">
+              <svg viewBox="0 0 108 108" role="img">
+                <path d="M31 38C27 42 27 48 31 52" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".85" />
+                <path d="M77 38C81 42 81 48 77 52" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".85" />
+                <path d="M54 28C44.6 28 37 35.6 37 45C37 58.5 54 80 54 80C54 80 71 58.5 71 45C71 35.6 63.4 28 54 28Z" fill="currentColor" />
+                <circle cx="54" cy="44" r="6.5" fill="#F26419" />
+              </svg>
+            </span>
+            <span class="brand__name">Travel Guide<span>Fort Kochi · Kerala</span></span>
+          </a>
+          <p>Built for slow travel. Stories told where they happened, on a phone that keeps your walk to itself.</p>
+        </div>
+
+        <div class="footer__col">
+          <h3>The app</h3>
+          <ul>
+            <li><a href="#how">How a walk works</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#privacy">Privacy</a></li>
+            <li><a href="#download">Download</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h3>Project</h3>
+          <ul>
+            <li><a href="https://github.com/greninja-op/TRAVEL-GUIDE" target="_blank" rel="noreferrer">Source on GitHub</a></li>
+            <li><a href="https://github.com/greninja-op/TRAVEL-GUIDE/blob/main/SPEC.md" target="_blank" rel="noreferrer">Product spec</a></li>
+            <li><a href="https://github.com/greninja-op/TRAVEL-GUIDE/blob/main/docs/QA.md" target="_blank" rel="noreferrer">Field QA notes</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h3>Small print</h3>
+          <ul>
+            <li><a href="privacy.html">Privacy policy</a></li>
+            <li><a href="credits.html">Photo &amp; font credits</a></li>
+            <li><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Map data © OpenStreetMap</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> Travel Guide · Fort Kochi Heritage Edition · v1.0.0</span>
+        <span>Pack v1.1.0 · Android 8.0+ · Made in Kerala</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js" defer></script>
+</body>
+</html>
