@@ -241,4 +241,202 @@
       updateAllTrails();
     }
   });
+
+  /* ---------------------------------------------------------------------
+     Custom overlay scroll thumb
+     No track, no native bar: a coral capsule that appears while scrolling or
+     when the pointer nears the right edge, then fades away. Movement is eased
+     with a lerp, and the thumb can be dragged.
+     --------------------------------------------------------------------- */
+  (function initScrollThumb() {
+    var finePointer = window.matchMedia("(pointer: fine)").matches;
+    if (!finePointer || window.innerWidth < 900) return;
+
+    var doc = document.documentElement;
+    var thumb = document.createElement("div");
+    var visible = false;
+    var dragging = false;
+    var hovering = false;
+    var nearPointer = false;
+    var hideTimer = 0;
+    var raf = 0;
+    var targetY = 0;
+    var targetH = 0;
+    var currentY = 0;
+    var currentH = 0;
+    var PAD = 10;
+    var EDGE = 88;
+    var EASE = 0.22;
+
+    thumb.className = "scroll-thumb";
+    thumb.setAttribute("aria-hidden", "true");
+    document.body.appendChild(thumb);
+    doc.classList.add("has-custom-scrollbar");
+
+    function metrics() {
+      var viewport = window.innerHeight;
+      var total = Math.max(doc.scrollHeight, document.body.scrollHeight);
+      var maxScroll = Math.max(total - viewport, 1);
+      var track = Math.max(viewport - PAD * 2, 1);
+      var ratio = viewport / total;
+      var height = Math.max(42, Math.min(track, track * ratio));
+      var y = PAD + (window.scrollY / maxScroll) * (track - height);
+      return { viewport: viewport, total: total, maxScroll: maxScroll, track: track, height: height, y: y };
+    }
+
+    function setTarget() {
+      var m = metrics();
+      if (m.total <= m.viewport + 1) {
+        targetH = 0;
+        targetY = PAD;
+        return;
+      }
+      targetH = m.height;
+      targetY = m.y;
+    }
+
+    function render() {
+      raf = 0;
+      if (reduceMotion.matches) {
+        currentY = targetY;
+        currentH = targetH;
+      } else {
+        currentY += (targetY - currentY) * EASE;
+        currentH += (targetH - currentH) * EASE;
+        if (Math.abs(targetY - currentY) < 0.1 && Math.abs(targetH - currentH) < 0.1) {
+          currentY = targetY;
+          currentH = targetH;
+        }
+      }
+      thumb.style.height = currentH.toFixed(1) + "px";
+      thumb.style.transform = "translate3d(0," + currentY.toFixed(1) + "px,0)";
+      if (!reduceMotion.matches && (Math.abs(targetY - currentY) > 0.1 || Math.abs(targetH - currentH) > 0.1)) {
+        raf = window.requestAnimationFrame(render);
+      }
+    }
+
+    function kick() {
+      if (!raf) raf = window.requestAnimationFrame(render);
+    }
+
+    function show() {
+      if (visible) return;
+      var m = metrics();
+      if (m.total <= m.viewport + 1) return;
+      visible = true;
+      thumb.classList.add("is-visible");
+      setTarget();
+      kick();
+    }
+
+    function hide() {
+      if (!visible || dragging || hovering || nearPointer) return;
+      visible = false;
+      thumb.classList.remove("is-visible");
+    }
+
+    function scheduleHide(delay) {
+      window.clearTimeout(hideTimer);
+      if (dragging || hovering || nearPointer) return;
+      hideTimer = window.setTimeout(hide, delay || 900);
+    }
+
+    function onScroll() {
+      show();
+      setTarget();
+      kick();
+      scheduleHide(900);
+    }
+
+    function onPointerMove(event) {
+      nearPointer = window.innerWidth - event.clientX <= EDGE;
+      if (nearPointer) {
+        show();
+        window.clearTimeout(hideTimer);
+      } else if (!dragging && !hovering) {
+        scheduleHide(180);
+      }
+    }
+
+    function onThumbDown(event) {
+      event.preventDefault();
+      dragging = true;
+      hovering = false;
+      visible = true;
+      thumb.classList.add("is-dragging", "is-visible");
+      thumb.setPointerCapture(event.pointerId);
+      var m = metrics();
+      var startY = event.clientY;
+      var startScroll = window.scrollY;
+      var maxScroll = m.maxScroll;
+      var travel = Math.max(m.track - m.height, 1);
+      var ratio = maxScroll / travel;
+
+      function move(ev) {
+        var next = startScroll + (ev.clientY - startY) * ratio;
+        window.scrollTo(0, Math.max(0, Math.min(maxScroll, next)));
+        setTarget();
+        kick();
+      }
+
+      function end() {
+        dragging = false;
+        thumb.classList.remove("is-dragging");
+        if (thumb.hasPointerCapture(event.pointerId)) {
+          thumb.releasePointerCapture(event.pointerId);
+        }
+        thumb.removeEventListener("pointermove", move);
+        thumb.removeEventListener("pointerup", end);
+        thumb.removeEventListener("pointercancel", end);
+        scheduleHide(600);
+      }
+
+      thumb.addEventListener("pointermove", move);
+      thumb.addEventListener("pointerup", end);
+      thumb.addEventListener("pointercancel", end);
+    }
+
+    thumb.addEventListener("pointerenter", function () {
+      hovering = true;
+      show();
+      window.clearTimeout(hideTimer);
+    });
+
+    thumb.addEventListener("pointerleave", function () {
+      hovering = false;
+      if (!dragging) scheduleHide(180);
+    });
+
+    thumb.addEventListener("pointerdown", onThumbDown);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("wheel", onScroll, { passive: true });
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("resize", function () {
+      setTarget();
+      kick();
+    }, { passive: true });
+
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(function () {
+        setTarget();
+        kick();
+      }).observe(document.body);
+    }
+
+    window.addEventListener("load", function () {
+      setTarget();
+      currentY = targetY;
+      currentH = targetH;
+      thumb.style.height = currentH.toFixed(1) + "px";
+      thumb.style.transform = "translate3d(0," + currentY.toFixed(1) + "px,0)";
+    });
+
+    // Set a sane initial position without showing the thumb.
+    setTarget();
+    currentY = targetY;
+    currentH = targetH;
+    thumb.style.height = currentH.toFixed(1) + "px";
+    thumb.style.transform = "translate3d(0," + currentY.toFixed(1) + "px,0)";
+  })();
 })();

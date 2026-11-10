@@ -2330,6 +2330,74 @@ ol {
   }
 }
 
+/* -------------------------------------------------- custom scroll thumb --- */
+
+html.has-custom-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html.has-custom-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.scroll-thumb {
+  position: fixed;
+  top: 0;
+  right: 7px;
+  z-index: 120;
+  width: 6px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--orange);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+    0 2px 10px rgba(242, 100, 25, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity 260ms var(--ease-out),
+    width 220ms var(--ease-out),
+    right 220ms var(--ease-out),
+    background-color 220ms var(--ease-out);
+  will-change: transform, opacity;
+}
+
+.scroll-thumb.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scroll-thumb:hover,
+.scroll-thumb.is-dragging {
+  width: 9px;
+  right: 5px;
+  background: var(--orange-bright);
+}
+
+.scroll-thumb:hover {
+  cursor: grab;
+}
+
+.scroll-thumb.is-dragging {
+  cursor: grabbing;
+}
+
+@media (pointer: coarse), (max-width: 899px) {
+  .scroll-thumb {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-thumb {
+    transition-duration: 120ms;
+  }
+}
+
 /* ---------------------------------------------------------- responsive --- */
 
 @media (min-width: 1101px) and (max-width: 1280px) {

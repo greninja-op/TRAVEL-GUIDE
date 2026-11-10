@@ -53,6 +53,10 @@ midnight `#121826`, amber `#F59E0B`, emerald `#10B981`, Inter + Lora, 18px cards
 Settings). The screens use real pack strings, stop names, distances, and route
 order from `content/packs/fort-kochi-walk-v1.json`.
 
+The page also has a custom coral scroll thumb with no track: it appears while
+scrolling or when the pointer nears the right edge, eases with the wheel, fades
+away when idle, and can be dragged. Touch and narrow screens keep the native bar.
+
 ## Provenance / anti-slop rules
 
 - Photography is from the project’s own Fort Kochi app assets — no AI images,
