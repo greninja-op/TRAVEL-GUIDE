@@ -267,28 +267,42 @@
     var PAD = 10;
     var EDGE = 88;
     var EASE = 0.22;
+    var navGuard = 8;
 
     thumb.className = "scroll-thumb";
     thumb.setAttribute("aria-hidden", "true");
     document.body.appendChild(thumb);
     doc.classList.add("has-custom-scrollbar");
 
+    function refreshNavGuard() {
+      var cssNav = parseFloat(window.getComputedStyle(doc).getPropertyValue("--nav-h")) || 0;
+      var currentNav = nav ? nav.getBoundingClientRect().height : 0;
+      navGuard = Math.max(cssNav, currentNav, 0) + 8;
+    }
+
+    refreshNavGuard();
+
+    function topInset() {
+      return navGuard;
+    }
+
     function metrics() {
       var viewport = window.innerHeight;
       var total = Math.max(doc.scrollHeight, document.body.scrollHeight);
       var maxScroll = Math.max(total - viewport, 1);
-      var track = Math.max(viewport - PAD * 2, 1);
+      var top = topInset();
+      var track = Math.max(viewport - top - PAD, 1);
       var ratio = viewport / total;
       var height = Math.max(42, Math.min(track, track * ratio));
-      var y = PAD + (window.scrollY / maxScroll) * (track - height);
-      return { viewport: viewport, total: total, maxScroll: maxScroll, track: track, height: height, y: y };
+      var y = top + (window.scrollY / maxScroll) * (track - height);
+      return { viewport: viewport, total: total, maxScroll: maxScroll, track: track, height: height, y: y, top: top };
     }
 
     function setTarget() {
       var m = metrics();
       if (m.total <= m.viewport + 1) {
         targetH = 0;
-        targetY = PAD;
+        targetY = m.top;
         return;
       }
       targetH = m.height;
@@ -297,7 +311,7 @@
 
     function render() {
       raf = 0;
-      if (reduceMotion.matches) {
+      if (dragging || reduceMotion.matches) {
         currentY = targetY;
         currentH = targetH;
       } else {
@@ -365,6 +379,8 @@
       visible = true;
       thumb.classList.add("is-dragging", "is-visible");
       thumb.setPointerCapture(event.pointerId);
+      var previousScrollBehavior = doc.style.scrollBehavior;
+      doc.style.scrollBehavior = "auto";
       var m = metrics();
       var startY = event.clientY;
       var startScroll = window.scrollY;
@@ -381,6 +397,7 @@
 
       function end() {
         dragging = false;
+        doc.style.scrollBehavior = previousScrollBehavior;
         thumb.classList.remove("is-dragging");
         if (thumb.hasPointerCapture(event.pointerId)) {
           thumb.releasePointerCapture(event.pointerId);
@@ -388,6 +405,8 @@
         thumb.removeEventListener("pointermove", move);
         thumb.removeEventListener("pointerup", end);
         thumb.removeEventListener("pointercancel", end);
+        setTarget();
+        kick();
         scheduleHide(600);
       }
 
@@ -413,6 +432,7 @@
     window.addEventListener("wheel", onScroll, { passive: true });
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("resize", function () {
+      refreshNavGuard();
       setTarget();
       kick();
     }, { passive: true });
