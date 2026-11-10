@@ -2371,6 +2371,15 @@ html.has-custom-scrollbar::-webkit-scrollbar {
   pointer-events: auto;
 }
 
+.scroll-thumb::before {
+  content: "";
+  position: absolute;
+  inset: -4px -9px;
+  border-radius: inherit;
+  cursor: inherit;
+  pointer-events: auto;
+}
+
 .scroll-thumb:hover,
 .scroll-thumb.is-dragging {
   width: 9px;
