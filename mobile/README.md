@@ -15,13 +15,30 @@ $env:JAVA_HOME = "<jdk-17 path>"; $env:ANDROID_HOME = "<android sdk path>"
 .\gradlew :app:assembleDebug  # -> app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Toolchain: Gradle 8.9 (wrapper) · AGP 8.7.3 · Kotlin 2.0.21 + Compose
-compiler plugin · compileSdk/targetSdk 35 · minSdk 26.
+Toolchain: Gradle 9.9 (wrapper) · AGP 9.5.1 · Kotlin 2.4.21 + Compose
+compiler plugin · compileSdk/targetSdk 37 · minSdk 26.
 
 ## Open in Android Studio
 
 Open `travel-guide/mobile/` (Gradle root). Run `app` on a device with GPS
 (emulator: extended controls → location → route playback for the loop).
+
+## Install on a USB phone (allowlisted ADB)
+
+Device access is restricted to the Travel Guide app only — see `AGENTS.md` and
+the `adb-travel-guide` skill. Use the controller, never raw adb:
+
+```powershell
+# from the repo root
+python tools/adb_control.py doctor    # adb version + device state + APK
+python tools/adb_control.py setup     # install, grant, companions, launch
+python tools/adb_control.py status
+python tools/adb_control.py logs --lines 200
+```
+
+Optional local debug port: `python tools/adb_control.py reverse --port 8080`.
+If the phone shows `unauthorized`, tap **Allow USB debugging** on the device.
+
 
 ## Where things are
 

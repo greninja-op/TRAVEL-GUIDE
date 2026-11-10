@@ -22,22 +22,24 @@ jobs:
       run:
         working-directory: mobile
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The build is self-contained locally (JDK vendored at .tools/jdk-17,
       # which is git-ignored and therefore absent in CI). Here we supply the
       # JDK via setup-java instead; org.gradle.java.home in gradle.properties
       # is overridden by the JAVA_HOME the action exports.
-      - uses: actions/setup-java@v4
+      # Keep 17 here: shared-core requests jvmToolchain(17) and Android
+      # compiles with Java 17 target (AGP 9 minimum is JDK 17).
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
         with:
           cache-dependencies: true
 
-      # Android SDK (platform 35) is preinstalled on ubuntu-latest; AGP
+      # Android SDK (platform 37) is preinstalled on ubuntu-latest; AGP
       # auto-installs anything missing (licenses pre-accepted on the image).
 
       - name: shared-core unit tests
@@ -47,7 +49,7 @@ jobs:
         run: ./gradlew :app:assembleDebug --stacktrace
 
       - name: Upload debug APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: travel-guide-debug-apk
           path: mobile/app/build/outputs/apk/debug/*.apk
@@ -56,10 +58,10 @@ jobs:
   content-tools:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Validate Fort Kochi pack against schema
         run: python tools/validate_pack.py content/packs/fort-kochi-walk-v1.json

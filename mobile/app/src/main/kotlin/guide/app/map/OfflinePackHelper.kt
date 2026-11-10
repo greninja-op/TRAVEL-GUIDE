@@ -8,7 +8,7 @@ import org.maplibre.android.offline.OfflineRegion
 import org.maplibre.android.offline.OfflineTilePyramidRegionDefinition
 
 /**
- * Offline city tiles via MapLibre Native (android-sdk:11.11.0).
+ * Offline city tiles via MapLibre Native (android-sdk:2026.11.2-globe).
  * Style: any offline-capable OSM style URL baked per pack release.
  * Kochi bbox covers Fort Kochi + Mattancherry at zoom 12..16.
  */

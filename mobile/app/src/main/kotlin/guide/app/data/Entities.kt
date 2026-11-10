@@ -50,7 +50,7 @@ abstract class GuideDb : RoomDatabase() {
                     context.applicationContext,
                     GuideDb::class.java,
                     "guide.db",
-                ).fallbackToDestructiveMigration().build().also { INSTANCE = it }
+                ).fallbackToDestructiveMigration(true).build().also { INSTANCE = it }
             }
     }
 }
