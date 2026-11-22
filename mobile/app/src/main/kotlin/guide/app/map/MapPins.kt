@@ -202,6 +202,7 @@ object MapPins {
         route: List<com.google.android.gms.maps.model.LatLng> = emptyList(),
         activeId: String? = null,
         nextId: String? = null,
+        userPosition: com.google.android.gms.maps.model.LatLng? = null,
         fitToPins: Boolean = false,
     ) {
         map.clear()
@@ -252,7 +253,22 @@ object MapPins {
             marker?.tag = pin.id
         }
 
-        // 3. Fit bounds if requested
+        // 3. User position puck. Google Maps' own blue dot depends on Play
+        // services' location layer; this independent circle keeps the current
+        // position visible when that layer is unavailable.
+        if (userPosition != null) {
+            map.addCircle(
+                com.google.android.gms.maps.model.CircleOptions()
+                    .center(userPosition)
+                    .radius(9.0)
+                    .fillColor(0xFF1A73E8.toInt())
+                    .strokeColor(0xFFFFFFFF.toInt())
+                    .strokeWidth(3f)
+                    .zIndex(10f),
+            )
+        }
+
+        // 4. Fit bounds if requested
         if (fitToPins && (pins.isNotEmpty() || route.isNotEmpty())) {
             val builder = com.google.android.gms.maps.model.LatLngBounds.Builder()
             pins.forEach { builder.include(com.google.android.gms.maps.model.LatLng(it.lat, it.lng)) }

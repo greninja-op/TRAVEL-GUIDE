@@ -229,6 +229,7 @@ fun MapScreen(
             route = route,
             activeId = latestActive,
             nextId = latestNext,
+            userPosition = userPosition,
             fitToPins = shouldFit,
         )
         lastRouteSize = route.size
@@ -549,11 +550,11 @@ fun MapScreen(
                             CameraUpdateFactory.newLatLngZoom(pos, FOLLOW_ZOOM),
                         )
                     } else if (pins.isNotEmpty()) {
-                        val builder = LatLngBounds.Builder()
-                        displayedPins.forEach { builder.include(LatLng(it.lat, it.lng)) }
-                        try {
-                            map.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 120))
-                        } catch (_: Exception) {}
+                        android.widget.Toast.makeText(
+                            context,
+                            "Waiting for your location — check that GPS is on and location permission is allowed.",
+                            android.widget.Toast.LENGTH_SHORT,
+                        ).show()
                     }
                 },
             )

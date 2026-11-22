@@ -470,13 +470,8 @@ fun GuideApp(
         // notification); this is a second, lighter subscription purely so the
         // UI reflects position — the two do not fight, and the UI one stops
         // with the composition.
-        LaunchedEffect(Unit) {
-            if (ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.ACCESS_FINE_LOCATION,
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return@LaunchedEffect
-            }
+        LaunchedEffect(hasLocationPerm) {
+            if (!hasLocationPerm) return@LaunchedEffect
             val tracker = LocationTracker(context)
             try {
                 tracker.start(profile) { fix ->
