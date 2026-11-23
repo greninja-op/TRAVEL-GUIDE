@@ -1,32 +1,29 @@
-import subprocess
+#!/usr/bin/env python3
+"""Enable the Travel Guide companion services over ADB.
+
+Thin, policy-compliant wrapper around ``tools/adb_control.py``. Only the
+Travel Guide accessibility service and notification listener are touched; other
+apps' entries are preserved and never printed. See ``AGENTS.md``.
+"""
+
+from __future__ import annotations
+
 import sys
 
-def run_adb(cmd):
-    full_cmd = f"adb -s 8TCABAIFWOZTDICI {cmd}"
-    res = subprocess.run(full_cmd, capture_output=True, text=True, shell=True)
-    return res.stdout.strip()
+import adb_control as adb
 
-print("Enabling Travel Guide Companion permissions via adb...")
 
-curr_acc = run_adb("shell settings get secure enabled_accessibility_services")
-svc_acc = "guide.app/guide.app.companion.TravelGuideAccessibilityService"
-if svc_acc not in curr_acc:
-    new_acc = f"{curr_acc}:{svc_acc}" if curr_acc and curr_acc != "null" else svc_acc
-    run_adb(f'shell settings put secure enabled_accessibility_services "{new_acc}"')
-    run_adb("shell settings put secure accessibility_enabled 1")
-    print("Added Accessibility Service:", svc_acc)
-else:
-    print("Accessibility Service was already registered.")
+def main() -> int:
+    try:
+        adb.ADB = adb.find_adb()
+        serial = adb.resolve_serial(None)
+    except adb.AdbError as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 1
 
-curr_notif = run_adb("shell settings get secure enabled_notification_listeners")
-svc_notif = "guide.app/guide.app.navigation.MapsCompanionService"
-if svc_notif not in curr_notif:
-    new_notif = f"{curr_notif}:{svc_notif}" if curr_notif and curr_notif != "null" else svc_notif
-    run_adb(f'shell settings put secure enabled_notification_listeners "{new_notif}"')
-    print("Added Notification Listener:", svc_notif)
-else:
-    print("Notification Listener was already registered.")
+    print(f"Configuring companions on {serial} for guide.app only ...")
+    return adb.cmd_companion(serial)
 
-print("Verification:")
-print("Enabled Accessibility:", run_adb("shell settings get secure enabled_accessibility_services"))
-print("Enabled Notification Listeners:", run_adb("shell settings get secure enabled_notification_listeners"))
+
+if __name__ == "__main__":
+    raise SystemExit(main())
