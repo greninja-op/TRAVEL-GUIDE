@@ -30,7 +30,9 @@
 
 ## What it is
 
-Travel Guide is an Android audio guide that speaks when you arrive. Walk into a heritage stop and the story begins on its own — no searching, no reading, no screen. The app is built around the Fort Kochi & Mattancherry heritage pack: **24 curated stops, two self-guided walks**, and a voice that keeps working when the signal doesn’t.
+Travel Guide is an Android audio guide that speaks when you arrive. Walk into a heritage stop and the story begins on its own — no searching, no reading, no screen. It ships with the Fort Kochi & Mattancherry heritage pack — **24 curated stops, two self-guided walks** — as its reference content, and a voice that keeps working when the signal doesn’t.
+
+The engine is city-agnostic: any place with a baked pack behaves the same way, and depth is delivered by **corridor**, not by city download — the phone asks for the next few hundred metres and skips everything it already holds ([docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
 
 It is local-first by design: no account, no ads, no analytics. Location is processed on the phone, notes are encrypted, and the whole guide is available offline.
 
@@ -41,7 +43,7 @@ It is local-first by design: no account, no ads, no analytics. Location is proce
 | **Platform** | Android 8.0+ (API 26–37) |
 | **Language / UI** | Kotlin 2.4.21 · Jetpack Compose |
 | **Build** | Gradle 9.9 · AGP 9.5.1 · compileSdk 37 |
-| **Guide** | Fort Kochi & Mattancherry · 24 stops · 2 walks |
+| **Guide** | Engine is city-agnostic · Fort Kochi & Mattancherry bundled as the reference pack · 24 stops · 2 walks |
 | **Voice** | On-device TTS · optional Sarvam neural voice |
 | **Privacy** | No account · no ads · no analytics |
 | **Release** | App v1.0.0 · Pack v1.1.0 |
@@ -78,11 +80,12 @@ Five tabs, one job each:
 |---|---|
 | **Input** | GPS + heading, plus optional Google Maps companion cues |
 | **Engine** | `shared-core` — geofencing, dwell/cooldown, route order, narration queue |
+| **Delivery** | Corridor prefetch: cells along the predicted path, three lanes — index, text, audio |
 | **Voice** | On-device TTS by default; opt-in Sarvam neural voice |
 | **Storage** | Room — visits and notes, encrypted at rest |
 | **Output** | Earbuds or speaker; one voice at a time, mute in under 500 ms |
 
-- **`shared-core`** is pure Kotlin: geofencing, dwell/cooldown rules, route ordering, quiet hours, and the narration queue. It has no Android imports and is tested on the JVM.
+- **`shared-core`** is pure Kotlin: geofencing, dwell/cooldown rules, route ordering, quiet hours, the narration queue, and the delivery engine (cells, route funnel, planner, bundle store, deviation). It has no Android imports and is tested on the JVM.
 - **`mobile`** is the Android app: Compose UI, Room, Fused Location, MapLibre, foreground service, and TTS.
 - **`content`** holds the versioned Fort Kochi pack and JSON schema. The same bytes are bundled into the app assets.
 - **`tools`** mirrors the core logic in Python for pack validation, trigger simulation, and ADB field playback.
@@ -91,7 +94,7 @@ Five tabs, one job each:
 
 ```text
 mobile/        Android app — Compose UI, Room, location, voice
-shared-core/   Pure Kotlin engine — geofencing, queue, routes
+shared-core/   Pure Kotlin engine — geofencing, queue, routes, delivery
 content/       Fort Kochi pack + schema (24 POIs, 2 routes)
 website/       Static marketing site (Vercel-ready)
 tools/         Python pack validation, simulation, ADB helpers
@@ -137,7 +140,7 @@ The site is static — no build step. Vercel configuration and deployment steps 
 
 | Layer | Command | Result |
 |---|---|---|
-| Core engine | `cd mobile && .\gradlew.bat :shared-core:test` | **29 tests passing** |
+| Core engine | `cd mobile && .\gradlew.bat :shared-core:test` | **46 tests passing** (29 rules + 17 delivery) |
 | Pack schema | `python tools/validate_pack.py content/packs/fort-kochi-walk-v1.json` | valid pack |
 | Logic mirrors | `python tools/test_engine.py` · `test_queue.py` · `test_itinerary.py` · `test_completion.py` | all pass |
 | Website QA | `python website/tools/qa_audit.py` | 1440 / 1180 / 768 / 390 / 320 — 0 errors, 0 overflow |

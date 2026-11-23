@@ -5,6 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.room.Room
+import guide.app.delivery.ContentPrefetcher
+import guide.app.delivery.HttpContentSource
+import guide.app.delivery.OsrmRouteProvider
 import guide.app.location.GuideService
 import guide.app.map.MapPins
 import guide.app.ui.NearbyRow
@@ -13,6 +16,7 @@ import guide.app.ui.Trio
 import guide.app.ui.VisitRow
 import guide.core.Geo
 import guide.core.Itineraries
+import guide.core.delivery.MapPoint
 import guide.app.security.CryptoVault
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -210,10 +214,47 @@ class AppState(private val context: Context) {
     // ---- Location ----------------------------------------------------------
 
     fun onFix(lat: Double, lng: Double) {
+        onFix(lat, lng, speedMps = 0.0)
+    }
+
+    /**
+     * The prefetch loop rides the same fix as the UI (docs/ARCHITECTURE.md §3):
+     * it needs position, speed and the active route, and nothing else.
+     */
+    fun onFix(lat: Double, lng: Double, speedMps: Double) {
         lastLat = lat
         lastLng = lng
         refreshNearby()
         updateCompanionCorridor()
+
+        prefetcher?.let { engine ->
+            engine.setRoute(routePoints().map { MapPoint(it.latitude, it.longitude) })
+            engine.onFix(lat, lng, speedMps)
+        }
+    }
+
+    // ---- Offline content delivery -----------------------------------------
+
+    /**
+     * Null unless a content server is configured: without one the app is the
+     * bundled-pack guide it has always been, and no network path is attempted.
+     */
+    private val prefetcher: ContentPrefetcher? = createPrefetcher()
+
+    private fun createPrefetcher(): ContentPrefetcher? {
+        val baseUrl = context.getSharedPreferences("guide_prefs", Context.MODE_PRIVATE)
+            .getString("content_base_url", "")
+            .orEmpty()
+            .trim()
+        if (baseUrl.isEmpty()) return null
+        return runCatching {
+            ContentPrefetcher(
+                context = context,
+                source = HttpContentSource(baseUrl),
+                language = appLanguage.code,
+                routeProvider = OsrmRouteProvider(),
+            )
+        }.getOrNull()
     }
 
     private fun refreshNearby() {

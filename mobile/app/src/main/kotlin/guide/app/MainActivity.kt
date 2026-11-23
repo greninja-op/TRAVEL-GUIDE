@@ -475,7 +475,7 @@ fun GuideApp(
             val tracker = LocationTracker(context)
             try {
                 tracker.start(profile) { fix ->
-                    app.onFix(fix.lat, fix.lng)
+                    app.onFix(fix.lat, fix.lng, fix.speedMps)
                     userPos = LatLng(fix.lat, fix.lng)
                 }
                 awaitCancellation()

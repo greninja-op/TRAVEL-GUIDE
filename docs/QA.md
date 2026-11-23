@@ -14,6 +14,17 @@ python tools/export_trip.py content/packs/fort-kochi-walk-v1.json 2026-09-10 \
   vasco-square chinese-fishing-nets st-francis-church
 ```
 
+Delivery engine (JVM, no device):
+
+```bash
+cd mobile && .\gradlew.bat :shared-core:test
+```
+
+- `DeliveryEngineTest` — cell addressing, corridor width, projection, funnel
+  lanes, junction-only index, alternatives without audio, free-roam corridor.
+- `DeliveryStoreTest` — store reload, audio-before-text eviction, pinned
+  entries, deviation hysteresis/debounce/promotion, one-fetch-then-zero loop.
+
 Pack v1.1.0: 24 POIs (20 heritage + 2 food + 2 stay), 2 routes.
 
 ## Manual (device)
